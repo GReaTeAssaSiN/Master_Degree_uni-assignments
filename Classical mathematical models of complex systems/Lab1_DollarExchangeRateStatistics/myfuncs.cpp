@@ -1,11 +1,34 @@
 #include "myfuncs.h"
 #include "xlsxdocument.h"
-#include <QDebug>
 #include <QTableView>
 #include <QStandardItemModel>
 #include <QFileInfo>
 #include <QMessageBox>
 
+// ----- Общие функии ----- //
+//Центрирование значений в таблицах
+void centerTableItems(QTableView *tableView)
+{
+    if (!tableView)
+        return;
+
+    QAbstractItemModel *model = tableView->model();
+    if (!model)
+        return;
+
+    int rows = model->rowCount();
+    int cols = model->columnCount();
+
+    for (int row = 0; row < rows; ++row) {
+        for (int col = 0; col < cols; ++col) {
+            QStandardItem *item = qobject_cast<QStandardItemModel*>(model)->item(row, col);
+            if (item) {
+                item->setTextAlignment(Qt::AlignCenter);
+            }
+        }
+    }
+}
+//Загрузка исходных данных из Excel в таблицу
 bool loadDataFromExcel(const QString &filePath, QTableView *tableView)
 {
     QFileInfo fileInfo(filePath);
@@ -25,7 +48,7 @@ bool loadDataFromExcel(const QString &filePath, QTableView *tableView)
     // 3. Определяем диапазон данных
     auto dim = xlsx.dimension();
     if (!dim.isValid()) {
-        QMessageBox::warning(nullptr, "Предупреждение", "Файл пуст или данные отсутствуют (необходим формат .xlsx)!");
+        QMessageBox::warning(nullptr, "Предупреждение", "Файл пуст или необходимо вручную сохранить формат .xlsx!");
         return false;
     }
 
@@ -50,14 +73,30 @@ bool loadDataFromExcel(const QString &filePath, QTableView *tableView)
             auto cell = xlsx.cellAt(row, col);
             QString value{};
 
+            // Если ячейка читаемая и не пустая
             if (cell) {
                 QVariant cellValue = cell->value();
+                bool ok = false;
 
-                if (col == 2 && cellValue.toDouble()) {
-                    double excelDate = cellValue.toDouble();
-                    QDate date = QDate(1900, 1, 1).addDays(int(excelDate) - 2); //1900г. считается високосным + QDate считает дни с 1
-                    value = date.toString("dd.MM.yyyy");
-                } else {
+                // Попытка конвертировать в число
+                double d = cellValue.toDouble(&ok);
+                if (ok && col != 2) {  // если это не дата
+                    value = QString::number(d, 'g', 6);
+                }
+                else if (col == 2) { // столбец с датой
+                    // Попытка распарсить как строку даты
+                    QDate date = QDate::fromString(cellValue.toString(), "dd.MM.yyyy");
+                    if (!date.isValid())
+                        date = QDate::fromString(cellValue.toString(), Qt::ISODate);
+                    if (!date.isValid()) {
+                        // Попытка как Excel-число
+                        double excelDate = cellValue.toDouble(&ok);
+                        if (ok)
+                            date = QDate(1900, 1, 1).addDays(int(excelDate) - 2); //1900г. считается високосным + смещение Excel (с 1)
+                    }
+                    value = date.isValid() ? date.toString("dd.MM.yyyy") : cellValue.toString();
+                }
+                else { // Просто текст
                     value = cellValue.toString();
                 }
             } else {
@@ -73,13 +112,16 @@ bool loadDataFromExcel(const QString &filePath, QTableView *tableView)
     tableView->setModel(model);
     tableView->resizeColumnsToContents();
 
+    // Центрирование
+    centerTableItems(tableView);
+
     // Информационное сообщение
     QMessageBox::information(nullptr, "Успех", "Данные успешно загружены!");
 
     return true;
 }
-
-void readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, QVector<int> &numericDates, QVector<double> &cursValues)
+//Чтение исходных данных из таблицы и приведение к нужному виду
+void readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, QVector<double> &numericDates, QVector<double> &cursValues)
 {
     const QAbstractItemModel *model = tableView->model();
     if (!model) return;
@@ -108,10 +150,11 @@ void readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
         QDate date = QDate::fromString(valData.toString(), "dd.MM.yyyy");
         if (date.isValid()) {
             dataColumn.append(date.toString("dd.MM.yyyy"));
-            numericDates.append(epoch.daysTo(date));
+            numericDates.append(epoch.daysTo(date)/10000.0); // Чтобы не работать с большими числами, уменьшим в 10000 раз число дней
         } else {
             numericDates.append(0);
-            qDebug() << "Некорректная дата:" << valData.toString();
+            QMessageBox::critical(nullptr, "Ошибка", QString("Не удалось корректно обработать дату:%1!").arg(valData.toString()));
+            return;
         }
 
         // Конвертация курса в число
@@ -122,17 +165,21 @@ void readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
             cursValues.append(curs);
         } else {
             cursValues.append(0.0);
-            qDebug() << "Некорректный курс:" << valCurs.toString();
+            QMessageBox::critical(nullptr, "Ошибка", QString("Не удалось корректно обработать курс:%1!").arg(valCurs.toString()));
+            return;
         }
     }
 }
 
-void calculateRegressionValues(const QVector<int> numericDates, const QVector<double> &cursValues,
-                               QVector<int> &xSquared, QVector<double> &ySquared, QVector<double> &xyProduct,
+
+// ----- Функции общих вычислений ----- //
+//Вычисление значений, необходимых для построения регрессии
+void calculateRegressionTotalValues(const QVector<double> numericDates, const QVector<double> &cursValues,
+                               QVector<double> &xSquared, QVector<double> &ySquared, QVector<double> &xyProduct,
                                RegressionValues &values)
 {
-    int n = numericDates.size();
-    if (n==0) return;
+    values.n = numericDates.size();
+    if (values.n==0) return;
 
     xSquared.clear();
     ySquared.clear();
@@ -140,11 +187,11 @@ void calculateRegressionValues(const QVector<int> numericDates, const QVector<do
 
     values.sumX = values.sumY = values.sumX2 = values.sumY2 = values.sumXY = 0.0;
 
-    for (int i = 0; i < n; ++i){
-        int x = numericDates[i];
+    for (int i = 0; i < values.n; ++i){
+        double x = numericDates[i];
         double y = cursValues[i];
 
-        int x2 = x * x;
+        double x2 = x * x;
         double y2 = y * y;
         double xy = x * y;
 
@@ -159,15 +206,47 @@ void calculateRegressionValues(const QVector<int> numericDates, const QVector<do
         values.sumXY += xy;
     }
 
-    values.meanX = values.sumX / n;
-    values.meanY = values.sumY / n;
+    values.meanX = values.sumX / values.n;
+    values.meanY = values.sumY / values.n;
+}
+//Вычисление значений, необходимых для проверки регрессии
+bool calculateRegressionCalcValues(const QVector<double> &cursValues,
+                                   const QVector<double> &yT,
+                                   QVector<double> &Sost, QVector<double> &Sregr, QVector<double> Sfull,
+                                   RegressionValues &values, const double eps)
+{
+    Sost.clear();
+    Sregr.clear();
+    Sfull.clear();
+
+    values.sumOst = values.sumRegr = values.sumFull = 0.0;
+
+    for (int i = 0; i < values.n; ++i){
+        double elem_of_Sost = std::pow(cursValues[i] - yT[i], 2);
+        double elem_of_Sregr = std::pow(yT[i] - values.meanY, 2);
+        double elem_of_Sfull = std::pow(cursValues[i] - values.meanY, 2);
+
+        Sost.append(elem_of_Sost);
+        Sregr.append(elem_of_Sregr);
+        Sfull.append(elem_of_Sfull);
+
+        values.sumOst += elem_of_Sost;
+        values.sumRegr += elem_of_Sregr;
+        values.sumFull += elem_of_Sfull;
+    }
+
+    values.R2 = 1 - values.sumOst / values.sumFull;
+    values.MSE = values.sumOst / values.n;
+
+    return std::abs(values.sumOst + values.sumRegr - values.sumFull) < eps;
 }
 
+//Заполнение общей таблицы значениями
 void fillTotalTable(QTableView *tableView,
                     const QVector<QString> &dataColumn,
-                    const QVector<int> &numericDates,
+                    const QVector<double> &numericDates,
                     const QVector<double> &cursValues,
-                    const QVector<int> &xSquared,
+                    const QVector<double> &xSquared,
                     const QVector<double> &ySquared,
                     const QVector<double> &xyProduct)
 {
@@ -186,13 +265,118 @@ void fillTotalTable(QTableView *tableView,
 
     for (int r = 0; r < rowCount; ++r) {
         model->setItem(r, 0, new QStandardItem(dataColumn[r]));
-        model->setItem(r, 1, new QStandardItem(QString::number(numericDates[r])));
-        model->setItem(r, 2, new QStandardItem(QString::number(cursValues[r], 'f', 6)));
-        model->setItem(r, 3, new QStandardItem(QString::number(xSquared[r])));
-        model->setItem(r, 4, new QStandardItem(QString::number(ySquared[r], 'f', 6)));
-        model->setItem(r, 5, new QStandardItem(QString::number(xyProduct[r], 'f', 6)));
+        model->setItem(r, 1, new QStandardItem(QString::number(numericDates[r], 'g', 6)));
+        model->setItem(r, 2, new QStandardItem(QString::number(cursValues[r], 'g', 6)));
+        model->setItem(r, 3, new QStandardItem(QString::number(xSquared[r], 'g', 6)));
+        model->setItem(r, 4, new QStandardItem(QString::number(ySquared[r], 'g', 6)));
+        model->setItem(r, 5, new QStandardItem(QString::number(xyProduct[r], 'g', 6)));
     }
 
     tableView->setModel(model);
     tableView->resizeColumnsToContents();
+}
+// Заполнение вычисляемой таблицы значениями
+void fillCalculateTable(QTableView *tableView,
+                        const QVector<double> &numericDates,
+                        const QVector<double> &cursValues,
+                        const QVector<double> &yT,
+                        const RegressionValues &values)
+{
+    int rowCount = numericDates.size();
+    int colCount = 4; // yi^T, (yi-yi^T)^2, (yi^T - mean(y))^2, (yi-mean(y))^2
+
+    QStandardItemModel *model = new QStandardItemModel(rowCount, colCount, tableView);
+
+    // Заголовки
+    model->setHeaderData(0, Qt::Horizontal, "yi^T");
+    model->setHeaderData(1, Qt::Horizontal, "(yi-yi^T)^2");
+    model->setHeaderData(2, Qt::Horizontal, "(yi^T - mean(y))^2");
+    model->setHeaderData(3, Qt::Horizontal, "(yi-mean(y))^2");
+
+    for (int r = 0; r < rowCount; ++r) {
+       model->setItem(r, 0, new QStandardItem(QString::number(yT[r])));
+       model->setItem(r, 1, new QStandardItem(QString::number(std::pow(cursValues[r]-yT[r], 2), 'g', 6)));
+       model->setItem(r, 2, new QStandardItem(QString::number(std::pow(yT[r]-values.meanY,2), 'g', 6)));
+       model->setItem(r, 3, new QStandardItem(QString::number(std::pow(cursValues[r]-values.meanY,2), 'g', 6)));
+    }
+
+    tableView->setModel(model);
+    tableView->resizeColumnsToContents();
+}
+
+// ----- Расчет значений для регрессионной модели ----- //
+// ОБЩЕЕ
+QString getRegressionRelationship(const double& r){
+    QString regr_relationship = "Характер связи: ";
+    // Характер связи
+    if (r == 0)
+        regr_relationship += "Отсутствует.";
+    else if (r > 0 && r < 1)
+        regr_relationship += "Вероятностная, прямая.\nИнтерпретация связи: C увеличением X увеличивается Y.";
+    else if (r > - 1 && r < 0)
+        regr_relationship += "Вероятностная, обратная.\nИнтерпретация связи: С увеличением X ументшаеися Y и наоборот.";
+    else if (r == 1)
+        regr_relationship += "Функциональная, прямая.\nИнтерпретация связи: Каждому значению факторного признака строго соответствует одно "
+                             "значение функции, с увеличением X увеличивается Y.";
+    else
+        regr_relationship += "Функциональная, обратная.\nИнтерпретация связи: Каждому значению факторного признака строго соответствует одно "
+                             "значение функции, с увеличением X уменьшается Y и наоборот.";
+    regr_relationship += "\nХарактер связи: ";
+    // Характер связи
+    if (std::abs(r) <= 0.3)
+        regr_relationship += "Практически отсутствует.";
+    else if (std::abs(r) <= 0.5)
+        regr_relationship += "Слабая.";
+    else if (std::abs(r) <= 0.7)
+        regr_relationship += "Умеренная.";
+    else
+        regr_relationship += "Сильная.";
+    return regr_relationship;
+}
+QString getDeterminationDescription(const double& R2){
+    QString determination_descr = "Можно ли делать прогноз (>=75%): ";
+    if (R2 * 100 >= 75)
+        determination_descr += "Да!";
+    else
+        determination_descr += "Нет!";
+    return determination_descr;
+}
+// ЛИНЕЙНАЯ РЕГРЕССИЯ
+bool calculateLinearRegressionValues(const QVector<double> &numericDates, QVector<double> &yT, RegressionValues &values, const double eps){
+    // y = a0 + a1*x
+    // Система:
+    // {a1n + a2*E(xi) = E(yi)
+    // {a1*E(xi) + a2*E(xi^2) = E(xi*yi)
+
+    // Решение СЛУ методом Крамера (A, A0, A1, a0, a1)
+    // A
+    values.A = values.n * values.sumX2 - values.sumX * values.sumX;
+    // A0
+    values.A0 = values.sumY * values.sumX2 - values.sumX * values.sumXY;
+    // A1
+    values.A1 = values.n * values.sumXY - values.sumY * values.sumX;
+    // B
+    values.B = values.n * values.sumY2 - values.sumY * values.sumY;
+    // B0
+    values.B0 = values.sumX * values.sumY2 - values.sumY * values.sumXY;
+    // B1
+    values.B1 = values.n * values.sumXY - values.sumY * values.sumX;
+    // a0
+    values.a0 = values.A0 / values.A;
+    // a1
+    values.a1 = values.A1 / values.A;
+    // b0
+    values.b0 = values.B0 / values.B;
+    // b1
+    values.b1 = values.B1 / values.B;
+    // r1
+    values.r1 = values.A1 / std::sqrt(values.A * values.B);
+    // r2
+    values.r2 = values.B1 / std::sqrt(values.A * values.B);
+    // yT
+    yT.clear();
+    for (int i=0; i<values.n; ++i)
+        yT.append(values.a0 + values.a1 * numericDates[i]);
+
+    return std::abs(values.r1 - values.r2) < eps;
 }

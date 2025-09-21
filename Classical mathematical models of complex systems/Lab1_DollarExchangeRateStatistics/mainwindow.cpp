@@ -29,7 +29,8 @@ void MainWindow::on_pushButton_ChooseFile_clicked()
     QString str{};
     str = QFileDialog::getOpenFileName(this, "Выбрать файл", "D:/KAI_MAGISTRATURA/KMMSS/Labs",
                                        "All Files (*.*);; XLSX Files (*.xlsx);");
-    ui->choosenFile_label->setText(str);
+    if (ui->choosenFile_label->text().isEmpty() || !str.isEmpty())
+        ui->choosenFile_label->setText(str);
     if (!str.isEmpty() && loadDataFromExcel(str, ui->data_tableView)){
         ui->pushButton_linear_regr->setEnabled(true);
         ui->pushButton_inverse_linear_regr->setEnabled(true);
@@ -48,7 +49,7 @@ void MainWindow::show_window(){
 
 void MainWindow::on_pushButton_linear_regr_clicked()
 {
-    WorkplaceForm *workplace_form = new WorkplaceForm(1, ui->data_tableView);
+    WorkplaceForm *workplace_form = new WorkplaceForm(0, ui->data_tableView);
     connect(workplace_form, &WorkplaceForm::backToMain, this, &MainWindow::show_window);
     this->hide();
     workplace_form->show();

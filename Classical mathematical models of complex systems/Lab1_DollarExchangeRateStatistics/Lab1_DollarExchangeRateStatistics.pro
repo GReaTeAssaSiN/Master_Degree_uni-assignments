@@ -15,14 +15,14 @@ QXLSX_SOURCEPATH=./../QXlsx-master/QXlsx/source/
 include(./../QXlsx-master/QXlsx/QXlsx.pri)
 
 SOURCES += \
-    ./../qcustomplot/qcustomplot.cpp \
+    qcustomplot.cpp \
     main.cpp \
     mainwindow.cpp \
     myfuncs.cpp \
     workplaceform.cpp
 
 HEADERS += \
-    ./../qcustomplot/qcustomplot.h \
+    qcustomplot.h \
     RegressionValues.h \
     mainwindow.h \
     myfuncs.h \

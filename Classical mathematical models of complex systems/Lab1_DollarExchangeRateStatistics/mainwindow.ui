@@ -18,27 +18,182 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>800</width>
-    <height>600</height>
+    <width>976</width>
+    <height>725</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>4199_Горшков Ал.О._Лабораторная работа №1</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QMainWindow {
-    background-color: qlineargradient(
-        spread:pad, 
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 rgba(220, 225, 230, 255),
-        stop:0.3 rgba(235, 238, 242, 255),
-        stop:0.7 rgba(235, 238, 242, 255),
-        stop:1 rgba(220, 225, 230, 255)
-    );
-}</string>
+   <string notr="true">QMainWindow{
+	 background-color: rgb(30, 30, 30);  /* тёмно-серый фон */
+}
+</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
+    <item row="3" column="0">
+     <widget class="QPushButton" name="pushButton_ChooseFile">
+      <property name="minimumSize">
+       <size>
+        <width>556</width>
+        <height>36</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>43</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>12</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+    background-color: rgb(100, 100, 100);   /* основной фон кнопки */
+    color: white;                            /* белый текст */
+    border-radius: 8px;                      /* округлые углы */
+    border: 2px solid rgb(70, 70, 70);      /* тёмная рамка */
+    padding: 6px 14px;                       /* внутренние отступы */
+    font-weight: bold;                        /* полужирный текст */
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+}
+
+QPushButton:hover {
+    background-color: rgb(130, 130, 130);   /* подсветка при наведении */
+    border: 2px solid rgb(100, 100, 100);  /* рамка чуть светлее */
+}
+
+QPushButton:pressed {
+    background-color: rgb(70, 70, 70);      /* фон при нажатии */
+    border: 2px solid rgb(50, 50, 50);     /* тёмная рамка */
+}
+
+QPushButton:checked {
+    background-color: rgb(80, 80, 80);      /* фон для состояния “включено” */
+    border: 2px solid rgb(70, 70, 70);     /* рамка */
+}
+</string>
+      </property>
+      <property name="text">
+       <string>Выбрать .xlsx файл с исходными данными</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="data_label">
+      <property name="minimumSize">
+       <size>
+        <width>556</width>
+        <height>30</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>40</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>13</pointsize>
+        <fontweight>ExtraBold</fontweight>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QLabel {
+    background-color: rgb(80, 80, 80);        /* тёмно-серый фон */
+    color: rgb(240, 240, 240);               /* светлый текст для контраста */
+    border: 1px solid rgb(120, 120, 120);    /* мягкая рамка */
+    border-radius: 4px;                       /* небольшое скругление */
+    padding: 4px 8px;                         /* внутренние отступы */
+    font-family: &quot;Segoe UI&quot;, sans-serif;      /* корпоративный шрифт */
+    font-weight: 800;                          /* жирный шрифт */
+    font-size: 13pt;                           /* читаемый размер */
+}
+</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::WinPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="text">
+       <string>Данные из файла</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::AutoText</enum>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QTableView" name="data_tableView">
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>12</pointsize>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="cursor" stdset="0">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QTableView {
+    background-color: rgb(245, 245, 245);           /* светлый фон таблицы */
+    alternate-background-color: rgb(235, 235, 235); /* чередующиеся строки */
+    gridline-color: rgb(200, 200, 200);            /* цвет сетки */
+    font: 12pt &quot;Segoe UI&quot;;                          /* корпоративный шрифт */
+    color: rgb(28, 28, 28);                         /* тёмный текст */
+    selection-background-color: rgb(180, 180, 180); /* цвет выделенной строки */
+    selection-color: rgb(28, 28, 28);               /* цвет текста выделения */
+}
+
+QHeaderView::section {
+    background-color: rgb(208, 208, 208);          /* фон заголовка */
+    color: rgb(28, 28, 28);                         /* текст заголовка */
+    padding: 4px;
+    border: 1px solid rgb(176, 176, 176);          /* рамка заголовка */
+    font-weight: bold;
+    text-align: center;                             /* выравнивание текста по центру */
+}
+
+QTableView::item:selected {
+    background-color: rgb(176, 176, 176);          /* выделение строки */
+    color: rgb(28, 28, 28);
+}
+
+QTableView::item:hover {
+    background-color: rgb(216, 216, 216);          /* подсветка при наведении */
+}
+</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="0" colspan="2">
      <widget class="QFrame" name="frame_lab_model_labels">
       <property name="minimumSize">
@@ -49,10 +204,11 @@
       </property>
       <property name="styleSheet">
        <string notr="true">QFrame {
-    background-color: rgba(235, 238, 242, 180);
-    border: 1px solid rgba(180, 185, 190, 200);
-    border-radius: 8px;
-}</string>
+    background-color: rgb(245, 245, 245);  /* светлый серый фон */
+    border-radius: 15px;
+    border: 2px solid rgb(200, 200, 200); /* мягкая серо-белая рамка */
+}
+</string>
       </property>
       <property name="frameShape">
        <enum>QFrame::WinPanel</enum>
@@ -84,23 +240,25 @@
          <property name="font">
           <font>
            <family>Segoe UI</family>
-           <pointsize>14</pointsize>
+           <pointsize>-1</pointsize>
            <bold>true</bold>
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">QLabel{
-    background-color: rgba(58, 65, 82, 200);
-    color: #ffffff;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
+          <string notr="true">QLabel {
+    background-color: rgb(60, 60, 60);     /* тёмно-серый фон для контраста */
+    color: white;                           /* белый текст */
+    font-size: 20px;
     font-weight: bold;
-    font-size: 14pt;
-}</string>
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid rgb(100, 100, 100);  /* серый контраст для рамки */
+    qproperty-alignment: 'AlignCenter';
+}
+</string>
          </property>
          <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
+          <enum>QFrame::StyledPanel</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Plain</enum>
@@ -136,21 +294,32 @@
          <property name="font">
           <font>
            <family>Segoe UI</family>
-           <pointsize>11</pointsize>
+           <pointsize>-1</pointsize>
            <italic>true</italic>
-           <fontweight>Medium</fontweight>
+           <fontweight>DemiBold</fontweight>
           </font>
          </property>
          <property name="styleSheet">
           <string notr="true">QLabel {
-    background-color: rgba(200, 210, 220, 180);
-    color: #102a43;
-    border-radius: 4px;
-    padding: 4px 8px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-weight: 500;
-    font-size: 11pt;
-}</string>
+    background-color: rgb(100, 100, 100);   /* средний серый фон */
+    color: white;                           /* белый текст */
+    font-size: 16px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgb(150, 150, 150);  /* тонкая рамка */
+    qproperty-alignment: 'AlignCenter';
+}
+</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="lineWidth">
+          <number>1</number>
          </property>
          <property name="text">
           <string>Моделирование роста курса доллара США к рублю</string>
@@ -163,125 +332,39 @@
       </layout>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="data_label">
-      <property name="minimumSize">
-       <size>
-        <width>556</width>
-        <height>30</height>
-       </size>
-      </property>
+    <item row="1" column="1">
+     <widget class="QLabel" name="regressions_label">
       <property name="maximumSize">
        <size>
         <width>16777215</width>
-        <height>30</height>
+        <height>40</height>
        </size>
       </property>
       <property name="font">
        <font>
-        <family>Times New Roman</family>
-        <pointsize>14</pointsize>
+        <family>Segoe UI</family>
+        <pointsize>13</pointsize>
+        <fontweight>ExtraBold</fontweight>
        </font>
       </property>
       <property name="styleSheet">
        <string notr="true">QLabel {
-    background-color: rgba(58, 65, 82, 200);
-    color: #ffffff;
-    border: 1px solid rgba(47, 53, 66, 200); 
-    border-radius: 4px;
-    padding: 2px 6px;
-}</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::WinPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Plain</enum>
-      </property>
-      <property name="text">
-       <string>Данные из файла</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::AutoText</enum>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLabel" name="regressions_label">
-      <property name="font">
-       <font>
-        <family>Times New Roman</family>
-        <pointsize>14</pointsize>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">QLabel {
-    background-color: rgba(58, 65, 82, 200);
-    color: #ffffff;
-    border: 1px solid rgba(47, 53, 66, 200); 
-    border-radius: 4px;
-    padding: 2px 6px;
-}</string>
+    background-color: rgb(80, 80, 80);        /* тёмно-серый фон */
+    color: rgb(240, 240, 240);               /* светлый текст для контраста */
+    border: 1px solid rgb(120, 120, 120);    /* мягкая рамка */
+    border-radius: 4px;                       /* небольшое скругление */
+    padding: 4px 8px;                         /* внутренние отступы */
+    font-family: &quot;Segoe UI&quot;, sans-serif;      /* корпоративный шрифт */
+    font-weight: 800;                          /* жирный шрифт */
+    font-size: 13pt;                           /* читаемый размер */
+}
+</string>
       </property>
       <property name="text">
        <string>Типы регрессий</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QTableView" name="data_tableView">
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>12</pointsize>
-        <italic>false</italic>
-        <bold>false</bold>
-       </font>
-      </property>
-      <property name="cursor" stdset="0">
-       <cursorShape>PointingHandCursor</cursorShape>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">QTableView {
-    background-color: #fdfdfd;
-    alternate-background-color: #f0f4f8;
-    gridline-color: #d1dbe5;
-    font: 12pt &quot;Segoe UI&quot;;
-    color: #102a43;
-}
-
-QHeaderView::section {
-    background-color: #1d4ed8;
-    color: white;
-    padding: 4px;
-    border: 1px solid #0f172a;
-    font-weight: bold;
-}
-
-QTableView::item:selected {
-    background-color: #93c5fd;
-    color: #0c1a2c;
-}
-
-QTableView::item:hover {
-    background-color: #dbeafe;
-}
-</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
       </property>
      </widget>
     </item>
@@ -297,8 +380,9 @@ QTableView::item:hover {
         </property>
         <property name="font">
          <font>
-          <family>Times New Roman</family>
-          <pointsize>14</pointsize>
+          <family>Segoe UI</family>
+          <pointsize>12</pointsize>
+          <fontweight>Medium</fontweight>
          </font>
         </property>
         <property name="cursor">
@@ -306,34 +390,35 @@ QTableView::item:hover {
         </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {
-    background-color: #DCE1E6;
-    color: #102A43;
-    border-radius: 8px;
-    border: 1px solid #A0A0A0;
-    padding: 5px 12px;
+    background-color: rgb(230, 230, 230);    /* светло-серый фон */
+    color: rgb(28, 28, 28);                  /* тёмный текст */
+    border-radius: 8px;                       /* закруглённые углы */
+    border: 1px solid rgb(176, 176, 176);    /* мягкая рамка */
+    padding: 5px 12px;                        /* внутренние отступы */
+    font-weight: 500;                         /* средний вес шрифта */
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 12pt;
 }
 
 QPushButton:hover {
-    background-color: #C9D4DF;
-    color: #0c1a2c;
+    background-color: rgb(216, 216, 216);    /* подсветка при наведении */
+    border: 1px solid rgb(160, 160, 160);
 }
 
 QPushButton:pressed {
-    background-color: #AFC3D0;
-    border: 1px solid #7A8A99;
-    color: #ffffff;
+    background-color: rgb(191, 191, 191);    /* фон при нажатии */
+    border: 1px solid rgb(140, 140, 140);
 }
 
 QPushButton:checked {
-    background-color: #B0E0FF;
-    border: 1px solid #3399FF;
-    color: #003366;
+    background-color: rgb(200, 200, 200);    /* фон для состояния “включено” */
+    border: 1px solid rgb(144, 144, 144);
 }
 
 QPushButton:disabled {
-    background-color: #E5E5E5;
-    color: #7A7A7A;
-    border: 1px solid #C0C0C0;
+    background-color: rgb(240, 240, 240);    /* фон для отключённой кнопки */
+    color: rgb(156, 156, 156);               /* серый текст */
+    border: 1px solid rgb(192, 192, 192);    /* рамка */
 }
 </string>
         </property>
@@ -346,8 +431,9 @@ QPushButton:disabled {
        <widget class="QPushButton" name="pushButton_inverse_linear_regr">
         <property name="font">
          <font>
-          <family>Times New Roman</family>
-          <pointsize>14</pointsize>
+          <family>Segoe UI</family>
+          <pointsize>12</pointsize>
+          <fontweight>Medium</fontweight>
          </font>
         </property>
         <property name="cursor">
@@ -355,35 +441,37 @@ QPushButton:disabled {
         </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {
-    background-color: #DCE1E6;
-    color: #102A43;
-    border-radius: 8px;
-    border: 1px solid #A0A0A0;
-    padding: 5px 12px;
+    background-color: rgb(230, 230, 230);    /* светло-серый фон */
+    color: rgb(28, 28, 28);                  /* тёмный текст */
+    border-radius: 8px;                       /* закруглённые углы */
+    border: 1px solid rgb(176, 176, 176);    /* мягкая рамка */
+    padding: 5px 12px;                        /* внутренние отступы */
+    font-weight: 500;                         /* средний вес шрифта */
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 12pt;
 }
 
 QPushButton:hover {
-    background-color: #C9D4DF;
-    color: #0c1a2c;
+    background-color: rgb(216, 216, 216);    /* подсветка при наведении */
+    border: 1px solid rgb(160, 160, 160);
 }
 
 QPushButton:pressed {
-    background-color: #AFC3D0;
-    border: 1px solid #7A8A99;
-    color: #ffffff;
+    background-color: rgb(191, 191, 191);    /* фон при нажатии */
+    border: 1px solid rgb(140, 140, 140);
 }
 
 QPushButton:checked {
-    background-color: #B0E0FF;
-    border: 1px solid #3399FF;
-    color: #003366;
+    background-color: rgb(200, 200, 200);    /* фон для состояния “включено” */
+    border: 1px solid rgb(144, 144, 144);
 }
 
 QPushButton:disabled {
-    background-color: #E5E5E5;
-    color: #7A7A7A;
-    border: 1px solid #C0C0C0;
-}</string>
+    background-color: rgb(240, 240, 240);    /* фон для отключённой кнопки */
+    color: rgb(156, 156, 156);               /* серый текст */
+    border: 1px solid rgb(192, 192, 192);    /* рамка */
+}
+</string>
         </property>
         <property name="text">
          <string>Обратная линейная регрессия</string>
@@ -394,8 +482,9 @@ QPushButton:disabled {
        <widget class="QPushButton" name="pushButton_exp_regr">
         <property name="font">
          <font>
-          <family>Times New Roman</family>
-          <pointsize>14</pointsize>
+          <family>Segoe UI</family>
+          <pointsize>12</pointsize>
+          <fontweight>Medium</fontweight>
          </font>
         </property>
         <property name="cursor">
@@ -403,35 +492,37 @@ QPushButton:disabled {
         </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {
-    background-color: #DCE1E6;
-    color: #102A43;
-    border-radius: 8px;
-    border: 1px solid #A0A0A0;
-    padding: 5px 12px;
+    background-color: rgb(230, 230, 230);    /* светло-серый фон */
+    color: rgb(28, 28, 28);                  /* тёмный текст */
+    border-radius: 8px;                       /* закруглённые углы */
+    border: 1px solid rgb(176, 176, 176);    /* мягкая рамка */
+    padding: 5px 12px;                        /* внутренние отступы */
+    font-weight: 500;                         /* средний вес шрифта */
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 12pt;
 }
 
 QPushButton:hover {
-    background-color: #C9D4DF;
-    color: #0c1a2c;
+    background-color: rgb(216, 216, 216);    /* подсветка при наведении */
+    border: 1px solid rgb(160, 160, 160);
 }
 
 QPushButton:pressed {
-    background-color: #AFC3D0;
-    border: 1px solid #7A8A99;
-    color: #ffffff;
+    background-color: rgb(191, 191, 191);    /* фон при нажатии */
+    border: 1px solid rgb(140, 140, 140);
 }
 
 QPushButton:checked {
-    background-color: #B0E0FF;
-    border: 1px solid #3399FF;
-    color: #003366;
+    background-color: rgb(200, 200, 200);    /* фон для состояния “включено” */
+    border: 1px solid rgb(144, 144, 144);
 }
 
 QPushButton:disabled {
-    background-color: #E5E5E5;
-    color: #7A7A7A;
-    border: 1px solid #C0C0C0;
-}</string>
+    background-color: rgb(240, 240, 240);    /* фон для отключённой кнопки */
+    color: rgb(156, 156, 156);               /* серый текст */
+    border: 1px solid rgb(192, 192, 192);    /* рамка */
+}
+</string>
         </property>
         <property name="text">
          <string>Экспоненциальная регрессия</string>
@@ -442,8 +533,9 @@ QPushButton:disabled {
        <widget class="QPushButton" name="pushButton_hyper_regr">
         <property name="font">
          <font>
-          <family>Times New Roman</family>
-          <pointsize>14</pointsize>
+          <family>Segoe UI</family>
+          <pointsize>12</pointsize>
+          <fontweight>Medium</fontweight>
          </font>
         </property>
         <property name="cursor">
@@ -451,35 +543,37 @@ QPushButton:disabled {
         </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {
-    background-color: #DCE1E6;
-    color: #102A43;
-    border-radius: 8px;
-    border: 1px solid #A0A0A0;
-    padding: 5px 12px;
+    background-color: rgb(230, 230, 230);    /* светло-серый фон */
+    color: rgb(28, 28, 28);                  /* тёмный текст */
+    border-radius: 8px;                       /* закруглённые углы */
+    border: 1px solid rgb(176, 176, 176);    /* мягкая рамка */
+    padding: 5px 12px;                        /* внутренние отступы */
+    font-weight: 500;                         /* средний вес шрифта */
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 12pt;
 }
 
 QPushButton:hover {
-    background-color: #C9D4DF;
-    color: #0c1a2c;
+    background-color: rgb(216, 216, 216);    /* подсветка при наведении */
+    border: 1px solid rgb(160, 160, 160);
 }
 
 QPushButton:pressed {
-    background-color: #AFC3D0;
-    border: 1px solid #7A8A99;
-    color: #ffffff;
+    background-color: rgb(191, 191, 191);    /* фон при нажатии */
+    border: 1px solid rgb(140, 140, 140);
 }
 
 QPushButton:checked {
-    background-color: #B0E0FF;
-    border: 1px solid #3399FF;
-    color: #003366;
+    background-color: rgb(200, 200, 200);    /* фон для состояния “включено” */
+    border: 1px solid rgb(144, 144, 144);
 }
 
 QPushButton:disabled {
-    background-color: #E5E5E5;
-    color: #7A7A7A;
-    border: 1px solid #C0C0C0;
-}</string>
+    background-color: rgb(240, 240, 240);    /* фон для отключённой кнопки */
+    color: rgb(156, 156, 156);               /* серый текст */
+    border: 1px solid rgb(192, 192, 192);    /* рамка */
+}
+</string>
         </property>
         <property name="text">
          <string>Гиперболическая регрессия</string>
@@ -490,8 +584,9 @@ QPushButton:disabled {
        <widget class="QPushButton" name="pushButton_parab_regr">
         <property name="font">
          <font>
-          <family>Times New Roman</family>
-          <pointsize>14</pointsize>
+          <family>Segoe UI</family>
+          <pointsize>12</pointsize>
+          <fontweight>Medium</fontweight>
          </font>
         </property>
         <property name="cursor">
@@ -499,35 +594,36 @@ QPushButton:disabled {
         </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {
-    background-color: #DCE1E6;
-    color: #102A43;
-    border-radius: 8px;
-    border: 1px solid #A0A0A0;
-    padding: 5px 12px;
+    background-color: rgb(230, 230, 230);    /* светло-серый фон */
+    color: rgb(28, 28, 28);                  /* тёмный текст */
+    border-radius: 8px;                       /* закруглённые углы */
+    border: 1px solid rgb(176, 176, 176);    /* мягкая рамка */
+    padding: 5px 12px;                        /* внутренние отступы */
+    font-weight: 500;                         /* средний вес шрифта */
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 12pt;
 }
-
 QPushButton:hover {
-    background-color: #C9D4DF;
-    color: #0c1a2c;
+    background-color: rgb(216, 216, 216);    /* подсветка при наведении */
+    border: 1px solid rgb(160, 160, 160);
 }
 
 QPushButton:pressed {
-    background-color: #AFC3D0;
-    border: 1px solid #7A8A99;
-    color: #ffffff;
+    background-color: rgb(191, 191, 191);    /* фон при нажатии */
+    border: 1px solid rgb(140, 140, 140);
 }
 
 QPushButton:checked {
-    background-color: #B0E0FF;
-    border: 1px solid #3399FF;
-    color: #003366;
+    background-color: rgb(200, 200, 200);    /* фон для состояния “включено” */
+    border: 1px solid rgb(144, 144, 144);
 }
 
 QPushButton:disabled {
-    background-color: #E5E5E5;
-    color: #7A7A7A;
-    border: 1px solid #C0C0C0;
-}</string>
+    background-color: rgb(240, 240, 240);    /* фон для отключённой кнопки */
+    color: rgb(156, 156, 156);               /* серый текст */
+    border: 1px solid rgb(192, 192, 192);    /* рамка */
+}
+</string>
         </property>
         <property name="text">
          <string>Параболическая регрессия</string>
@@ -538,8 +634,9 @@ QPushButton:disabled {
        <widget class="QPushButton" name="pushButton_log_regr">
         <property name="font">
          <font>
-          <family>Times New Roman</family>
-          <pointsize>14</pointsize>
+          <family>Segoe UI</family>
+          <pointsize>12</pointsize>
+          <fontweight>Medium</fontweight>
          </font>
         </property>
         <property name="cursor">
@@ -547,35 +644,37 @@ QPushButton:disabled {
         </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {
-    background-color: #DCE1E6;
-    color: #102A43;
-    border-radius: 8px;
-    border: 1px solid #A0A0A0;
-    padding: 5px 12px;
+    background-color: rgb(230, 230, 230);    /* светло-серый фон */
+    color: rgb(28, 28, 28);                  /* тёмный текст */
+    border-radius: 8px;                       /* закруглённые углы */
+    border: 1px solid rgb(176, 176, 176);    /* мягкая рамка */
+    padding: 5px 12px;                        /* внутренние отступы */
+    font-weight: 500;                         /* средний вес шрифта */
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 12pt;
 }
 
 QPushButton:hover {
-    background-color: #C9D4DF;
-    color: #0c1a2c;
+    background-color: rgb(216, 216, 216);    /* подсветка при наведении */
+    border: 1px solid rgb(160, 160, 160);
 }
 
 QPushButton:pressed {
-    background-color: #AFC3D0;
-    border: 1px solid #7A8A99;
-    color: #ffffff;
+    background-color: rgb(191, 191, 191);    /* фон при нажатии */
+    border: 1px solid rgb(140, 140, 140);
 }
 
 QPushButton:checked {
-    background-color: #B0E0FF;
-    border: 1px solid #3399FF;
-    color: #003366;
+    background-color: rgb(200, 200, 200);    /* фон для состояния “включено” */
+    border: 1px solid rgb(144, 144, 144);
 }
 
 QPushButton:disabled {
-    background-color: #E5E5E5;
-    color: #7A7A7A;
-    border: 1px solid #C0C0C0;
-}</string>
+    background-color: rgb(240, 240, 240);    /* фон для отключённой кнопки */
+    color: rgb(156, 156, 156);               /* серый текст */
+    border: 1px solid rgb(192, 192, 192);    /* рамка */
+}
+</string>
         </property>
         <property name="text">
          <string>Логарифмическая регрессия</string>
@@ -586,8 +685,9 @@ QPushButton:disabled {
        <widget class="QPushButton" name="pushButton_power_regr">
         <property name="font">
          <font>
-          <family>Times New Roman</family>
-          <pointsize>14</pointsize>
+          <family>Segoe UI</family>
+          <pointsize>12</pointsize>
+          <fontweight>Medium</fontweight>
          </font>
         </property>
         <property name="cursor">
@@ -595,35 +695,37 @@ QPushButton:disabled {
         </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {
-    background-color: #DCE1E6;
-    color: #102A43;
-    border-radius: 8px;
-    border: 1px solid #A0A0A0;
-    padding: 5px 12px;
+    background-color: rgb(230, 230, 230);    /* светло-серый фон */
+    color: rgb(28, 28, 28);                  /* тёмный текст */
+    border-radius: 8px;                       /* закруглённые углы */
+    border: 1px solid rgb(176, 176, 176);    /* мягкая рамка */
+    padding: 5px 12px;                        /* внутренние отступы */
+    font-weight: 500;                         /* средний вес шрифта */
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 12pt;
 }
 
 QPushButton:hover {
-    background-color: #C9D4DF;
-    color: #0c1a2c;
+    background-color: rgb(216, 216, 216);    /* подсветка при наведении */
+    border: 1px solid rgb(160, 160, 160);
 }
 
 QPushButton:pressed {
-    background-color: #AFC3D0;
-    border: 1px solid #7A8A99;
-    color: #ffffff;
+    background-color: rgb(191, 191, 191);    /* фон при нажатии */
+    border: 1px solid rgb(140, 140, 140);
 }
 
 QPushButton:checked {
-    background-color: #B0E0FF;
-    border: 1px solid #3399FF;
-    color: #003366;
+    background-color: rgb(200, 200, 200);    /* фон для состояния “включено” */
+    border: 1px solid rgb(144, 144, 144);
 }
 
 QPushButton:disabled {
-    background-color: #E5E5E5;
-    color: #7A7A7A;
-    border: 1px solid #C0C0C0;
-}</string>
+    background-color: rgb(240, 240, 240);    /* фон для отключённой кнопки */
+    color: rgb(156, 156, 156);               /* серый текст */
+    border: 1px solid rgb(192, 192, 192);    /* рамка */
+}
+</string>
         </property>
         <property name="text">
          <string>Степенная регрессия</string>
@@ -634,8 +736,9 @@ QPushButton:disabled {
        <widget class="QPushButton" name="pushButton_polynom_regr">
         <property name="font">
          <font>
-          <family>Times New Roman</family>
-          <pointsize>14</pointsize>
+          <family>Segoe UI</family>
+          <pointsize>12</pointsize>
+          <fontweight>Medium</fontweight>
          </font>
         </property>
         <property name="cursor">
@@ -643,35 +746,37 @@ QPushButton:disabled {
         </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {
-    background-color: #DCE1E6;
-    color: #102A43;
-    border-radius: 8px;
-    border: 1px solid #A0A0A0;
-    padding: 5px 12px;
+    background-color: rgb(230, 230, 230);    /* светло-серый фон */
+    color: rgb(28, 28, 28);                  /* тёмный текст */
+    border-radius: 8px;                       /* закруглённые углы */
+    border: 1px solid rgb(176, 176, 176);    /* мягкая рамка */
+    padding: 5px 12px;                        /* внутренние отступы */
+    font-weight: 500;                         /* средний вес шрифта */
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 12pt;
 }
 
 QPushButton:hover {
-    background-color: #C9D4DF;
-    color: #0c1a2c;
+    background-color: rgb(216, 216, 216);    /* подсветка при наведении */
+    border: 1px solid rgb(160, 160, 160);
 }
 
 QPushButton:pressed {
-    background-color: #AFC3D0;
-    border: 1px solid #7A8A99;
-    color: #ffffff;
+    background-color: rgb(191, 191, 191);    /* фон при нажатии */
+    border: 1px solid rgb(140, 140, 140);
 }
 
 QPushButton:checked {
-    background-color: #B0E0FF;
-    border: 1px solid #3399FF;
-    color: #003366;
+    background-color: rgb(200, 200, 200);    /* фон для состояния “включено” */
+    border: 1px solid rgb(144, 144, 144);
 }
 
 QPushButton:disabled {
-    background-color: #E5E5E5;
-    color: #7A7A7A;
-    border: 1px solid #C0C0C0;
-}</string>
+    background-color: rgb(240, 240, 240);    /* фон для отключённой кнопки */
+    color: rgb(156, 156, 156);               /* серый текст */
+    border: 1px solid rgb(192, 192, 192);    /* рамка */
+}
+</string>
         </property>
         <property name="text">
          <string>Полиномиальная регрессия</string>
@@ -693,61 +798,6 @@ QPushButton:disabled {
       </item>
      </layout>
     </item>
-    <item row="3" column="0">
-     <widget class="QPushButton" name="pushButton_ChooseFile">
-      <property name="minimumSize">
-       <size>
-        <width>556</width>
-        <height>36</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>36</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Times New Roman</family>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-      <property name="cursor">
-       <cursorShape>PointingHandCursor</cursorShape>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">QPushButton {
-    background-color: #DCE1E6;
-    color: #102A43;
-    border-radius: 8px;
-    border: 1px solid #A0A0A0;
-    padding: 5px 12px;
-}
-
-QPushButton:hover {
-    background-color: #C9D4DF;
-    color: #0c1a2c;
-}
-
-QPushButton:pressed {
-    background-color: #AFC3D0;
-    border: 1px solid #7A8A99;
-    color: #ffffff;
-}
-
-QPushButton:checked {
-    background-color: #B0E0FF;
-    border: 1px solid #3399FF;
-    color: #003366;
-}
-</string>
-      </property>
-      <property name="text">
-       <string>Выбрать .xlsx файл с исходными данными</string>
-      </property>
-     </widget>
-    </item>
     <item row="3" column="1">
      <widget class="QLabel" name="choosenFile_label">
       <property name="minimumSize">
@@ -764,19 +814,22 @@ QPushButton:checked {
       </property>
       <property name="font">
        <font>
-        <family>Calibri</family>
+        <family>Segoe UI</family>
         <pointsize>10</pointsize>
         <bold>false</bold>
        </font>
       </property>
       <property name="styleSheet">
        <string notr="true">QLabel {
-    background-color: rgba(58, 65, 82, 200);
-    color: #ffffff;
-    border: 1px solid rgba(47, 53, 66, 200); 
-    border-radius: 4px;
-    padding: 2px 6px;
-}</string>
+    background-color: rgb(230, 230, 230);        /* светло-серый фон */
+    color: rgb(28, 28, 28);                      /* тёмный текст */
+    border: 1px solid rgb(200, 200, 200);       /* мягкая рамка */
+    border-radius: 4px;                          /* небольшое скругление углов */
+    padding: 2px 6px;                            /* внутренние отступы */
+    font-family: &quot;Segoe UI&quot;, sans-serif;        /* официальный шрифт */
+    font-size: 10pt;                             /* удобочитаемый размер */
+}
+</string>
       </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>

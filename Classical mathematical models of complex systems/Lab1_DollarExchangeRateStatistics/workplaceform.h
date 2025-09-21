@@ -22,17 +22,22 @@ signals:
 
 private slots:
     void on_pushButton_back_clicked();
+    void MakePlot();
 
 private:
     Ui::WorkplaceForm *ui;
-    int m_mode{};
     QVector<QString> dataColumn{};
-    QVector<int> numericDates{};
+    QVector<double> numericDates{};
     QVector<double> cursValues{};
-    QVector<int> xSquared{};
+    QVector<double> xSquared{};
     QVector<double> ySquared{};
     QVector<double> xyProduct{};
+    QVector<double> yT{};
+    QVector<double> Sost{};
+    QVector<double> Sregr{};
+    QVector<double> Sfull{};
     RegressionValues values{};
+    QString trendLabel{};
 
 protected:
     void closeEvent(QCloseEvent *event) override;
