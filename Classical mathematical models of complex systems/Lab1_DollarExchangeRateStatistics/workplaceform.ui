@@ -557,6 +557,239 @@ QPushButton:checked {
      </layout>
     </widget>
    </item>
+   <item row="0" column="2">
+    <widget class="QFrame" name="third_frame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::WinPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="1" column="0">
+       <widget class="QDateEdit" name="chooseDate_dateEdit">
+        <property name="minimumSize">
+         <size>
+          <width>247</width>
+          <height>34</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>34</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QDateEdit {
+    border: 1px solid rgb(0, 32, 96);   /* строгая тёмно-синяя рамка */
+    border-radius: 4px;                 /* лёгкое скругление */
+    padding: 4px 6px;                   /* внутренние отступы */
+    background-color: white;            /* белый фон */
+    color: rgb(0, 32, 96);              /* тёмно-синий текст */
+    font: 10pt &quot;Segoe UI&quot;;              /* строгий шрифт */
+}
+
+QDateEdit::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+    border-left: 1px solid rgb(0, 32, 96);
+    background-color: rgb(146, 205, 220);  /* корпоративный голубой */
+}
+
+QDateEdit:focus {
+    border: 1px solid rgb(146, 205, 220);  /* голубая подсветка при фокусе */
+    background-color: rgb(240, 248, 255);  /* лёгкий акцент фона */
+}
+</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="calculate_pushButton">
+        <property name="minimumSize">
+         <size>
+          <width>246</width>
+          <height>36</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>246</width>
+          <height>36</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+    background-color: rgb(0, 32, 96);     /* строгий тёмно-синий */
+    color: white;                         /* белый текст */
+    border: 1px solid rgb(0, 32, 96);     /* рамка в тон */
+    border-radius: 6px;                   /* лёгкое скругление */
+    padding: 6px 12px;                    /* отступы */
+    font: 10pt &quot;Segoe UI&quot;;                /* строгий шрифт */
+}
+
+QPushButton:hover {
+    background-color: rgb(0, 45, 135);    /* светлее при наведении */
+}
+
+QPushButton:pressed {
+    background-color: rgb(0, 20, 64);     /* темнее при нажатии */
+}
+
+QPushButton:disabled {
+    background-color: rgb(200, 200, 200); /* серый фон */
+    color: rgb(120, 120, 120);            /* тусклый текст */
+    border: 1px solid rgb(160, 160, 160); /* бледная рамка */
+}
+</string>
+        </property>
+        <property name="text">
+         <string>Рассчитать</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="calculate_results_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>500</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>10</pointsize>
+          <italic>true</italic>
+          <fontweight>Medium</fontweight>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+    background-color: rgb(120, 120, 120);      /* мягкий тёмно-серый фон */
+    color: rgb(240, 240, 240);                /* светло-серый текст для хорошего контраста */
+    border: 1px solid rgb(160, 160, 160);     /* тонкая, мягкая рамка */
+    border-radius: 4px;                        /* небольшое скругление углов */
+    padding: 4px 8px;                          /* внутренние отступы */
+    font-family: &quot;Segoe UI&quot;, sans-serif;       /* официальный шрифт */
+    font-weight: 500;                           /* умеренно жирный шрифт */
+    font-size: 10pt;                            /* читаемый размер */
+    font-style: italic;   
+}
+</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::WinPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="text">
+         <string>Ввести дату и рассчитать</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::AutoText</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QLabel" name="graphic_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>500</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>10</pointsize>
+          <italic>true</italic>
+          <fontweight>Medium</fontweight>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+    background-color: rgb(120, 120, 120);      /* мягкий тёмно-серый фон */
+    color: rgb(240, 240, 240);                /* светло-серый текст для хорошего контраста */
+    border: 1px solid rgb(160, 160, 160);     /* тонкая, мягкая рамка */
+    border-radius: 4px;                        /* небольшое скругление углов */
+    padding: 4px 8px;                          /* внутренние отступы */
+    font-family: &quot;Segoe UI&quot;, sans-serif;       /* официальный шрифт */
+    font-weight: 500;                           /* умеренно жирный шрифт */
+    font-size: 10pt;                            /* читаемый размер */
+    font-style: italic;   
+}
+</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::WinPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="text">
+         <string>График</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::AutoText</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QCustomPlot" name="customPlot" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="cursor">
+         <cursorShape>SizeAllCursor</cursorShape>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item row="0" column="1">
     <widget class="QFrame" name="second_frame">
      <property name="sizePolicy">
@@ -584,299 +817,8 @@ QPushButton:checked {
       <enum>QFrame::Sunken</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="4" column="0" colspan="4">
-       <widget class="QTextEdit" name="correlation_determination_textEdit">
-        <property name="minimumSize">
-         <size>
-          <width>465</width>
-          <height>80</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>465</width>
-          <height>80</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QTextEdit {
-    background-color: rgb(220, 220, 220);   /* нежно-серый */
-    color: #1C1C1C;
-    border: 1px solid rgb(180, 180, 180);
-    border-radius: 4px;
-    padding: 4px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-size: 8pt;
-}
-</string>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="1">
-       <widget class="QLabel" name="MSE_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Segoe UI</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>IBeamCursor</cursorShape>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    background-color: rgb(230, 210, 250);   /* нежно-фиолетовый */
-    color: #1C1C1C;
-    border: 1px solid rgb(180, 160, 210);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-size: 8pt;
-}
-</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="text">
-         <string>MSE=</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="2">
-       <widget class="QLabel" name="Sx2_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>125</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>125</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Segoe UI</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>IBeamCursor</cursorShape>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    background-color: rgb(250, 200, 220);   /* нежно-розовый */
-    color: #1C1C1C;
-    border: 1px solid rgb(220, 150, 180);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-size: 8pt;
-}
-</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="text">
-         <string>(Sx)^2=</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <widget class="QLabel" name="Sfull_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Segoe UI</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>IBeamCursor</cursorShape>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    background-color: rgb(255, 255, 200);   /* светло-жёлтый */
-    color: #1C1C1C;
-    border: 1px solid rgb(210, 210, 150);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-size: 8pt;
-}
-</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="text">
-         <string>Sполн.=</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="2" colspan="2">
-       <widget class="QLabel" name="check_Sfull_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>251</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>251</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Segoe UI</family>
-          <pointsize>9</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>IBeamCursor</cursorShape>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    background-color: rgb(255, 255, 200);   /* светло-жёлтый */
-    color: #1C1C1C;
-    border: 1px solid rgb(210, 210, 150);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-size: 9pt;
-}
-</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="3">
-       <widget class="QLabel" name="meanSy_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>125</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>125</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Segoe UI</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>IBeamCursor</cursorShape>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    background-color: rgb(250, 200, 220);   /* нежно-розовый */
-    color: #1C1C1C;
-    border: 1px solid rgb(220, 150, 180);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-size: 8pt;
-}
-</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="text">
-         <string>(Sy)_ср=</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="4">
-       <widget class="QLabel" name="coefficients_eq_label">
+      <item row="0" column="0" colspan="4">
+       <widget class="QLabel" name="calc_label">
         <property name="minimumSize">
          <size>
           <width>465</width>
@@ -918,365 +860,13 @@ QPushButton:checked {
          <enum>QFrame::Plain</enum>
         </property>
         <property name="text">
-         <string>Уравнение и коэффициенты</string>
+         <string>Таблица, коэффициенты и описание</string>
         </property>
         <property name="textFormat">
          <enum>Qt::AutoText</enum>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="n_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Times New Roman</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>IBeamCursor</cursorShape>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="text">
-         <string>n=</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="calc_meanY_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Segoe UI</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>IBeamCursor</cursorShape>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    background-color: rgb(200, 250, 200);   /* нежно-зелёный */
-    color: #1C1C1C;
-    border: 1px solid rgb(150, 220, 150);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-size: 8pt;
-}
-</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="text">
-         <string>fср.=</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QLabel" name="Sregr_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Segoe UI</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>IBeamCursor</cursorShape>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    background-color: rgb(255, 255, 200);   /* светло-жёлтый */
-    color: #1C1C1C;
-    border: 1px solid rgb(210, 210, 150);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-size: 8pt;
-}
-</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="text">
-         <string>Sрегр.=</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="2">
-       <widget class="QLabel" name="meanSx_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>125</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>125</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Segoe UI</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>IBeamCursor</cursorShape>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    background-color: rgb(250, 200, 220);   /* нежно-розовый */
-    color: #1C1C1C;
-    border: 1px solid rgb(220, 150, 180);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-size: 8pt;
-}
-</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="text">
-         <string>(Sx)_ср.=</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="3">
-       <widget class="QLabel" name="Sy2_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>125</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>125</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Segoe UI</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>IBeamCursor</cursorShape>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    background-color: rgb(250, 200, 220);   /* нежно-розовый */
-    color: #1C1C1C;
-    border: 1px solid rgb(220, 150, 180);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-size: 8pt;
-}
-</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="text">
-         <string>(Sy)^2=</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="Sost_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Segoe UI</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>IBeamCursor</cursorShape>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    background-color: rgb(255, 255, 200);   /* светло-жёлтый */
-    color: #1C1C1C;
-    border: 1px solid rgb(210, 210, 150);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-size: 8pt;
-}
-</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="text">
-         <string>Sост.=</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1" colspan="3">
-       <widget class="QLabel" name="descr_R2_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>360</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>360</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Segoe UI</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>IBeamCursor</cursorShape>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-    background-color: rgb(255, 220, 180);   /* светло-оранжевый */
-    color: #1C1C1C;
-    border: 1px solid rgb(210, 170, 130);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-size: 8pt;
-}
-</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::WinPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="text">
-         <string/>
         </property>
        </widget>
       </item>
@@ -1347,6 +937,59 @@ QTableView::item:hover {
         </property>
        </widget>
       </item>
+      <item row="2" column="0" colspan="4">
+       <widget class="QLabel" name="coefficients_eq_label">
+        <property name="minimumSize">
+         <size>
+          <width>465</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>465</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>10</pointsize>
+          <italic>true</italic>
+          <fontweight>Medium</fontweight>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+    background-color: rgb(120, 120, 120);      /* мягкий тёмно-серый фон */
+    color: rgb(240, 240, 240);                /* светло-серый текст для хорошего контраста */
+    border: 1px solid rgb(160, 160, 160);     /* тонкая, мягкая рамка */
+    border-radius: 4px;                        /* небольшое скругление углов */
+    padding: 4px 8px;                          /* внутренние отступы */
+    font-family: &quot;Segoe UI&quot;, sans-serif;       /* официальный шрифт */
+    font-weight: 500;                           /* умеренно жирный шрифт */
+    font-size: 10pt;                            /* читаемый размер */
+    font-style: italic;   
+}
+</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::WinPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="text">
+         <string>Уравнение и коэффициенты</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::AutoText</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="0" colspan="4">
        <widget class="QLabel" name="equation_label">
         <property name="sizePolicy">
@@ -1402,7 +1045,262 @@ QTableView::item:hover {
         </property>
        </widget>
       </item>
+      <item row="4" column="0" colspan="4">
+       <widget class="QTextEdit" name="correlation_determination_textEdit">
+        <property name="minimumSize">
+         <size>
+          <width>465</width>
+          <height>80</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>465</width>
+          <height>80</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QTextEdit {
+    background-color: rgb(220, 220, 220);   /* нежно-серый */
+    color: #1C1C1C;
+    border: 1px solid rgb(180, 180, 180);
+    border-radius: 4px;
+    padding: 4px;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 8pt;
+}
+</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" colspan="4">
+       <widget class="QTextEdit" name="coefficients_textEdit">
+        <property name="minimumSize">
+         <size>
+          <width>465</width>
+          <height>80</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>465</width>
+          <height>80</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QTextEdit {
+    background-color: rgb(225, 250, 240);   /* нежно-мятный */
+    color: #1C1C1C;                         /* тёмный текст */
+    border: 1px solid rgb(150, 200, 190);   /* мягкая рамка в тон */
+    border-radius: 4px;
+    padding: 4px;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 8pt;
+}
+</string>
+        </property>
+       </widget>
+      </item>
       <item row="6" column="0">
+       <widget class="QLabel" name="n_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>IBeamCursor</cursorShape>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::WinPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string>n=</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="Sost_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>IBeamCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+    background-color: rgb(255, 255, 200);   /* светло-жёлтый */
+    color: #1C1C1C;
+    border: 1px solid rgb(210, 210, 150);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 8pt;
+}
+</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::WinPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string>Sост.=</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLabel" name="Sregr_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>IBeamCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+    background-color: rgb(255, 255, 200);   /* светло-жёлтый */
+    color: #1C1C1C;
+    border: 1px solid rgb(210, 210, 150);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 8pt;
+}
+</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::WinPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string>Sрегр.=</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="MSE_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>IBeamCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+    background-color: rgb(230, 210, 250);   /* нежно-фиолетовый */
+    color: #1C1C1C;
+    border: 1px solid rgb(180, 160, 210);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 8pt;
+}
+</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::WinPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string>MSE=</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
        <widget class="QLabel" name="R2_label">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -1454,67 +1352,96 @@ QTableView::item:hover {
         </property>
        </widget>
       </item>
-      <item row="5" column="0" colspan="4">
-       <widget class="QTextEdit" name="coefficients_textEdit">
+      <item row="9" column="1" colspan="3">
+       <widget class="QLabel" name="descr_R2_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="minimumSize">
          <size>
-          <width>465</width>
-          <height>80</height>
+          <width>360</width>
+          <height>28</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>465</width>
-          <height>80</height>
+          <width>360</width>
+          <height>28</height>
          </size>
         </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>IBeamCursor</cursorShape>
+        </property>
         <property name="styleSheet">
-         <string notr="true">QTextEdit {
-    background-color: rgb(220, 230, 250);   /* нежно-голубой */
+         <string notr="true">QLabel {
+    background-color: rgb(255, 220, 180);   /* светло-оранжевый */
     color: #1C1C1C;
-    border: 1px solid rgb(180, 180, 180);
+    border: 1px solid rgb(210, 170, 130);
     border-radius: 4px;
-    padding: 4px;
+    padding: 2px 6px;
     font-family: &quot;Segoe UI&quot;, sans-serif;
     font-size: 8pt;
 }
 </string>
         </property>
+        <property name="frameShape">
+         <enum>QFrame::WinPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
        </widget>
       </item>
-      <item row="0" column="0" colspan="4">
-       <widget class="QLabel" name="calc_label">
+      <item row="8" column="1">
+       <widget class="QLabel" name="Sfull_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="minimumSize">
          <size>
-          <width>465</width>
-          <height>40</height>
+          <width>100</width>
+          <height>28</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>465</width>
-          <height>40</height>
+          <width>100</width>
+          <height>28</height>
          </size>
         </property>
         <property name="font">
          <font>
           <family>Segoe UI</family>
-          <pointsize>10</pointsize>
-          <italic>true</italic>
-          <fontweight>Medium</fontweight>
+          <pointsize>8</pointsize>
          </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>IBeamCursor</cursorShape>
         </property>
         <property name="styleSheet">
          <string notr="true">QLabel {
-    background-color: rgb(120, 120, 120);      /* мягкий тёмно-серый фон */
-    color: rgb(240, 240, 240);                /* светло-серый текст для хорошего контраста */
-    border: 1px solid rgb(160, 160, 160);     /* тонкая, мягкая рамка */
-    border-radius: 4px;                        /* небольшое скругление углов */
-    padding: 4px 8px;                          /* внутренние отступы */
-    font-family: &quot;Segoe UI&quot;, sans-serif;       /* официальный шрифт */
-    font-weight: 500;                           /* умеренно жирный шрифт */
-    font-size: 10pt;                            /* читаемый размер */
-    font-style: italic;   
+    background-color: rgb(255, 255, 200);   /* светло-жёлтый */
+    color: #1C1C1C;
+    border: 1px solid rgb(210, 210, 150);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 8pt;
 }
 </string>
         </property>
@@ -1522,70 +1449,51 @@ QTableView::item:hover {
          <enum>QFrame::WinPanel</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
+         <enum>QFrame::Sunken</enum>
         </property>
         <property name="text">
-         <string>Таблица, коэффициенты и описание</string>
-        </property>
-        <property name="textFormat">
-         <enum>Qt::AutoText</enum>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <string>Sполн.=</string>
         </property>
        </widget>
       </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="0" column="2">
-    <widget class="QFrame" name="third_frame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::WinPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="graphic_label">
+      <item row="6" column="2">
+       <widget class="QLabel" name="Sx2_label">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
         <property name="minimumSize">
          <size>
-          <width>171</width>
-          <height>40</height>
+          <width>125</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>125</width>
+          <height>28</height>
          </size>
         </property>
         <property name="font">
          <font>
           <family>Segoe UI</family>
-          <pointsize>10</pointsize>
-          <italic>true</italic>
-          <fontweight>Medium</fontweight>
+          <pointsize>8</pointsize>
          </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>IBeamCursor</cursorShape>
         </property>
         <property name="styleSheet">
          <string notr="true">QLabel {
-    background-color: rgb(120, 120, 120);      /* мягкий тёмно-серый фон */
-    color: rgb(240, 240, 240);                /* светло-серый текст для хорошего контраста */
-    border: 1px solid rgb(160, 160, 160);     /* тонкая, мягкая рамка */
-    border-radius: 4px;                        /* небольшое скругление углов */
-    padding: 4px 8px;                          /* внутренние отступы */
-    font-family: &quot;Segoe UI&quot;, sans-serif;       /* официальный шрифт */
-    font-weight: 500;                           /* умеренно жирный шрифт */
-    font-size: 10pt;                            /* читаемый размер */
-    font-style: italic;   
+    background-color: rgb(250, 200, 220);   /* нежно-розовый */
+    color: #1C1C1C;
+    border: 1px solid rgb(220, 150, 180);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 8pt;
 }
 </string>
         </property>
@@ -1593,29 +1501,218 @@ QTableView::item:hover {
          <enum>QFrame::WinPanel</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
+         <enum>QFrame::Sunken</enum>
         </property>
         <property name="text">
-         <string>График</string>
-        </property>
-        <property name="textFormat">
-         <enum>Qt::AutoText</enum>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <string>(Sx)^2=</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QCustomPlot" name="customPlot" native="true">
+      <item row="6" column="3">
+       <widget class="QLabel" name="Sy2_label">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="minimumSize">
+         <size>
+          <width>125</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>125</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
         <property name="cursor">
-         <cursorShape>SizeAllCursor</cursorShape>
+         <cursorShape>IBeamCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+    background-color: rgb(250, 200, 220);   /* нежно-розовый */
+    color: #1C1C1C;
+    border: 1px solid rgb(220, 150, 180);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 8pt;
+}
+</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::WinPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string>(Sy)^2=</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="2">
+       <widget class="QLabel" name="meanSx_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>125</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>125</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>IBeamCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+    background-color: rgb(250, 200, 220);   /* нежно-розовый */
+    color: #1C1C1C;
+    border: 1px solid rgb(220, 150, 180);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 8pt;
+}
+</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::WinPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string>(Sx)_ср.=</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="3">
+       <widget class="QLabel" name="meanSy_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>125</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>125</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>IBeamCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+    background-color: rgb(250, 200, 220);   /* нежно-розовый */
+    color: #1C1C1C;
+    border: 1px solid rgb(220, 150, 180);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 8pt;
+}
+</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::WinPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string>(Sy)_ср=</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="2">
+       <widget class="QLabel" name="check_Sfull_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>251</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>251</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>IBeamCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+    background-color: rgb(255, 255, 200);   /* светло-жёлтый */
+    color: #1C1C1C;
+    border: 1px solid rgb(210, 210, 150);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 9pt;
+}
+</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::WinPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>

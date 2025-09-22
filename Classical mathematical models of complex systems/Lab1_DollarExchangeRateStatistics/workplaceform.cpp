@@ -120,7 +120,6 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
     ui->n_label->setText(ui->n_label->text() + QString::number(this->values.n));
     ui->check_Sfull_label->setText("Sполн.=Sрегр.+Sост.? " + QString(Sfull_flag ? "True" : "False"));
     ui->MSE_label->setText(ui->MSE_label->text() + QString::number(this->coefficients["MSE"]));
-    ui->calc_meanY_label->setText(ui->calc_meanY_label->text() + QString::number(this->values.meanY));
     ui->Sx2_label->setText(ui->Sx2_label->text() + QString::number(this->values.Sx2, 'g', 6));
     ui->Sy2_label->setText(ui->Sy2_label->text() + QString::number(this->values.Sy2, 'g', 6));
     ui->meanSx_label->setText(ui->meanSx_label->text() + QString::number(this->values.meanSx, 'g', 6));
@@ -129,6 +128,9 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
     // ---- ГРАФИК ---- //
     // Отрисовка графика
     WorkplaceForm::MakePlot();
+
+    // ---- УСТАНОВКА ДАТЫ ---- //
+    ui->chooseDate_dateEdit->setDate(QDate::currentDate());
 }
 
 void WorkplaceForm::MakePlot()
@@ -222,12 +224,13 @@ void WorkplaceForm::MakePlot()
 
     // ----------------- Легенда -----------------
     QFont legendFont = ui->customPlot->legend->font();
-    legendFont.setPointSize(8);
-    legendFont.setWeight(QFont::Normal);
-    ui->customPlot->legend->setFont(legendFont);
-    ui->customPlot->legend->setVisible(true);
-    ui->customPlot->legend->setBrush(QColor(255, 255, 255, 150));
-    ui->customPlot->legend->setBorderPen(QPen(QColor(150, 150, 150, 180)));
+    legendFont.setPointSize(8);// Кегль
+    legendFont.setWeight(QFont::Normal); // Вес
+    ui->customPlot->legend->setFont(legendFont); // Установка шриффта
+    ui->customPlot->legend->setVisible(true); // Видимость легенды
+    ui->customPlot->legend->setBrush(QColor(255, 255, 255, 150)); // Прозрачность фона
+    ui->customPlot->legend->setBorderPen(QPen(QColor(150, 150, 150, 180))); // Границы
+    ui->customPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignLeft | Qt::AlignTop); // Установка в левый верхний угол
 
     // Отрисовка
     ui->customPlot->replot();
@@ -248,3 +251,50 @@ void WorkplaceForm::closeEvent(QCloseEvent *event)
     Q_UNUSED(event);
     emit backToMain();
 }
+
+void WorkplaceForm::on_calculate_pushButton_clicked()
+{
+    // Проверка дат
+    if (this->dataColumn.isEmpty()) return;
+
+    QDate chosen_date = ui->chooseDate_dateEdit->date();
+    // 1. Рассчитать положение даты между мин и макс
+    // 2. Середина - подсветить дату и прогноз
+    // 3. < мин - дорисовать график от даты до мин и подсветить
+    // 4. > макс - дорисовать график от макс до даты и подстветить
+    QVector<QDate> dates;
+    for (const auto& s : dataColumn){
+        QDate d = QDate::fromString(s, "dd.MM.yyyy");
+        if (d.isValid())
+            dates.append(d);
+    }
+
+    // Проверка преобразованных дат
+    if (dates.isEmpty()) return;
+
+    // Минимальная и максимальная даты
+    QDate minDate = *std::min_element(dates.begin(), dates.end());
+    QDate maxDate = *std::max_element(dates.begin(), dates.end());
+
+    // Сравнение выбранной даты
+    if (chosen_date < minDate) {
+        qDebug() << "Выбрана дата меньше минимальной. Дорисовать график от выбранной даты до minDate и подсветить.";
+        // TODO: дорисовать график от chosenDate до minDate
+    }
+    else if (chosen_date > maxDate) {
+        qDebug() << "Выбрана дата больше максимальной. Дорисовать график от maxDate до выбранной даты и подсветить.";
+        // TODO: дорисовать график от maxDate до chosenDate
+    }
+    else {
+        // Выбрана дата внутри диапазона
+        QDate midDate = minDate.addDays(minDate.daysTo(maxDate) / 2);
+        if (chosen_date == midDate) {
+            qDebug() << "Выбрана середина диапазона. Подсветить дату и прогноз.";
+            // TODO: подсветить
+        } else {
+            qDebug() << "Выбрана дата внутри диапазона, но не середина. Можно подсветить или рассчитать положение.";
+            // TODO: подсветить позицию на графике
+        }
+    }
+}
+

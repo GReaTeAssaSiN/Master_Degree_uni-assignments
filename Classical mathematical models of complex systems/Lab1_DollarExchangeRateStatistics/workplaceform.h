@@ -24,6 +24,7 @@ signals:
 private slots:
     void on_pushButton_back_clicked();
     void MakePlot();
+    void on_calculate_pushButton_clicked();
 
 private:
     Ui::WorkplaceForm *ui;
@@ -39,7 +40,7 @@ private:
     QVector<double> Sfull{};
     RegressionValues values{}; // Хранит суммы и значения для оценки адекватности модели
     QHash<QString, double> coefficients{}; // Хранит коэффициенты регрессии
-    QString trendLabel{};
+    QString trendLabel{}; // Уравнение линии тренда
 
 protected:
     void closeEvent(QCloseEvent *event) override;
