@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTableView>
+#include <QHash>
 #include "RegressionValues.h"
 
 namespace Ui {
@@ -36,7 +37,8 @@ private:
     QVector<double> Sost{};
     QVector<double> Sregr{};
     QVector<double> Sfull{};
-    RegressionValues values{};
+    RegressionValues values{}; // Хранит суммы и значения для оценки адекватности модели
+    QHash<QString, double> coefficients{}; // Хранит коэффициенты регрессии
     QString trendLabel{};
 
 protected:

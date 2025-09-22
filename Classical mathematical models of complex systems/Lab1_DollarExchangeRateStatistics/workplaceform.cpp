@@ -51,7 +51,7 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
 
     // ---- ОБЩАЯ ТАБЛИЦА ---- //
     // Вычисление значений квадратов, сумм и средних значений + количества экспериментов (n)
-    calculateRegressionTotalValues(this->numericDates, this->cursValues, this->xSquared, this->ySquared, this->xyProduct, this->values);
+    calculateRegressionTotalValues(this->numericDates, this->cursValues, this->xSquared, this->ySquared, this->xyProduct, this->values, this->coefficients);
     // Заполнение общей таблицы
     fillTotalTable(ui->total_tableView, this->dataColumn, this->numericDates, this->cursValues,
                    this->xSquared, this->ySquared, this->xyProduct);
@@ -69,8 +69,8 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
     bool correlation_flag{};
     switch (mode) {
     case 0: // Линейная
-        correlation_flag = calculateLinearRegressionValues(this->numericDates, this->yT, this->values);
-        this->trendLabel = QString("y = %1 + %2*x").arg(values.a0, 0, 'f', 6).arg(values.a1, 0, 'f', 2);
+        correlation_flag = calculateLinearRegressionValues(this->numericDates, this->yT, this->values, this->coefficients);
+        this->trendLabel = QString("y = %1 + %2*x").arg(coefficients["a0"], 0, 'f', 6).arg(coefficients["a1"], 0, 'f', 2);
         break;
     case 1: // Обратная линейная
         break;
@@ -90,34 +90,41 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
         QMessageBox::warning(nullptr, "Предупреждение", "Неизвестный тип регрессии, не удалось вычислить коэффициенты!");
         break;
     }
-    // Вычисление Sост., Sрегр., Sполн. + R2, MSE
-    bool Sfull_flag = calculateRegressionCalcValues(this->cursValues, this->yT, this->Sost, this->Sregr, this->Sfull, this->values);
+    // Вычисление Sост., Sрегр., Sполн. + R2, MSE + Sx2, Sy2, meanSx, meanSy
+    bool Sfull_flag = calculateRegressionCalcValues(this->cursValues, this->yT, this->Sost, this->Sregr, this->Sfull, this->values, this->coefficients);
     // Заполнение вычисляемой таблицы
     fillCalculateTable(ui->calculate_tableView, this->numericDates, this->cursValues, this->yT, this->values);
-    // Отображение значений величин вне вычисляемой таблицы
+    // --- Отображение значений величин вне вычисляемой таблицы --- //
+    // Уравнение
     ui->equation_label->setText(this->trendLabel);
-    ui->n_label->setText(ui->n_label->text() + QString::number(this->values.n));
-    ui->A_label->setText(ui->A_label->text() + QString::number(this->values.A));
-    ui->A0_label->setText(ui->A0_label->text() + QString::number(this->values.A0));
-    ui->A1_label->setText(ui->A1_label->text() + QString::number(this->values.A1));
-    ui->B_label->setText(ui->B_label->text() + QString::number(this->values.B));
-    ui->B0_label->setText(ui->B0_label->text() + QString::number(this->values.B0));
-    ui->B1_label->setText(ui->B1_label->text() + QString::number(this->values.B1));
-    ui->a0_label->setText(ui->a0_label->text() + QString::number(this->values.a0));
-    ui->a1_label->setText(ui->a1_label->text() + QString::number(this->values.a1));
-    ui->b0_label->setText(ui->b0_label->text() + QString::number(this->values.b0));
-    ui->b1_label->setText(ui->b1_label->text() + QString::number(this->values.b1));
-    ui->r1_label->setText(ui->r1_label->text() + QString::number(this->values.r1));
-    ui->r2_label->setText(ui->r2_label->text() + QString::number(this->values.r2));
-    ui->check_regression_label->setText("r1=r2? " + QString(correlation_flag ? "True" : "False"));
-    ui->descr_regression_label->setText(getRegressionRelationship(this->values.r1));
+    // Корреляция
+    ui->correlation_determination_textEdit->append("r1=" + QString::number(this->coefficients["r1"]));
+    ui->correlation_determination_textEdit->setText(ui->correlation_determination_textEdit->toPlainText() +
+                                                    ";r2=" + QString::number(this->coefficients["r2"]));
+    ui->correlation_determination_textEdit->setText(ui->correlation_determination_textEdit->toPlainText() +
+                                                    ";r1=r2? " + QString(correlation_flag ? "True" : "False"));
+    ui->correlation_determination_textEdit->append("Значение линейного коэффициента корреляции: r=" + QString::number(this->coefficients["r1"]));
+    ui->correlation_determination_textEdit->append(getRegressionRelationship(this->coefficients["r1"]));
+    // Коэффииенты
+    ui->coefficients_textEdit->append("A =" + QString::number(this->coefficients["A"]) + "\t" + "B =" + QString::number(this->coefficients["B"]));
+    ui->coefficients_textEdit->append("A0=" + QString::number(this->coefficients["A0"]) + "\t" + "B0=" + QString::number(this->coefficients["B0"]));
+    ui->coefficients_textEdit->append("A1=" + QString::number(this->coefficients["A1"]) + "\t" + "B1=" + QString::number(this->coefficients["B1"]));
+    ui->coefficients_textEdit->append("a0=" + QString::number(this->coefficients["a0"]) + "\t" + "b0=" + QString::number(this->coefficients["b0"]));
+    ui->coefficients_textEdit->append("a1=" + QString::number(this->coefficients["a1"]) + "\t" + "b1=" + QString::number(this->coefficients["b1"]));
+    // Величины
+    ui->R2_label->setText(ui->R2_label->text() + QString::number(this->coefficients["R2"]));
+    ui->descr_R2_label->setText(getDeterminationDescription(this->coefficients["R2"]));
     ui->Sost_label->setText(ui->Sost_label->text() + QString::number(this->values.sumOst));
     ui->Sregr_label->setText(ui->Sregr_label->text() + QString::number(this->values.sumRegr));
     ui->Sfull_label->setText(ui->Sfull_label->text() + QString::number(this->values.sumFull));
+    ui->n_label->setText(ui->n_label->text() + QString::number(this->values.n));
     ui->check_Sfull_label->setText("Sполн.=Sрегр.+Sост.? " + QString(Sfull_flag ? "True" : "False"));
-    ui->R2_label->setText(ui->R2_label->text() + QString::number(this->values.R2));
-    ui->descr_R2_label->setText(getDeterminationDescription(this->values.R2));
-    ui->MSE_label->setText(ui->MSE_label->text() + QString::number(this->values.MSE));
+    ui->MSE_label->setText(ui->MSE_label->text() + QString::number(this->coefficients["MSE"]));
+    ui->calc_meanY_label->setText(ui->calc_meanY_label->text() + QString::number(this->values.meanY));
+    ui->Sx2_label->setText(ui->Sx2_label->text() + QString::number(this->values.Sx2, 'g', 6));
+    ui->Sy2_label->setText(ui->Sy2_label->text() + QString::number(this->values.Sy2, 'g', 6));
+    ui->meanSx_label->setText(ui->meanSx_label->text() + QString::number(this->values.meanSx, 'g', 6));
+    ui->meanSy_label->setText(ui->meanSy_label->text() + QString::number(this->values.meanSy, 'g', 6));
 
     // ---- ГРАФИК ---- //
     // Отрисовка графика
@@ -161,7 +168,7 @@ void WorkplaceForm::MakePlot()
     ui->customPlot->graph(1)->setPen(QPen(Qt::red, 2));
 
     // ----------------- Подпись линии тренда -----------------
-    this->trendLabel += QString("\nR² = %1").arg(values.R2, 0, 'f', 4);
+    this->trendLabel += QString("\nR² = %1").arg(coefficients["R2"], 0, 'f', 4);
     ui->customPlot->graph(1)->setName(this->trendLabel);
 
     // ----------------- Оси -----------------

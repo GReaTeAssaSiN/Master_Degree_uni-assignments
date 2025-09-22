@@ -175,8 +175,8 @@ void readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
 // ----- Функции общих вычислений ----- //
 //Вычисление значений, необходимых для построения регрессии
 void calculateRegressionTotalValues(const QVector<double> numericDates, const QVector<double> &cursValues,
-                               QVector<double> &xSquared, QVector<double> &ySquared, QVector<double> &xyProduct,
-                               RegressionValues &values)
+                                    QVector<double> &xSquared, QVector<double> &ySquared, QVector<double> &xyProduct,
+                                    RegressionValues &values, QHash<QString, double> &coefficients)
 {
     values.n = numericDates.size();
     if (values.n==0) return;
@@ -213,7 +213,7 @@ void calculateRegressionTotalValues(const QVector<double> numericDates, const QV
 bool calculateRegressionCalcValues(const QVector<double> &cursValues,
                                    const QVector<double> &yT,
                                    QVector<double> &Sost, QVector<double> &Sregr, QVector<double> Sfull,
-                                   RegressionValues &values, const double eps)
+                                   RegressionValues &values, QHash<QString, double> &coefficients, const double eps)
 {
     Sost.clear();
     Sregr.clear();
@@ -235,8 +235,15 @@ bool calculateRegressionCalcValues(const QVector<double> &cursValues,
         values.sumFull += elem_of_Sfull;
     }
 
-    values.R2 = 1 - values.sumOst / values.sumFull;
-    values.MSE = values.sumOst / values.n;
+    // Коэффииент детерминации и MSE
+    coefficients.insert("R2", 1 - values.sumOst / values.sumFull);
+    coefficients.insert("MSE", values.sumOst / values.n);
+
+    // Несмещенная дисперсия и среднее кв. отклонение выборочнного среднего
+    values.Sx2 = 1.0 / (values.n - 1) * (values.sumX2 - 1.0 / values.n * std::pow(values.sumX, 2));
+    values.Sy2 = 1.0 / (values.n - 1) * (values.sumY2 - 1.0 / values.n * std::pow(values.sumY, 2));
+    values.meanSx = std::sqrt(values.Sx2 / values.n);
+    values.meanSy = std::sqrt(values.Sy2 / values.n);
 
     return std::abs(values.sumOst + values.sumRegr - values.sumFull) < eps;
 }
@@ -342,7 +349,8 @@ QString getDeterminationDescription(const double& R2){
     return determination_descr;
 }
 // ЛИНЕЙНАЯ РЕГРЕССИЯ
-bool calculateLinearRegressionValues(const QVector<double> &numericDates, QVector<double> &yT, RegressionValues &values, const double eps){
+bool calculateLinearRegressionValues(const QVector<double> &numericDates, QVector<double> &yT,
+                                     RegressionValues &values, QHash<QString, double> &coefficients, const double eps){
     // y = a0 + a1*x
     // Система:
     // {a1n + a2*E(xi) = E(yi)
@@ -350,33 +358,33 @@ bool calculateLinearRegressionValues(const QVector<double> &numericDates, QVecto
 
     // Решение СЛУ методом Крамера (A, A0, A1, a0, a1)
     // A
-    values.A = values.n * values.sumX2 - values.sumX * values.sumX;
+    coefficients.insert("A", values.n * values.sumX2 - values.sumX * values.sumX);
     // A0
-    values.A0 = values.sumY * values.sumX2 - values.sumX * values.sumXY;
+    coefficients.insert("A0", values.sumY * values.sumX2 - values.sumX * values.sumXY);
     // A1
-    values.A1 = values.n * values.sumXY - values.sumY * values.sumX;
+    coefficients.insert("A1", values.n * values.sumXY - values.sumY * values.sumX);
     // B
-    values.B = values.n * values.sumY2 - values.sumY * values.sumY;
+    coefficients.insert("B" , values.n * values.sumY2 - values.sumY * values.sumY);
     // B0
-    values.B0 = values.sumX * values.sumY2 - values.sumY * values.sumXY;
+    coefficients.insert("B0", values.sumX * values.sumY2 - values.sumY * values.sumXY);
     // B1
-    values.B1 = values.n * values.sumXY - values.sumY * values.sumX;
+    coefficients.insert("B1", values.n * values.sumXY - values.sumY * values.sumX);
     // a0
-    values.a0 = values.A0 / values.A;
+    coefficients.insert("a0", coefficients["A0"] / coefficients["A"]);
     // a1
-    values.a1 = values.A1 / values.A;
+    coefficients.insert("a1", coefficients["A1"] / coefficients["A"]);
     // b0
-    values.b0 = values.B0 / values.B;
+    coefficients.insert("b0", coefficients["B0"] / coefficients["B"]);
     // b1
-    values.b1 = values.B1 / values.B;
+    coefficients.insert("b1", coefficients["B1"] / coefficients["B"]);
     // r1
-    values.r1 = values.A1 / std::sqrt(values.A * values.B);
+    coefficients.insert("r1", coefficients["A1"] / std::sqrt(coefficients["A"] * coefficients["B"]));
     // r2
-    values.r2 = values.B1 / std::sqrt(values.A * values.B);
+    coefficients.insert("r2", coefficients["B1"] / std::sqrt(coefficients["A"] * coefficients["B"]));
     // yT
     yT.clear();
     for (int i=0; i<values.n; ++i)
-        yT.append(values.a0 + values.a1 * numericDates[i]);
+        yT.append(coefficients["a0"] + coefficients["a1"] * numericDates[i]);
 
-    return std::abs(values.r1 - values.r2) < eps;
+    return std::abs(coefficients["r1"] - coefficients["r2"]) < eps;
 }
