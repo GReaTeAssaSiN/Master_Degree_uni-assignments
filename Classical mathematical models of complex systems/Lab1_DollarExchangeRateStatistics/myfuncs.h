@@ -12,7 +12,7 @@ void readDataAndCurs(const QTableView *tableView,
                      QVector<QString> &dataColumn, QVector<double> &numericDates, QVector<double> &cursValues);
 void calculateRegressionTotalValues(const QVector<double> numericDates, const QVector<double> &cursValues,
                                     QVector<double> &xSquared, QVector<double> &ySquared, QVector<double> &xyProduct,
-                                    RegressionValues &values, QHash<QString, double> &coefficients);
+                                    RegressionValues &values);
 
 // ----- Функции общих вычислений ----- //
 bool calculateRegressionCalcValues(const QVector<double> &cursValues,
@@ -37,6 +37,9 @@ void fillCalculateTable(QTableView *tableView,
 QString getRegressionRelationship(const double& r);
 QString getDeterminationDescription(const double& R2);
 // РЕГРЕССИИ
-bool calculateLinearRegressionValues(const QVector<double> &numericDates, QVector<double> &yT,
-                                     RegressionValues &values, QHash<QString, double> &coefficients, const double eps=1e-9);
+// Линейная регрессия
+bool calculateLinearRegressionCoefficients(RegressionValues &values, QHash<QString, double> &coefficients, const double eps=1e-9);
+void calculateLinearRegressionValues(const QVector<double> &numericDates, QVector<double> &yT,
+                                     const RegressionValues &values, const QHash<QString, double> &coefficients);
+
 #endif // MYFUNCS_H

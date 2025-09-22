@@ -9,49 +9,23 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
     , ui(new Ui::WorkplaceForm)
 {
     ui->setupUi(this);
-    // Выделение текста на label
+
+    // ----- Сигналы ----- //
+    connect(ui->pushButton_back, &QPushButton::clicked, this, &WorkplaceForm::on_pushButton_back_clicked);
+
+    // ----- Выделение текста на label'ах ----- //
     QList<QLabel*> labels = this->findChildren<QLabel*>();
     for (QLabel* lbl : labels) {
         lbl->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     }
-    connect(ui->pushButton_back, &QPushButton::clicked, this, &WorkplaceForm::on_pushButton_back_clicked);
-    // Заголовок окна
-    switch(mode){
-    case 0:
-        setWindowTitle("Линейная регрессия");
-        break;
-    case 1:
-        setWindowTitle("Обратная линейная регрессия");
-        break;
-    case 2:
-        setWindowTitle("Экспоненциальная регрессия");
-        break;
-    case 3:
-        setWindowTitle("Гиперболическая регрессия");
-        break;
-    case 4:
-        setWindowTitle("Параболическая регрессия");
-        break;
-    case 5:
-        setWindowTitle("Логарифмическая регрессия");
-        break;
-    case 6:
-        setWindowTitle("Степенная регрессия");
-        break;
-    case 7:
-        setWindowTitle("Полиномиальная регрессия");
-        break;
-    default:
-        setWindowTitle("Неопознанный тип регрессии");
-        break;
-    }
-    // ---- ПРЕДОБРАБОТКА ---- //
+
+    // ----- ПРЕДОБРАБОТКА ДАННЫХ ----- //
     // Чтение исходных данных и преобразование к нужному виду
     readDataAndCurs(data_tableView, this->dataColumn, this->numericDates, this->cursValues);
 
-    // ---- ОБЩАЯ ТАБЛИЦА ---- //
+    // ----- ОБЩАЯ ТАБЛИЦА ----- //
     // Вычисление значений квадратов, сумм и средних значений + количества экспериментов (n)
-    calculateRegressionTotalValues(this->numericDates, this->cursValues, this->xSquared, this->ySquared, this->xyProduct, this->values, this->coefficients);
+    calculateRegressionTotalValues(this->numericDates, this->cursValues, this->xSquared, this->ySquared, this->xyProduct, this->values);
     // Заполнение общей таблицы
     fillTotalTable(ui->total_tableView, this->dataColumn, this->numericDates, this->cursValues,
                    this->xSquared, this->ySquared, this->xyProduct);
@@ -64,29 +38,38 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
     ui->meanX_label->setText(ui->meanX_label->text() + QString::number(this->values.meanX, 'f', 6));
     ui->meanY_label->setText(ui->meanY_label->text() + QString::number(this->values.meanY, 'f', 6));
 
-    // ---- ВЫЧИСЛЯЕМАЯ ТАБЛИЦА ---- //
+    // ----- ВЫЧИСЛЯЕМАЯ ТАБЛИЦА ----- //
     // Вычиление значений констант и коэффициентов регрессии + построение уравнения регрессии
     bool correlation_flag{};
     switch (mode) {
     case 0: // Линейная
-        correlation_flag = calculateLinearRegressionValues(this->numericDates, this->yT, this->values, this->coefficients);
-        this->trendLabel = QString("y = %1 + %2*x").arg(coefficients["a0"], 0, 'f', 6).arg(coefficients["a1"], 0, 'f', 2);
+        setWindowTitle("Линейная регрессия");
+        correlation_flag = calculateLinearRegressionCoefficients(this->values, this->coefficients);
+        calculateLinearRegressionValues(this->numericDates, this->yT, this->values, this->coefficients);
         break;
     case 1: // Обратная линейная
+        setWindowTitle("Обратная линейная регрессия");
         break;
     case 2: // Экспоненциальная
+        setWindowTitle("Экспонениальная регрессия");
         break;
     case 3: // Гиперболическая
+        setWindowTitle("Гиперболическая регрессия");
         break;
     case 4: // Параболическая
+        setWindowTitle("Параболическая регрессия");
         break;
     case 5: // Логарифмическая
+        setWindowTitle("Логарифмическая регрессия");
         break;
     case 6: // Степенная
+        setWindowTitle("Степенная регрессия");
         break;
     case 7: // Полиномиальная
+        setWindowTitle("Полиномиальная регрессия");
         break;
     default:
+        setWindowTitle("Неопознанный тип регрессии");
         QMessageBox::warning(nullptr, "Предупреждение", "Неизвестный тип регрессии, не удалось вычислить коэффициенты!");
         break;
     }
@@ -96,7 +79,8 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
     fillCalculateTable(ui->calculate_tableView, this->numericDates, this->cursValues, this->yT, this->values);
     // --- Отображение значений величин вне вычисляемой таблицы --- //
     // Уравнение
-    ui->equation_label->setText(this->trendLabel);
+    this->trend_eq = QString("y = %1 + %2*x").arg(coefficients["a0"], 0, 'f', 6).arg(coefficients["a1"], 0, 'f', 2);
+    ui->equation_label->setText(trend_eq);
     // Корреляция
     ui->correlation_determination_textEdit->append("r1=" + QString::number(this->coefficients["r1"]));
     ui->correlation_determination_textEdit->setText(ui->correlation_determination_textEdit->toPlainText() +
@@ -130,20 +114,22 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
     WorkplaceForm::MakePlot();
 
     // ---- УСТАНОВКА ДАТЫ ---- //
-    ui->chooseDate_dateEdit->setDate(QDate::currentDate());
+    QDate default_date = QDate::fromString(this->dataColumn.first(), "dd.MM.yyyy").addDays(1);
+    ui->selectDate_dateEdit->setDate(default_date);
+    ui->selectDate_dateEdit->setMinimumDate(default_date);
 }
 
 void WorkplaceForm::MakePlot()
 {
     // Проверка данных
-    if (this->dataColumn.isEmpty() || cursValues.isEmpty() || yT.isEmpty())
+    if (this->dataColumn.isEmpty() || this->cursValues.isEmpty() || this->yT.isEmpty())
         return;
 
     // Очистка графика
     ui->customPlot->clearGraphs();
 
     // Подготовка векторов
-    int n = this->dataColumn.size();
+    int n = this->values.n;
     QVector<double> x(n), y(n), yReg(n);
     QVector<QDateTime> dateTimes(n);
 
@@ -153,14 +139,14 @@ void WorkplaceForm::MakePlot()
         dateTimes[i] = QDateTime(date, QTime(0,0));
 
         x[i] = dateTimes[i].toSecsSinceEpoch(); // координата X
-        y[i] = cursValues[i];                   // исходные данные
+        y[i] = this->cursValues[i];             // исходные данные
         yReg[i] = yT[i];                        // регрессия
     }
 
     // ----------------- График исходных данных -----------------
     ui->customPlot->addGraph();
     ui->customPlot->graph(0)->setData(x, y);
-    ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsNone); // только точки
+    ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsNone); // Отключение соединительной кривой
     ui->customPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 6));
     ui->customPlot->graph(0)->setName("Исходные данные");
 
@@ -168,16 +154,13 @@ void WorkplaceForm::MakePlot()
     ui->customPlot->addGraph();
     ui->customPlot->graph(1)->setData(x, yReg);
     ui->customPlot->graph(1)->setPen(QPen(Qt::red, 2));
-
-    // ----------------- Подпись линии тренда -----------------
-    this->trendLabel += QString("\nR² = %1").arg(coefficients["R2"], 0, 'f', 4);
-    ui->customPlot->graph(1)->setName(this->trendLabel);
+    ui->customPlot->graph(1)->setName(this->trend_eq + QString("\nR² = %3").arg(coefficients["R2"], 0, 'f', 6));
 
     // ----------------- Оси -----------------
     ui->customPlot->xAxis->setLabel("Дата");
     ui->customPlot->yAxis->setLabel("Курс доллара к рублю");
 
-    // Стиль осей
+    // Стиль подписей осей
     QFont axisFont;
     axisFont.setBold(true);
     axisFont.setPointSize(10);
@@ -185,6 +168,8 @@ void WorkplaceForm::MakePlot()
     ui->customPlot->yAxis->setLabelFont(axisFont);
 
     // Ось X — формат даты
+    QDateTime minDate = *std::min_element(dateTimes.constBegin(), dateTimes.constEnd());
+    QDateTime maxDate = *std::max_element(dateTimes.constBegin(), dateTimes.constEnd());
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
     dateTicker->setDateTimeFormat("dd.MM.yyyy");
     dateTicker->setTickCount(10);
@@ -195,17 +180,16 @@ void WorkplaceForm::MakePlot()
 
     // Ось Y — шаг делений
     QSharedPointer<QCPAxisTickerFixed> yTicker(new QCPAxisTickerFixed);
-    double yStep = ( *std::max_element(y.constBegin(), y.constEnd()) -
-                    *std::min_element(y.constBegin(), y.constEnd()) ) / 10.0;
+    double minY = *std::min_element(y.constBegin(), y.constEnd());
+    double maxY = *std::max_element(y.constBegin(), y.constEnd());
+    double yStep = ( maxY - minY ) / 10.0;
     yTicker->setTickStep(yStep);
-    yTicker->setScaleStrategy(QCPAxisTickerFixed::ssMultiples);
+    yTicker->setScaleStrategy(QCPAxisTickerFixed::ssPowers);
     ui->customPlot->yAxis->setTicker(yTicker);
     ui->customPlot->yAxis->setSubTicks(true);
 
     // Диапазоны осей
-    ui->customPlot->xAxis->setRange(x.first(), x.last());
-    double minY = *std::min_element(y.constBegin(), y.constEnd());
-    double maxY = *std::max_element(y.constBegin(), y.constEnd());
+    ui->customPlot->xAxis->setRange(minDate.addDays(-1).toSecsSinceEpoch(), maxDate.addDays(1).toSecsSinceEpoch());
     ui->customPlot->yAxis->setRange(minY - yStep, maxY + yStep);
 
     // ----------------- Масштабирование и drag -----------------
@@ -214,13 +198,22 @@ void WorkplaceForm::MakePlot()
     ui->customPlot->setInteraction(QCP::iSelectPlottables, true);
 
     // ----------------- Заголовок -----------------
-    QDateTime minDate = *std::min_element(dateTimes.constBegin(), dateTimes.constEnd());
-    QDateTime maxDate = *std::max_element(dateTimes.constBegin(), dateTimes.constEnd());
     QString title = QString("Курс доллара США с %1 по %2")
                         .arg(minDate.date().toString("dd.MM.yyyy"))
                         .arg(maxDate.date().toString("dd.MM.yyyy"));
-    ui->customPlot->plotLayout()->insertRow(0);
-    ui->customPlot->plotLayout()->addElement(0, 0, new QCPTextElement(ui->customPlot, title, QFont("Arial", 12, QFont::Bold)));
+
+    // Проверка на существование заголовка в окне. Если нет - добавление, иначе - замена текста.
+    if (!ui->customPlot->plotLayout()->elementCount() ||
+        !qobject_cast<QCPTextElement*>(ui->customPlot->plotLayout()->elementAt(0)))
+    {
+        ui->customPlot->plotLayout()->insertRow(0);
+        ui->customPlot->plotLayout()->addElement(0, 0, new QCPTextElement(ui->customPlot, title, QFont("Arial", 12, QFont::Bold)));
+    }
+    else
+    {
+        auto header = qobject_cast<QCPTextElement*>(ui->customPlot->plotLayout()->elementAt(0));
+        header->setText(title);
+    }
 
     // ----------------- Легенда -----------------
     QFont legendFont = ui->customPlot->legend->font();
@@ -254,47 +247,6 @@ void WorkplaceForm::closeEvent(QCloseEvent *event)
 
 void WorkplaceForm::on_calculate_pushButton_clicked()
 {
-    // Проверка дат
-    if (this->dataColumn.isEmpty()) return;
-
-    QDate chosen_date = ui->chooseDate_dateEdit->date();
-    // 1. Рассчитать положение даты между мин и макс
-    // 2. Середина - подсветить дату и прогноз
-    // 3. < мин - дорисовать график от даты до мин и подсветить
-    // 4. > макс - дорисовать график от макс до даты и подстветить
-    QVector<QDate> dates;
-    for (const auto& s : dataColumn){
-        QDate d = QDate::fromString(s, "dd.MM.yyyy");
-        if (d.isValid())
-            dates.append(d);
-    }
-
-    // Проверка преобразованных дат
-    if (dates.isEmpty()) return;
-
-    // Минимальная и максимальная даты
-    QDate minDate = *std::min_element(dates.begin(), dates.end());
-    QDate maxDate = *std::max_element(dates.begin(), dates.end());
-
-    // Сравнение выбранной даты
-    if (chosen_date < minDate) {
-        qDebug() << "Выбрана дата меньше минимальной. Дорисовать график от выбранной даты до minDate и подсветить.";
-        // TODO: дорисовать график от chosenDate до minDate
-    }
-    else if (chosen_date > maxDate) {
-        qDebug() << "Выбрана дата больше максимальной. Дорисовать график от maxDate до выбранной даты и подсветить.";
-        // TODO: дорисовать график от maxDate до chosenDate
-    }
-    else {
-        // Выбрана дата внутри диапазона
-        QDate midDate = minDate.addDays(minDate.daysTo(maxDate) / 2);
-        if (chosen_date == midDate) {
-            qDebug() << "Выбрана середина диапазона. Подсветить дату и прогноз.";
-            // TODO: подсветить
-        } else {
-            qDebug() << "Выбрана дата внутри диапазона, но не середина. Можно подсветить или рассчитать положение.";
-            // TODO: подсветить позицию на графике
-        }
-    }
+    this->select_date = ui->selectDate_dateEdit->date();
+    WorkplaceForm::MakePlot();
 }
-

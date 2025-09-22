@@ -176,7 +176,7 @@ void readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
 //Вычисление значений, необходимых для построения регрессии
 void calculateRegressionTotalValues(const QVector<double> numericDates, const QVector<double> &cursValues,
                                     QVector<double> &xSquared, QVector<double> &ySquared, QVector<double> &xyProduct,
-                                    RegressionValues &values, QHash<QString, double> &coefficients)
+                                    RegressionValues &values)
 {
     values.n = numericDates.size();
     if (values.n==0) return;
@@ -349,8 +349,7 @@ QString getDeterminationDescription(const double& R2){
     return determination_descr;
 }
 // ЛИНЕЙНАЯ РЕГРЕССИЯ
-bool calculateLinearRegressionValues(const QVector<double> &numericDates, QVector<double> &yT,
-                                     RegressionValues &values, QHash<QString, double> &coefficients, const double eps){
+bool calculateLinearRegressionCoefficients(RegressionValues &values, QHash<QString, double> &coefficients, const double eps){
     // y = a0 + a1*x
     // Система:
     // {a1n + a2*E(xi) = E(yi)
@@ -381,10 +380,13 @@ bool calculateLinearRegressionValues(const QVector<double> &numericDates, QVecto
     coefficients.insert("r1", coefficients["A1"] / std::sqrt(coefficients["A"] * coefficients["B"]));
     // r2
     coefficients.insert("r2", coefficients["B1"] / std::sqrt(coefficients["A"] * coefficients["B"]));
+
+    return std::abs(coefficients["r1"] - coefficients["r2"]) < eps;
+}
+void calculateLinearRegressionValues(const QVector<double> &numericDates, QVector<double> &yT,
+                                     const RegressionValues &values, const QHash<QString, double> &coefficients){
     // yT
     yT.clear();
     for (int i=0; i<values.n; ++i)
         yT.append(coefficients["a0"] + coefficients["a1"] * numericDates[i]);
-
-    return std::abs(coefficients["r1"] - coefficients["r2"]) < eps;
 }

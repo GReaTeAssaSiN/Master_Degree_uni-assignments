@@ -4,7 +4,9 @@
 #include <QWidget>
 #include <QTableView>
 #include <QHash>
+#include <QDate>
 #include "RegressionValues.h"
+#include "qcustomplot.h"
 
 namespace Ui {
 class WorkplaceForm;
@@ -40,7 +42,8 @@ private:
     QVector<double> Sfull{};
     RegressionValues values{}; // Хранит суммы и значения для оценки адекватности модели
     QHash<QString, double> coefficients{}; // Хранит коэффициенты регрессии
-    QString trendLabel{}; // Уравнение линии тренда
+    QDate select_date{}; // Выбранная дата
+    QString trend_eq{}; // Уравнение регрессии
 
 protected:
     void closeEvent(QCloseEvent *event) override;

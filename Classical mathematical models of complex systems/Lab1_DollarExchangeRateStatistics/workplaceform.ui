@@ -513,7 +513,7 @@ QTableView::item:hover {
          <font>
           <family>Segoe UI</family>
           <pointsize>10</pointsize>
-          <fontweight>Medium</fontweight>
+          <fontweight>DemiBold</fontweight>
          </font>
         </property>
         <property name="cursor">
@@ -521,30 +521,30 @@ QTableView::item:hover {
         </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {
-    background-color: rgb(220, 225, 230);    /* мягкий светло-серый с оттенком синего */
-    color: rgb(16, 42, 67);                  /* тёмно-синий текст */
-    border-radius: 12px;                      /* плавное скругление углов */
-    border: 1px solid rgb(160, 160, 160);    /* мягкая рамка */
-    padding: 6px 14px;                        /* внутренние отступы */
+    background-color: rgb(100, 149, 237);    /* яркий голубой (Cornflower Blue) */
+    color: rgb(255, 255, 255);               /* белый текст для контраста */
+    border-radius: 12px;                     
+    border: 2px solid rgb(65, 105, 225);    /* более заметная рамка (Royal Blue) */
+    padding: 6px 14px;
     font-family: &quot;Segoe UI&quot;, sans-serif;
-    font-weight: 500;                         /* умеренно жирный шрифт */
+    font-weight: 600;                        /* чуть более жирный */
     font-size: 10pt;
 }
 
 QPushButton:hover {
-    background-color: rgb(201, 212, 223);    /* чуть темнее при наведении */
-    color: rgb(12, 26, 44);                  /* чуть темнее текст */
+    background-color: rgb(72, 118, 255);     /* ярче при наведении (Dodger Blue) */
+    color: rgb(255, 255, 255);
 }
 
 QPushButton:pressed {
-    background-color: rgb(175, 195, 208);    /* фон при нажатии */
-    border: 1px solid rgb(122, 138, 153);
-    color: rgb(255, 255, 255);               /* текст белый для контраста */
+    background-color: rgb(25, 25, 112);      /* тёмно-синий при нажатии (Midnight Blue) */
+    border: 2px solid rgb(0, 0, 139);       /* тёмно-синяя рамка */
+    color: rgb(255, 255, 255);
 }
 
 QPushButton:checked {
-    background-color: rgb(176, 224, 255);    /* светло-голубой для активного состояния */
-    border: 1px solid rgb(51, 153, 255);
+    background-color: rgb(0, 191, 255);      /* активный светло-голубой (Deep Sky Blue) */
+    border: 2px solid rgb(30, 144, 255);    /* контрастная рамка (Dodger Blue) */
     color: rgb(0, 51, 102);                  /* тёмно-синий текст */
 }
 </string>
@@ -572,90 +572,6 @@ QPushButton:checked {
       <enum>QFrame::Sunken</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="1" column="0">
-       <widget class="QDateEdit" name="chooseDate_dateEdit">
-        <property name="minimumSize">
-         <size>
-          <width>247</width>
-          <height>34</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>34</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QDateEdit {
-    border: 1px solid rgb(0, 32, 96);   /* строгая тёмно-синяя рамка */
-    border-radius: 4px;                 /* лёгкое скругление */
-    padding: 4px 6px;                   /* внутренние отступы */
-    background-color: white;            /* белый фон */
-    color: rgb(0, 32, 96);              /* тёмно-синий текст */
-    font: 10pt &quot;Segoe UI&quot;;              /* строгий шрифт */
-}
-
-QDateEdit::drop-down {
-    subcontrol-origin: padding;
-    subcontrol-position: top right;
-    width: 20px;
-    border-left: 1px solid rgb(0, 32, 96);
-    background-color: rgb(146, 205, 220);  /* корпоративный голубой */
-}
-
-QDateEdit:focus {
-    border: 1px solid rgb(146, 205, 220);  /* голубая подсветка при фокусе */
-    background-color: rgb(240, 248, 255);  /* лёгкий акцент фона */
-}
-</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="calculate_pushButton">
-        <property name="minimumSize">
-         <size>
-          <width>246</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>246</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton {
-    background-color: rgb(0, 32, 96);     /* строгий тёмно-синий */
-    color: white;                         /* белый текст */
-    border: 1px solid rgb(0, 32, 96);     /* рамка в тон */
-    border-radius: 6px;                   /* лёгкое скругление */
-    padding: 6px 12px;                    /* отступы */
-    font: 10pt &quot;Segoe UI&quot;;                /* строгий шрифт */
-}
-
-QPushButton:hover {
-    background-color: rgb(0, 45, 135);    /* светлее при наведении */
-}
-
-QPushButton:pressed {
-    background-color: rgb(0, 20, 64);     /* темнее при нажатии */
-}
-
-QPushButton:disabled {
-    background-color: rgb(200, 200, 200); /* серый фон */
-    color: rgb(120, 120, 120);            /* тусклый текст */
-    border: 1px solid rgb(160, 160, 160); /* бледная рамка */
-}
-</string>
-        </property>
-        <property name="text">
-         <string>Рассчитать</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="calculate_results_label">
         <property name="sizePolicy">
@@ -712,6 +628,90 @@ QPushButton:disabled {
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QDateEdit" name="selectDate_dateEdit">
+        <property name="minimumSize">
+         <size>
+          <width>241</width>
+          <height>41</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>41</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QDateEdit {
+    border: 1px solid rgb(0, 32, 96);   /* строгая тёмно-синяя рамка */
+    border-radius: 4px;                 /* лёгкое скругление */
+    padding: 4px 6px;                   /* внутренние отступы */
+    background-color: white;            /* белый фон */
+    color: rgb(0, 32, 96);              /* тёмно-синий текст */
+    font: 10pt &quot;Segoe UI&quot;;              /* строгий шрифт */
+}
+
+QDateEdit::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+    border-left: 1px solid rgb(0, 32, 96);
+    background-color: rgb(146, 205, 220);  /* корпоративный голубой */
+}
+
+QDateEdit:focus {
+    border: 1px solid rgb(146, 205, 220);  /* голубая подсветка при фокусе */
+    background-color: rgb(240, 248, 255);  /* лёгкий акцент фона */
+}
+</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="calculate_pushButton">
+        <property name="minimumSize">
+         <size>
+          <width>246</width>
+          <height>41</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>246</width>
+          <height>41</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+    background-color: rgb(0, 32, 96);     /* строгий тёмно-синий */
+    color: white;                         /* белый текст */
+    border: 1px solid rgb(0, 32, 96);     /* рамка в тон */
+    border-radius: 6px;                   /* лёгкое скругление */
+    padding: 6px 12px;                    /* отступы */
+    font: 10pt &quot;Segoe UI&quot;;                /* строгий шрифт */
+}
+
+QPushButton:hover {
+    background-color: rgb(0, 45, 135);    /* светлее при наведении */
+}
+
+QPushButton:pressed {
+    background-color: rgb(0, 20, 64);     /* темнее при нажатии */
+}
+
+QPushButton:disabled {
+    background-color: rgb(200, 200, 200); /* серый фон */
+    color: rgb(120, 120, 120);            /* тусклый текст */
+    border: 1px solid rgb(160, 160, 160); /* бледная рамка */
+}
+</string>
+        </property>
+        <property name="text">
+         <string>Рассчитать</string>
         </property>
        </widget>
       </item>
@@ -776,14 +776,11 @@ QPushButton:disabled {
       </item>
       <item row="3" column="0" colspan="2">
        <widget class="QCustomPlot" name="customPlot" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="cursor">
-         <cursorShape>SizeAllCursor</cursorShape>
+        <property name="minimumSize">
+         <size>
+          <width>500</width>
+          <height>589</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -1725,7 +1722,7 @@ QTableView::item:hover {
   <customwidget>
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
-   <header>qcustomplot.h</header>
+   <header location="global">qcustomplot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
