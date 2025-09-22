@@ -40,6 +40,6 @@ QString getDeterminationDescription(const double& R2);
 // Линейная регрессия
 bool calculateLinearRegressionCoefficients(RegressionValues &values, QHash<QString, double> &coefficients, const double eps=1e-9);
 void calculateLinearRegressionValues(const QVector<double> &numericDates, QVector<double> &yT,
-                                     const RegressionValues &values, const QHash<QString, double> &coefficients);
+                                     const int &n, const QHash<QString, double> &coefficients);
 
 #endif // MYFUNCS_H

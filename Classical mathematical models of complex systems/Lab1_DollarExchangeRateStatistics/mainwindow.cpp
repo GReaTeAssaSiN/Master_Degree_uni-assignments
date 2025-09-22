@@ -29,9 +29,8 @@ void MainWindow::on_pushButton_ChooseFile_clicked()
     QString str{};
     str = QFileDialog::getOpenFileName(this, "Выбрать файл", "D:/KAI_MAGISTRATURA/KMMSS/Labs",
                                        "All Files (*.*);; XLSX Files (*.xlsx);");
-    if (ui->choosenFile_label->text().isEmpty() || !str.isEmpty())
+    if ((ui->choosenFile_label->text().isEmpty() || !str.isEmpty()) && loadDataFromExcel(str, ui->data_tableView)){
         ui->choosenFile_label->setText(str);
-    if (!str.isEmpty() && loadDataFromExcel(str, ui->data_tableView)){
         ui->pushButton_linear_regr->setEnabled(true);
         ui->pushButton_inverse_linear_regr->setEnabled(true);
         ui->pushButton_exp_regr->setEnabled(true);

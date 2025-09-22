@@ -45,7 +45,7 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
     case 0: // Линейная
         setWindowTitle("Линейная регрессия");
         correlation_flag = calculateLinearRegressionCoefficients(this->values, this->coefficients);
-        calculateLinearRegressionValues(this->numericDates, this->yT, this->values, this->coefficients);
+        calculateLinearRegressionValues(this->numericDates, this->yT, this->values.n, this->coefficients);
         break;
     case 1: // Обратная линейная
         setWindowTitle("Обратная линейная регрессия");
@@ -114,9 +114,9 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
     WorkplaceForm::MakePlot();
 
     // ---- УСТАНОВКА ДАТЫ ---- //
-    QDate default_date = QDate::fromString(this->dataColumn.first(), "dd.MM.yyyy").addDays(1);
-    ui->selectDate_dateEdit->setDate(default_date);
-    ui->selectDate_dateEdit->setMinimumDate(default_date);
+    this->default_date = QDate::fromString(this->dataColumn.first(), "dd.MM.yyyy").addDays(1);
+    ui->selectDate_dateEdit->setDate(this->default_date);
+    ui->selectDate_dateEdit->setMinimumDate(this->default_date);
 }
 
 void WorkplaceForm::MakePlot()
@@ -127,6 +127,7 @@ void WorkplaceForm::MakePlot()
 
     // Очистка графика
     ui->customPlot->clearGraphs();
+    ui->forecastCurs_label->setText("Прогноз курса Доллара США: не определен.");
 
     // Подготовка векторов
     int n = this->values.n;
@@ -140,74 +141,178 @@ void WorkplaceForm::MakePlot()
 
         x[i] = dateTimes[i].toSecsSinceEpoch(); // координата X
         y[i] = this->cursValues[i];             // исходные данные
-        yReg[i] = yT[i];                        // регрессия
+        yReg[i] = this->yT[i];                  // регрессия
     }
 
-    // ----------------- График исходных данных -----------------
+    // Определение минимальных и максимальных значений
+    QDateTime minDate = *std::min_element(dateTimes.constBegin(), dateTimes.constEnd());
+    QDateTime maxDate = *std::max_element(dateTimes.constBegin(), dateTimes.constEnd());
+    double minY = std::min(*std::min_element(y.constBegin(), y.constEnd()),
+                           *std::min_element(yReg.constBegin(), yReg.constEnd()));
+    double maxY = std::max(*std::max_element(y.constBegin(), y.constEnd()),
+                           *std::max_element(yReg.constBegin(), yReg.constEnd()));
+
+    // ----------------- Дополнение графика по выбранной дате (будущей) ----------------- //
+    QVector<double> temp_x = x;
+    int temp_n = n;
+    QVector<double> temp_numericDates = this->numericDates;
+    QVector<double> temp_yReg = this->yT;
+
+    if (this->select_date.isValid()){
+        QDate lastDate = maxDate.date();
+        // Пока последняя дата < введенной, добавляем значения
+        while (lastDate < this->select_date){
+            QDate epoch(1970, 1, 1);
+            lastDate = lastDate.addDays(1);
+            temp_n++;
+            // Значение даты в секундах для оси абсцисс (по убыванию идут)
+            temp_x.prepend(QDateTime(lastDate, QTime(0,0)).toSecsSinceEpoch());
+            // Значения даты в днях для расчета предсказанного моделью значения (по убыванию идут)
+            temp_numericDates.prepend(epoch.daysTo(lastDate)/10000.0);
+        }
+        calculateLinearRegressionValues(temp_numericDates, temp_yReg, temp_n, this->coefficients);
+        // minDate остается той же, maxDate изменилась, minY и maxY могли измениться
+        maxDate = QDateTime(lastDate, QTime(0,0));
+        minY = std::min(*std::min_element(y.constBegin(), y.constEnd()),
+                        *std::min_element(yReg.constBegin(), yReg.constEnd()));
+        maxY = std::max(*std::max_element(y.constBegin(), y.constEnd()),
+                        *std::max_element(yReg.constBegin(), yReg.constEnd()));
+    }
+
+    // ----------------- График исходных данных ----------------- //
     ui->customPlot->addGraph();
     ui->customPlot->graph(0)->setData(x, y);
-    ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsNone); // Отключение соединительной кривой
-    ui->customPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 6));
-    ui->customPlot->graph(0)->setName("Исходные данные");
+    ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
+    ui->customPlot->graph(0)->setPen(QPen(Qt::transparent));
+    ui->customPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, QColor(Qt::blue), 6));
+    ui->customPlot->graph(0)->setName("Эксперементальные данные");
 
-    // ----------------- Линия тренда -----------------
+    // ----------------- Линия тренда ----------------- //
     ui->customPlot->addGraph();
-    ui->customPlot->graph(1)->setData(x, yReg);
+    ui->customPlot->graph(1)->setData(temp_x, temp_yReg);
     ui->customPlot->graph(1)->setPen(QPen(Qt::red, 2));
     ui->customPlot->graph(1)->setName(this->trend_eq + QString("\nR² = %3").arg(coefficients["R2"], 0, 'f', 6));
 
-    // ----------------- Оси -----------------
-    ui->customPlot->xAxis->setLabel("Дата");
-    ui->customPlot->yAxis->setLabel("Курс доллара к рублю");
+    // ----------------- Выделение выбранной даты и соответствующего курса ----------------- //
+    if (this->select_date.isValid())
+    {
+        // Отрисовка
+        double xPos = QDateTime(this->select_date, QTime(0,0)).toSecsSinceEpoch();
+        double yPos = temp_yReg.first();
+        ui->customPlot->addGraph();
+        ui->customPlot->graph(2)->setData({xPos}, {yPos});
+        ui->customPlot->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDiamond, 10));
+        ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsNone);
+        ui->customPlot->graph(2)->setName("Прогноз");
+        // Надпись
+        ui->forecastCurs_label->setText("Прогноз курса Доллара США: " + QString::number(yPos, 'f', 2) + " руб.");
+    }
 
-    // Стиль подписей осей
+    // ----------------- Подсветка графика ----------------- //
+    // Для графика эксперементальных данных
+    QCPSelectionDecorator *decor0 = new QCPSelectionDecorator;
+    decor0->setPen(QPen(Qt::green, 2));
+    ui->customPlot->graph(0)->setSelectionDecorator(decor0);
+
+    // Для графика линии тренда
+    QCPSelectionDecorator *decor1 = new QCPSelectionDecorator;
+    decor1->setPen(QPen(Qt::green, 2));
+    ui->customPlot->graph(1)->setSelectionDecorator(decor1);
+
+    // Для графика прогноза
+    if (this->select_date.isValid()){
+        QCPSelectionDecorator *decor2 = new QCPSelectionDecorator;
+        decor2->setPen(QPen(Qt::green, 2));
+        ui->customPlot->graph(2)->setSelectionDecorator(decor2);
+    }
+
+    // ----------------- Оси ----------------- //
+    ui->customPlot->xAxis->setLabel("Дата");
+    ui->customPlot->yAxis->setLabel("Курс Доллара США к рублю");
+
+    // Стиль осей
+    // Подписи
     QFont axisFont;
     axisFont.setBold(true);
     axisFont.setPointSize(10);
     ui->customPlot->xAxis->setLabelFont(axisFont);
     ui->customPlot->yAxis->setLabelFont(axisFont);
+    // Тики
+    QFont tickFont;
+    tickFont.setItalic(true);
+    tickFont.setPointSize(8);
+    ui->customPlot->xAxis->setTickLabelFont(tickFont);
+    ui->customPlot->yAxis->setTickLabelFont(tickFont);
 
-    // Ось X — формат даты
-    QDateTime minDate = *std::min_element(dateTimes.constBegin(), dateTimes.constEnd());
-    QDateTime maxDate = *std::max_element(dateTimes.constBegin(), dateTimes.constEnd());
+    // Ось X - формат делений
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
     dateTicker->setDateTimeFormat("dd.MM.yyyy");
     dateTicker->setTickCount(10);
     dateTicker->setTickStepStrategy(QCPAxisTicker::tssMeetTickCount);
     ui->customPlot->xAxis->setTicker(dateTicker);
-    ui->customPlot->xAxis->setTickLabelRotation(45); // поворот меток
+    ui->customPlot->xAxis->setTickLabelRotation(30);
     ui->customPlot->xAxis->setSubTicks(true);
 
-    // Ось Y — шаг делений
+    // Ось Y — формат делений
     QSharedPointer<QCPAxisTickerFixed> yTicker(new QCPAxisTickerFixed);
-    double minY = *std::min_element(y.constBegin(), y.constEnd());
-    double maxY = *std::max_element(y.constBegin(), y.constEnd());
-    double yStep = ( maxY - minY ) / 10.0;
-    yTicker->setTickStep(yStep);
-    yTicker->setScaleStrategy(QCPAxisTickerFixed::ssPowers);
+    yTicker->setTickStep(1.0);
+    yTicker->setScaleStrategy(QCPAxisTickerFixed::ssNone);
     ui->customPlot->yAxis->setTicker(yTicker);
     ui->customPlot->yAxis->setSubTicks(true);
+    connect(ui->customPlot->yAxis,
+            static_cast<void (QCPAxis::*)(const QCPRange &)>(&QCPAxis::rangeChanged),
+            this,
+            [=](const QCPRange &newRange){
+                // Текущий масштаб
+                double range = newRange.size();
+
+                // * Масштабирование шага * //
+                // Примерный шаг делений оси
+                double roughStep = range / 20.0;
+                // Представим: roughStep = fraction * 10^exponent ([что-то между 1 и 10] * 10^n)
+                double exponent = std::floor(std::log10(roughStep));
+                double fraction = roughStep / std::pow(10, exponent);
+                double niceFraction{};
+
+                // Красивый Fraction
+                if (fraction <= 1.0) niceFraction = 1.0;
+                else if (fraction <= 2.0) niceFraction = 2.0;
+                else if (fraction <= 5.0) niceFraction = 5.0;
+                else niceFraction = 10.0;
+
+                // Полученный шаг
+                double step = niceFraction * std::pow(10, exponent);
+
+                // Установка шага
+                yTicker->setTickStep(step);
+                ui->customPlot->yAxis->setTicker(yTicker);
+            });
 
     // Диапазоны осей
     ui->customPlot->xAxis->setRange(minDate.addDays(-1).toSecsSinceEpoch(), maxDate.addDays(1).toSecsSinceEpoch());
-    ui->customPlot->yAxis->setRange(minY - yStep, maxY + yStep);
+    ui->customPlot->yAxis->setRange(minY - 0.5, maxY + 0.5);
 
-    // ----------------- Масштабирование и drag -----------------
-    ui->customPlot->setInteraction(QCP::iRangeDrag, true);
-    ui->customPlot->setInteraction(QCP::iRangeZoom, true);
-    ui->customPlot->setInteraction(QCP::iSelectPlottables, true);
+    // ----------------- Масштабирование и drag ----------------- //
+    ui->customPlot->setInteraction(QCP::iRangeDrag, true);        // Перетаскивание мышью
+    ui->customPlot->setInteraction(QCP::iRangeZoom, true);        // Масштаб колесиком
+    ui->customPlot->setInteraction(QCP::iSelectPlottables, true); // Подсветка графика
 
-    // ----------------- Заголовок -----------------
-    QString title = QString("Курс доллара США с %1 по %2")
+    // ----------------- Заголовок ----------------- //
+    QString title = QString("Курс Доллара США с %1 по %2")
                         .arg(minDate.date().toString("dd.MM.yyyy"))
                         .arg(maxDate.date().toString("dd.MM.yyyy"));
+    // Паддинг от краев графика
+    ui->customPlot->axisRect()->setMargins(QMargins(20, 20, 20, 20));
 
     // Проверка на существование заголовка в окне. Если нет - добавление, иначе - замена текста.
     if (!ui->customPlot->plotLayout()->elementCount() ||
         !qobject_cast<QCPTextElement*>(ui->customPlot->plotLayout()->elementAt(0)))
     {
+        // Установка названия графика
         ui->customPlot->plotLayout()->insertRow(0);
-        ui->customPlot->plotLayout()->addElement(0, 0, new QCPTextElement(ui->customPlot, title, QFont("Arial", 12, QFont::Bold)));
+        QCPTextElement *titleElement = new QCPTextElement(ui->customPlot, title, QFont("Arial", 12, QFont::Bold));
+        titleElement->setMargins(QMargins(0, 10, 0, 0));
+        ui->customPlot->plotLayout()->addElement(0, 0, titleElement);
     }
     else
     {
@@ -215,11 +320,11 @@ void WorkplaceForm::MakePlot()
         header->setText(title);
     }
 
-    // ----------------- Легенда -----------------
+    // ----------------- Легенда ----------------- //
     QFont legendFont = ui->customPlot->legend->font();
     legendFont.setPointSize(8);// Кегль
     legendFont.setWeight(QFont::Normal); // Вес
-    ui->customPlot->legend->setFont(legendFont); // Установка шриффта
+    ui->customPlot->legend->setFont(legendFont); // Установка шрифта
     ui->customPlot->legend->setVisible(true); // Видимость легенды
     ui->customPlot->legend->setBrush(QColor(255, 255, 255, 150)); // Прозрачность фона
     ui->customPlot->legend->setBorderPen(QPen(QColor(150, 150, 150, 180))); // Границы
@@ -250,3 +355,11 @@ void WorkplaceForm::on_calculate_pushButton_clicked()
     this->select_date = ui->selectDate_dateEdit->date();
     WorkplaceForm::MakePlot();
 }
+
+void WorkplaceForm::on_clean_pushButton_clicked()
+{
+    this->select_date = QDate();
+    ui->selectDate_dateEdit->setDate(this->default_date);
+    WorkplaceForm::MakePlot();
+}
+

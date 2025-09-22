@@ -28,6 +28,8 @@ private slots:
     void MakePlot();
     void on_calculate_pushButton_clicked();
 
+    void on_clean_pushButton_clicked();
+
 private:
     Ui::WorkplaceForm *ui;
     QVector<QString> dataColumn{};
@@ -43,6 +45,7 @@ private:
     RegressionValues values{}; // Хранит суммы и значения для оценки адекватности модели
     QHash<QString, double> coefficients{}; // Хранит коэффициенты регрессии
     QDate select_date{}; // Выбранная дата
+    QDate default_date{}; // Дата по умолчанию
     QString trend_eq{}; // Уравнение регрессии
 
 protected:

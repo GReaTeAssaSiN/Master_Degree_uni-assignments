@@ -384,9 +384,9 @@ bool calculateLinearRegressionCoefficients(RegressionValues &values, QHash<QStri
     return std::abs(coefficients["r1"] - coefficients["r2"]) < eps;
 }
 void calculateLinearRegressionValues(const QVector<double> &numericDates, QVector<double> &yT,
-                                     const RegressionValues &values, const QHash<QString, double> &coefficients){
+                                     const int &n, const QHash<QString, double> &coefficients){
     // yT
     yT.clear();
-    for (int i=0; i<values.n; ++i)
+    for (int i=0; i<n; ++i)
         yT.append(coefficients["a0"] + coefficients["a1"] * numericDates[i]);
 }
