@@ -171,7 +171,6 @@ void readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
     }
 }
 
-
 // ----- Функции общих вычислений ----- //
 //Вычисление значений, необходимых для построения регрессии
 void calculateRegressionTotalValues(const QVector<double> numericDates, const QVector<double> &cursValues,
@@ -240,8 +239,8 @@ bool calculateRegressionCalcValues(const QVector<double> &cursValues,
     coefficients.insert("MSE", values.sumOst / values.n);
 
     // Несмещенная дисперсия и среднее кв. отклонение выборочнного среднего
-    values.Sx2 = 1.0 / (values.n - 1) * (values.sumX2 - 1.0 / values.n * std::pow(values.sumX, 2));
-    values.Sy2 = 1.0 / (values.n - 1) * (values.sumY2 - 1.0 / values.n * std::pow(values.sumY, 2));
+    values.Sx2 = 1.0 / (values.n - 1.0) * (values.sumX2 - 1.0 / values.n * std::pow(values.sumX, 2));
+    values.Sy2 = 1.0 / (values.n - 1.0) * (values.sumY2 - 1.0 / values.n * std::pow(values.sumY, 2));
     values.meanSx = std::sqrt(values.Sx2 / values.n);
     values.meanSy = std::sqrt(values.Sy2 / values.n);
 
@@ -284,27 +283,34 @@ void fillTotalTable(QTableView *tableView,
 }
 // Заполнение вычисляемой таблицы значениями
 void fillCalculateTable(QTableView *tableView,
+                        const QVector<QString> &dataColumn,
                         const QVector<double> &numericDates,
                         const QVector<double> &cursValues,
                         const QVector<double> &yT,
                         const RegressionValues &values)
 {
     int rowCount = numericDates.size();
-    int colCount = 4; // yi^T, (yi-yi^T)^2, (yi^T - mean(y))^2, (yi-mean(y))^2
+    int colCount = 7; // data, xi, yi, yi^T, (yi-yi^T)^2, (yi^T - mean(y))^2, (yi-mean(y))^2
 
     QStandardItemModel *model = new QStandardItemModel(rowCount, colCount, tableView);
 
     // Заголовки
-    model->setHeaderData(0, Qt::Horizontal, "yi^T");
-    model->setHeaderData(1, Qt::Horizontal, "(yi-yi^T)^2");
-    model->setHeaderData(2, Qt::Horizontal, "(yi^T - mean(y))^2");
-    model->setHeaderData(3, Qt::Horizontal, "(yi-mean(y))^2");
+    model->setHeaderData(0, Qt::Horizontal, "data");
+    model->setHeaderData(1, Qt::Horizontal, "xi");
+    model->setHeaderData(2, Qt::Horizontal, "yi");
+    model->setHeaderData(3, Qt::Horizontal, "yi^T");
+    model->setHeaderData(4, Qt::Horizontal, "(yi-yi^T)^2");
+    model->setHeaderData(5, Qt::Horizontal, "(yi^T - mean(y))^2");
+    model->setHeaderData(6, Qt::Horizontal, "(yi-mean(y))^2");
 
     for (int r = 0; r < rowCount; ++r) {
-       model->setItem(r, 0, new QStandardItem(QString::number(yT[r])));
-       model->setItem(r, 1, new QStandardItem(QString::number(std::pow(cursValues[r]-yT[r], 2), 'g', 6)));
-       model->setItem(r, 2, new QStandardItem(QString::number(std::pow(yT[r]-values.meanY,2), 'g', 6)));
-       model->setItem(r, 3, new QStandardItem(QString::number(std::pow(cursValues[r]-values.meanY,2), 'g', 6)));
+        model->setItem(r, 0, new QStandardItem(dataColumn[r]));
+        model->setItem(r, 1, new QStandardItem(QString::number(numericDates[r], 'g', 6)));
+        model->setItem(r, 2, new QStandardItem(QString::number(cursValues[r], 'g', 6)));
+        model->setItem(r, 3, new QStandardItem(QString::number(yT[r], 'g', 6)));
+        model->setItem(r, 4, new QStandardItem(QString::number(std::pow(cursValues[r]-yT[r], 2), 'g', 6)));
+        model->setItem(r, 5, new QStandardItem(QString::number(std::pow(yT[r]-values.meanY,2), 'g', 6)));
+        model->setItem(r, 6, new QStandardItem(QString::number(std::pow(cursValues[r]-values.meanY,2), 'g', 6)));
     }
 
     tableView->setModel(model);
@@ -314,38 +320,62 @@ void fillCalculateTable(QTableView *tableView,
 // ----- Расчет значений для регрессионной модели ----- //
 // ОБЩЕЕ
 QString getRegressionRelationship(const double& r){
-    QString regr_relationship = "Характер связи: ";
-    // Характер связи
-    if (r == 0)
-        regr_relationship += "Отсутствует.";
-    else if (r > 0 && r < 1)
-        regr_relationship += "Вероятностная, прямая.\nИнтерпретация связи: C увеличением X увеличивается Y.";
-    else if (r > - 1 && r < 0)
-        regr_relationship += "Вероятностная, обратная.\nИнтерпретация связи: С увеличением X ументшаеися Y и наоборот.";
-    else if (r == 1)
-        regr_relationship += "Функциональная, прямая.\nИнтерпретация связи: Каждому значению факторного признака строго соответствует одно "
-                             "значение функции, с увеличением X увеличивается Y.";
+    QString regr_description = "Характер связи: ";
+    if (r == 0) {
+        regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
+                                   "Характер связи: отсутствует.\n"
+                                   "Интерпретация связи: -.")
+                               .arg(QString::number(r, 'f', 2));
+    }
+    else if (r > 0 && r < 1) {
+        regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
+                                   "Характер связи: вероятностная, прямая.\n"
+                                   "Интерпретация связи: С увеличением X увеличивается Y.")
+                               .arg(QString::number(r, 'f', 2));
+    }
+    else if (r < 0 && r > -1){
+        regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
+                                   "Характер связи: вероятностная, обратная.\n"
+                                   "Интерпретация связи: С увеличением X уменьшается Y, и наоборот.")
+                               .arg(QString::number(r, 'f', 2));
+    }
+    else if (r == 1){
+        regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
+                                   "Характер связи: функциональная, прямая.\n"
+                                   "Интерпретация связи: Каждому значению факторного признака строго соответствует одно значение функции, с увеличением X увеличивается Y.")
+                               .arg(QString::number(r, 'f', 2));
+    }
+    else if (r == -1){
+        regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
+                                   "Характер связи: функциональная, обратная.\n"
+                                   "Интерпретация связи: Каждому значению факторного признака строго соответствует одно значение функции, увеличением X уменьшается Y, и наоборот.")
+                               .arg(QString::number(r, 'f', 2));
+    }
+    else{
+        regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
+                                   "Ошибка вычислений.")
+                               .arg(QString::number(r, 'f', 2));
+        return regr_description;
+    }
+
+    // Характер связи.
+    if (std::abs(r) < 0.3)
+        regr_description += QString("\nХарактер связи: Практически отсустствует.");
+    else if (std::abs(r) >= 0.3 && std::abs(r) < 0.5)
+        regr_description += QString("\nХарактер связи: Слабая.");
+    else if (std::abs(r) >= 0.5 && std::abs(r) < 0.7)
+        regr_description += QString("\nХарактер связи: Умеренная.");
     else
-        regr_relationship += "Функциональная, обратная.\nИнтерпретация связи: Каждому значению факторного признака строго соответствует одно "
-                             "значение функции, с увеличением X уменьшается Y и наоборот.";
-    regr_relationship += "\nХарактер связи: ";
-    // Характер связи
-    if (std::abs(r) <= 0.3)
-        regr_relationship += "Практически отсутствует.";
-    else if (std::abs(r) <= 0.5)
-        regr_relationship += "Слабая.";
-    else if (std::abs(r) <= 0.7)
-        regr_relationship += "Умеренная.";
-    else
-        regr_relationship += "Сильная.";
-    return regr_relationship;
+        regr_description += QString("\nХарактер связи: Сильная.");
+
+    return regr_description;
 }
 QString getDeterminationDescription(const double& R2){
     QString determination_descr = "Можно ли делать прогноз (>=75%): ";
     if (R2 * 100 >= 75)
         determination_descr += "Да!";
     else
-        determination_descr += "Нет!";
+        determination_descr += "Не рекомендуется!";
     return determination_descr;
 }
 // ЛИНЕЙНАЯ РЕГРЕССИЯ

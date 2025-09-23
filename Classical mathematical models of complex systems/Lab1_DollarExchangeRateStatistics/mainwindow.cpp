@@ -53,4 +53,3 @@ void MainWindow::on_pushButton_linear_regr_clicked()
     this->hide();
     workplace_form->show();
 }
-

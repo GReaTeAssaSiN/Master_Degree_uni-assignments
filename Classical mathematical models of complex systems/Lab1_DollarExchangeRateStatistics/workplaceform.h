@@ -27,7 +27,6 @@ private slots:
     void on_pushButton_back_clicked();
     void MakePlot();
     void on_calculate_pushButton_clicked();
-
     void on_clean_pushButton_clicked();
 
 private:

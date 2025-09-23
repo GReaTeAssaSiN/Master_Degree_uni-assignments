@@ -76,34 +76,33 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
     // Вычисление Sост., Sрегр., Sполн. + R2, MSE + Sx2, Sy2, meanSx, meanSy
     bool Sfull_flag = calculateRegressionCalcValues(this->cursValues, this->yT, this->Sost, this->Sregr, this->Sfull, this->values, this->coefficients);
     // Заполнение вычисляемой таблицы
-    fillCalculateTable(ui->calculate_tableView, this->numericDates, this->cursValues, this->yT, this->values);
+    fillCalculateTable(ui->calculate_tableView, this->dataColumn, this->numericDates, this->cursValues, this->yT, this->values);
     // --- Отображение значений величин вне вычисляемой таблицы --- //
     // Уравнение
-    this->trend_eq = QString("y = %1 + %2*x").arg(coefficients["a0"], 0, 'f', 6).arg(coefficients["a1"], 0, 'f', 2);
+    this->trend_eq = QString("y = %1 + %2*x").arg(coefficients["a0"], 0, 'g', 6).arg(coefficients["a1"], 0, 'f', 2);
     ui->equation_label->setText(trend_eq);
     // Корреляция
-    ui->correlation_determination_textEdit->append("r1=" + QString::number(this->coefficients["r1"]));
-    ui->correlation_determination_textEdit->setText(ui->correlation_determination_textEdit->toPlainText() +
-                                                    ";r2=" + QString::number(this->coefficients["r2"]));
-    ui->correlation_determination_textEdit->setText(ui->correlation_determination_textEdit->toPlainText() +
-                                                    ";r1=r2? " + QString(correlation_flag ? "True" : "False"));
-    ui->correlation_determination_textEdit->append("Значение линейного коэффициента корреляции: r=" + QString::number(this->coefficients["r1"]));
+    if (!correlation_flag)
+        QMessageBox::warning(this, "Предупреждение", "Коэффициент корреляции линейной и обратной регрессии не совпадает (r1 != r2).");
     ui->correlation_determination_textEdit->append(getRegressionRelationship(this->coefficients["r1"]));
     // Коэффииенты
-    ui->coefficients_textEdit->append("A =" + QString::number(this->coefficients["A"]) + "\t" + "B =" + QString::number(this->coefficients["B"]));
-    ui->coefficients_textEdit->append("A0=" + QString::number(this->coefficients["A0"]) + "\t" + "B0=" + QString::number(this->coefficients["B0"]));
-    ui->coefficients_textEdit->append("A1=" + QString::number(this->coefficients["A1"]) + "\t" + "B1=" + QString::number(this->coefficients["B1"]));
-    ui->coefficients_textEdit->append("a0=" + QString::number(this->coefficients["a0"]) + "\t" + "b0=" + QString::number(this->coefficients["b0"]));
-    ui->coefficients_textEdit->append("a1=" + QString::number(this->coefficients["a1"]) + "\t" + "b1=" + QString::number(this->coefficients["b1"]));
+    ui->coefficients_textEdit->append("Вспомогательные величины:");
+    ui->coefficients_textEdit->append("A =" + QString::number(this->coefficients["A"], 'g', 6) + "\t" + "B =" + QString::number(this->coefficients["B"], 'g', 6));
+    ui->coefficients_textEdit->append("A0=" + QString::number(this->coefficients["A0"], 'g', 6) + "\t" + "B0=" + QString::number(this->coefficients["B0"], 'g', 6));
+    ui->coefficients_textEdit->append("A1=" + QString::number(this->coefficients["A1"], 'g', 6) + "\t" + "B1=" + QString::number(this->coefficients["B1"], 'g', 6));
+    ui->coefficients_textEdit->append("\nКоэффициенты:");
+    ui->coefficients_textEdit->append("a0=" + QString::number(this->coefficients["a0"], 'g', 6) + "\t" + "b0=" + QString::number(this->coefficients["b0"], 'g', 6));
+    ui->coefficients_textEdit->append("a1=" + QString::number(this->coefficients["a1"], 'g', 6) + "\t" + "b1=" + QString::number(this->coefficients["b1"], 'g', 6));
     // Величины
-    ui->R2_label->setText(ui->R2_label->text() + QString::number(this->coefficients["R2"]));
+    ui->R2_label->setText(ui->R2_label->text() + QString::number(this->coefficients["R2"], 'g', 6));
     ui->descr_R2_label->setText(getDeterminationDescription(this->coefficients["R2"]));
-    ui->Sost_label->setText(ui->Sost_label->text() + QString::number(this->values.sumOst));
-    ui->Sregr_label->setText(ui->Sregr_label->text() + QString::number(this->values.sumRegr));
-    ui->Sfull_label->setText(ui->Sfull_label->text() + QString::number(this->values.sumFull));
+    ui->Sost_label->setText(ui->Sost_label->text() + QString::number(this->values.sumOst, 'g', 6));
+    ui->Sregr_label->setText(ui->Sregr_label->text() + QString::number(this->values.sumRegr, 'g', 6));
+    ui->Sfull_label->setText(ui->Sfull_label->text() + QString::number(this->values.sumFull, 'g', 6));
     ui->n_label->setText(ui->n_label->text() + QString::number(this->values.n));
-    ui->check_Sfull_label->setText("Sполн.=Sрегр.+Sост.? " + QString(Sfull_flag ? "True" : "False"));
-    ui->MSE_label->setText(ui->MSE_label->text() + QString::number(this->coefficients["MSE"]));
+    if (!Sfull_flag)
+        QMessageBox::warning(this, "Предупреждение", "Sполн. != Sрегр. + Sост.");
+    ui->MSE_label->setText(ui->MSE_label->text() + QString::number(this->coefficients["MSE"], 'g', 6));
     ui->Sx2_label->setText(ui->Sx2_label->text() + QString::number(this->values.Sx2, 'g', 6));
     ui->Sy2_label->setText(ui->Sy2_label->text() + QString::number(this->values.Sy2, 'g', 6));
     ui->meanSx_label->setText(ui->meanSx_label->text() + QString::number(this->values.meanSx, 'g', 6));
@@ -144,13 +143,9 @@ void WorkplaceForm::MakePlot()
         yReg[i] = this->yT[i];                  // регрессия
     }
 
-    // Определение минимальных и максимальных значений
+    // Определение минимальных и максимальных значений даты
     QDateTime minDate = *std::min_element(dateTimes.constBegin(), dateTimes.constEnd());
     QDateTime maxDate = *std::max_element(dateTimes.constBegin(), dateTimes.constEnd());
-    double minY = std::min(*std::min_element(y.constBegin(), y.constEnd()),
-                           *std::min_element(yReg.constBegin(), yReg.constEnd()));
-    double maxY = std::max(*std::max_element(y.constBegin(), y.constEnd()),
-                           *std::max_element(yReg.constBegin(), yReg.constEnd()));
 
     // ----------------- Дополнение графика по выбранной дате (будущей) ----------------- //
     QVector<double> temp_x = x;
@@ -173,10 +168,6 @@ void WorkplaceForm::MakePlot()
         calculateLinearRegressionValues(temp_numericDates, temp_yReg, temp_n, this->coefficients);
         // minDate остается той же, maxDate изменилась, minY и maxY могли измениться
         maxDate = QDateTime(lastDate, QTime(0,0));
-        minY = std::min(*std::min_element(y.constBegin(), y.constEnd()),
-                        *std::min_element(yReg.constBegin(), yReg.constEnd()));
-        maxY = std::max(*std::max_element(y.constBegin(), y.constEnd()),
-                        *std::max_element(yReg.constBegin(), yReg.constEnd()));
     }
 
     // ----------------- График исходных данных ----------------- //
@@ -289,8 +280,11 @@ void WorkplaceForm::MakePlot()
             });
 
     // Диапазоны осей
-    ui->customPlot->xAxis->setRange(minDate.addDays(-1).toSecsSinceEpoch(), maxDate.addDays(1).toSecsSinceEpoch());
-    ui->customPlot->yAxis->setRange(minY - 0.5, maxY + 0.5);
+    ui->customPlot->rescaleAxes(); // Автоматическое изменение диапазона осей
+    auto xRange = ui->customPlot->xAxis->range();
+    auto yRange = ui->customPlot->yAxis->range();
+    ui->customPlot->xAxis->setRange(xRange.lower - 86400, xRange.upper + 86400); // 1 день отступ
+    ui->customPlot->yAxis->setRange(yRange.lower - 0.5, yRange.upper + 0.5);     // 0.5 отступ
 
     // ----------------- Масштабирование и drag ----------------- //
     ui->customPlot->setInteraction(QCP::iRangeDrag, true);        // Перетаскивание мышью
@@ -362,4 +356,3 @@ void WorkplaceForm::on_clean_pushButton_clicked()
     ui->selectDate_dateEdit->setDate(this->default_date);
     WorkplaceForm::MakePlot();
 }
-

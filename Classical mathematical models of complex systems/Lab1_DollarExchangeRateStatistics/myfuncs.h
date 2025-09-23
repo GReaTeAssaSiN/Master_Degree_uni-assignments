@@ -27,6 +27,7 @@ void fillTotalTable(QTableView *tableView,
                     const QVector<double> &ySquared,
                     const QVector<double> &xyProduct);
 void fillCalculateTable(QTableView *tableView,
+                        const QVector<QString> &dataColumn,
                         const QVector<double> &numericDates,
                         const QVector<double> &cursValues,
                         const QVector<double> &yT,
