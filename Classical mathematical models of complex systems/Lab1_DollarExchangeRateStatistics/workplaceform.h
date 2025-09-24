@@ -6,7 +6,6 @@
 #include <QHash>
 #include <QDate>
 #include "RegressionValues.h"
-#include "qcustomplot.h"
 
 namespace Ui {
 class WorkplaceForm;
@@ -26,11 +25,13 @@ signals:
 private slots:
     void on_pushButton_back_clicked();
     void MakePlot();
+    void MakeInversePlot();
     void on_calculate_pushButton_clicked();
     void on_clean_pushButton_clicked();
 
 private:
     Ui::WorkplaceForm *ui;
+    int mode{}; // Тип регрессии
     QVector<QString> dataColumn{};
     QVector<double> numericDates{};
     QVector<double> cursValues{};

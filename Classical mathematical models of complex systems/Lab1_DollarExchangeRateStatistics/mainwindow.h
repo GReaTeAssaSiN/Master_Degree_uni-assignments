@@ -20,7 +20,7 @@ public:
 private slots:
     void on_pushButton_ChooseFile_clicked();
     void show_window();
-    void on_pushButton_linear_regr_clicked();
+    void regression_button_clicked();
 
 private:
     Ui::MainWindow *ui;

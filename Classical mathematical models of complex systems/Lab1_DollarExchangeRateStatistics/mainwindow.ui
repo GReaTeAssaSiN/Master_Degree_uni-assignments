@@ -89,6 +89,56 @@ QPushButton:checked {
       </property>
      </widget>
     </item>
+    <item row="3" column="1">
+     <widget class="QLabel" name="choosenFile_label">
+      <property name="minimumSize">
+       <size>
+        <width>391</width>
+        <height>36</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>36</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>8</pointsize>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="cursor">
+       <cursorShape>ArrowCursor</cursorShape>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QLabel {
+    background-color: rgb(230, 230, 230);        /* светло-серый фон */
+    color: rgb(28, 28, 28);                      /* тёмный текст */
+    border: 1px solid rgb(200, 200, 200);       /* мягкая рамка */
+    border-radius: 4px;                          /* небольшое скругление углов */
+    padding: 2px 6px;                            /* внутренние отступы */
+    font-family: &quot;Segoe UI&quot;, sans-serif;        /* официальный шрифт */
+    font-size: 8pt;                             /* удобочитаемый размер */
+}
+</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
     <item row="1" column="0">
      <widget class="QLabel" name="data_label">
       <property name="minimumSize">
@@ -130,7 +180,7 @@ QPushButton:checked {
        <enum>QFrame::Plain</enum>
       </property>
       <property name="text">
-       <string>Данные из файла</string>
+       <string>Эксперементальные данные из файла</string>
       </property>
       <property name="textFormat">
        <enum>Qt::AutoText</enum>
@@ -191,6 +241,42 @@ QTableView::item:hover {
       </property>
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLabel" name="regressions_label">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>40</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>13</pointsize>
+        <fontweight>ExtraBold</fontweight>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QLabel {
+    background-color: rgb(80, 80, 80);        /* тёмно-серый фон */
+    color: rgb(240, 240, 240);               /* светлый текст для контраста */
+    border: 1px solid rgb(120, 120, 120);    /* мягкая рамка */
+    border-radius: 4px;                       /* небольшое скругление */
+    padding: 4px 8px;                         /* внутренние отступы */
+    font-family: &quot;Segoe UI&quot;, sans-serif;      /* корпоративный шрифт */
+    font-weight: 800;                          /* жирный шрифт */
+    font-size: 13pt;                           /* читаемый размер */
+}
+</string>
+      </property>
+      <property name="text">
+       <string>Типы регрессий</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
     </item>
@@ -330,42 +416,6 @@ QTableView::item:hover {
         </widget>
        </item>
       </layout>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLabel" name="regressions_label">
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>40</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>13</pointsize>
-        <fontweight>ExtraBold</fontweight>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">QLabel {
-    background-color: rgb(80, 80, 80);        /* тёмно-серый фон */
-    color: rgb(240, 240, 240);               /* светлый текст для контраста */
-    border: 1px solid rgb(120, 120, 120);    /* мягкая рамка */
-    border-radius: 4px;                       /* небольшое скругление */
-    padding: 4px 8px;                         /* внутренние отступы */
-    font-family: &quot;Segoe UI&quot;, sans-serif;      /* корпоративный шрифт */
-    font-weight: 800;                          /* жирный шрифт */
-    font-size: 13pt;                           /* читаемый размер */
-}
-</string>
-      </property>
-      <property name="text">
-       <string>Типы регрессий</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
      </widget>
     </item>
     <item row="2" column="1">
@@ -797,53 +847,6 @@ QPushButton:disabled {
        </spacer>
       </item>
      </layout>
-    </item>
-    <item row="3" column="1">
-     <widget class="QLabel" name="choosenFile_label">
-      <property name="minimumSize">
-       <size>
-        <width>391</width>
-        <height>36</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>36</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Segoe UI</family>
-        <pointsize>10</pointsize>
-        <bold>false</bold>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">QLabel {
-    background-color: rgb(230, 230, 230);        /* светло-серый фон */
-    color: rgb(28, 28, 28);                      /* тёмный текст */
-    border: 1px solid rgb(200, 200, 200);       /* мягкая рамка */
-    border-radius: 4px;                          /* небольшое скругление углов */
-    padding: 2px 6px;                            /* внутренние отступы */
-    font-family: &quot;Segoe UI&quot;, sans-serif;        /* официальный шрифт */
-    font-size: 10pt;                             /* удобочитаемый размер */
-}
-</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Sunken</enum>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="wordWrap">
-       <bool>true</bool>
-      </property>
-     </widget>
     </item>
    </layout>
   </widget>

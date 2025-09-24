@@ -209,7 +209,8 @@ void calculateRegressionTotalValues(const QVector<double> numericDates, const QV
     values.meanY = values.sumY / values.n;
 }
 //Вычисление значений, необходимых для проверки регрессии
-bool calculateRegressionCalcValues(const QVector<double> &cursValues,
+bool calculateRegressionCalcValues(const int& mode,
+                                   const QVector<double> &cursValues,
                                    const QVector<double> &yT,
                                    QVector<double> &Sost, QVector<double> &Sregr, QVector<double> Sfull,
                                    RegressionValues &values, QHash<QString, double> &coefficients, const double eps)
@@ -222,8 +223,8 @@ bool calculateRegressionCalcValues(const QVector<double> &cursValues,
 
     for (int i = 0; i < values.n; ++i){
         double elem_of_Sost = std::pow(cursValues[i] - yT[i], 2);
-        double elem_of_Sregr = std::pow(yT[i] - values.meanY, 2);
-        double elem_of_Sfull = std::pow(cursValues[i] - values.meanY, 2);
+        double elem_of_Sregr = std::pow((mode != 1) ? (yT[i] - values.meanY) : (yT[i] - values.meanX), 2);
+        double elem_of_Sfull = std::pow((mode != 1) ? (cursValues[i] - values.meanY) : (cursValues[i] - values.meanX), 2);
 
         Sost.append(elem_of_Sost);
         Sregr.append(elem_of_Sregr);
@@ -249,6 +250,7 @@ bool calculateRegressionCalcValues(const QVector<double> &cursValues,
 
 //Заполнение общей таблицы значениями
 void fillTotalTable(QTableView *tableView,
+                    const int &mode,
                     const QVector<QString> &dataColumn,
                     const QVector<double> &numericDates,
                     const QVector<double> &cursValues,
@@ -257,32 +259,33 @@ void fillTotalTable(QTableView *tableView,
                     const QVector<double> &xyProduct)
 {
     int rowCount = numericDates.size();
-    int colCount = 6; // data, xi, yi, xi^2, yi^2, xi*yi
+    int colCount = 6; // data, xi, yi, xi^2, yi^2, xi*yi или data, yi, xi, yi^2, xi^2, yi*xi
 
     QStandardItemModel *model = new QStandardItemModel(rowCount, colCount, tableView);
 
     // Заголовки
     model->setHeaderData(0, Qt::Horizontal, "data");
-    model->setHeaderData(1, Qt::Horizontal, "xi");
-    model->setHeaderData(2, Qt::Horizontal, "yi");
-    model->setHeaderData(3, Qt::Horizontal, "xi^2");
-    model->setHeaderData(4, Qt::Horizontal, "yi^2");
-    model->setHeaderData(5, Qt::Horizontal, "xi*yi");
+    model->setHeaderData(1, Qt::Horizontal, (mode != 1) ? "x\u1D62" : "y\u1D62");
+    model->setHeaderData(2, Qt::Horizontal, (mode != 1) ? "y\u1D62" : "x\u1D62");
+    model->setHeaderData(3, Qt::Horizontal, (mode != 1) ? "x\u1D62\u00B2" : "y\u1D62\u00B2");
+    model->setHeaderData(4, Qt::Horizontal, (mode != 1) ? "y\u1D62\u00B2" : "x\u1D62\u00B2");
+    model->setHeaderData(5, Qt::Horizontal, (mode != 1) ? "x\u1D62 \u00B7 y\u1D62" : "y\u1D62 \u00B7 x\u1D62");
 
     for (int r = 0; r < rowCount; ++r) {
         model->setItem(r, 0, new QStandardItem(dataColumn[r]));
-        model->setItem(r, 1, new QStandardItem(QString::number(numericDates[r], 'g', 6)));
-        model->setItem(r, 2, new QStandardItem(QString::number(cursValues[r], 'g', 6)));
-        model->setItem(r, 3, new QStandardItem(QString::number(xSquared[r], 'g', 6)));
-        model->setItem(r, 4, new QStandardItem(QString::number(ySquared[r], 'g', 6)));
-        model->setItem(r, 5, new QStandardItem(QString::number(xyProduct[r], 'g', 6)));
+        model->setItem(r, 1, new QStandardItem(QString::number((mode != 1) ? numericDates[r] : cursValues[r], 'f', 5)));
+        model->setItem(r, 2, new QStandardItem(QString::number((mode != 1) ? cursValues[r] : numericDates[r], 'f', 5)));
+        model->setItem(r, 3, new QStandardItem(QString::number((mode != 1) ? xSquared[r] : ySquared[r], 'f', 5)));
+        model->setItem(r, 4, new QStandardItem(QString::number((mode != 1) ? ySquared[r] : xSquared[r], 'f', 5)));
+        model->setItem(r, 5, new QStandardItem(QString::number(xyProduct[r], 'f', 5)));
     }
 
     tableView->setModel(model);
     tableView->resizeColumnsToContents();
 }
-// Заполнение вычисляемой таблицы значениями
+//Заполнение вычисляемой таблицы значениями
 void fillCalculateTable(QTableView *tableView,
+                        const int& mode,
                         const QVector<QString> &dataColumn,
                         const QVector<double> &numericDates,
                         const QVector<double> &cursValues,
@@ -290,27 +293,30 @@ void fillCalculateTable(QTableView *tableView,
                         const RegressionValues &values)
 {
     int rowCount = numericDates.size();
-    int colCount = 7; // data, xi, yi, yi^T, (yi-yi^T)^2, (yi^T - mean(y))^2, (yi-mean(y))^2
+    int colCount = 7; // data, xi, yi, yi^T, (yi-yi^T)^2, (yi^T - mean(y))^2, (yi - mean(y))^2
+                      // data, yi, xi, xi^T, (xi-xi^T)^2, (xi^T - mean(x))^2, (xi - mean(x))^2
 
     QStandardItemModel *model = new QStandardItemModel(rowCount, colCount, tableView);
 
     // Заголовки
     model->setHeaderData(0, Qt::Horizontal, "data");
-    model->setHeaderData(1, Qt::Horizontal, "xi");
-    model->setHeaderData(2, Qt::Horizontal, "yi");
-    model->setHeaderData(3, Qt::Horizontal, "yi^T");
-    model->setHeaderData(4, Qt::Horizontal, "(yi-yi^T)^2");
-    model->setHeaderData(5, Qt::Horizontal, "(yi^T - mean(y))^2");
-    model->setHeaderData(6, Qt::Horizontal, "(yi-mean(y))^2");
+    model->setHeaderData(1, Qt::Horizontal, (mode != 1) ? "x\u1D62" : "y\u1D62");
+    model->setHeaderData(2, Qt::Horizontal, (mode != 1) ? "y\u1D62" : "x\u1D62");
+    model->setHeaderData(3, Qt::Horizontal, (mode != 1) ? "y\u1D62\u1D40" : "x\u1D62\u1D40");
+    model->setHeaderData(4, Qt::Horizontal, (mode != 1) ? "(y\u1D62 - y\u1D62\u1D40)\u00B2" : "(x\u1D62 - x\u1D62\u1D40)\u00B2");
+    model->setHeaderData(5, Qt::Horizontal, (mode != 1) ? "(y\u1D62\u1D40 - y\u0304)\u00B2" : "(x\u1D62\u1D40 - x\u0304)\u00B2");
+    model->setHeaderData(6, Qt::Horizontal, (mode != 1) ? "(y\u1D62 - y\u0304)\u00B2" : "(x\u1D62 - x\u0304)\u00B2");
 
     for (int r = 0; r < rowCount; ++r) {
+        const char fmt = (mode != 1) ? 'f' : 'g';
+        const int sign_count = (mode != 1) ? 6 : 8;
         model->setItem(r, 0, new QStandardItem(dataColumn[r]));
-        model->setItem(r, 1, new QStandardItem(QString::number(numericDates[r], 'g', 6)));
-        model->setItem(r, 2, new QStandardItem(QString::number(cursValues[r], 'g', 6)));
-        model->setItem(r, 3, new QStandardItem(QString::number(yT[r], 'g', 6)));
-        model->setItem(r, 4, new QStandardItem(QString::number(std::pow(cursValues[r]-yT[r], 2), 'g', 6)));
-        model->setItem(r, 5, new QStandardItem(QString::number(std::pow(yT[r]-values.meanY,2), 'g', 6)));
-        model->setItem(r, 6, new QStandardItem(QString::number(std::pow(cursValues[r]-values.meanY,2), 'g', 6)));
+        model->setItem(r, 1, new QStandardItem(QString::number((mode != 1) ? numericDates[r] : cursValues[r], fmt, sign_count)));
+        model->setItem(r, 2, new QStandardItem(QString::number((mode != 1) ? cursValues[r] : numericDates[r], fmt, sign_count)));
+        model->setItem(r, 3, new QStandardItem(QString::number(yT[r], 'f', 6)));
+        model->setItem(r, 4, new QStandardItem(QString::number((mode != 1) ? std::pow(cursValues[r]-yT[r], 2) : std::pow(numericDates[r]-yT[r], 2), fmt, sign_count)));
+        model->setItem(r, 5, new QStandardItem(QString::number((mode != 1) ? std::pow(yT[r]-values.meanY, 2) : std::pow(yT[r]-values.meanX, 2), fmt, sign_count)));
+        model->setItem(r, 6, new QStandardItem(QString::number((mode != 1) ? std::pow(cursValues[r]-values.meanY, 2) : std::pow(numericDates[r]-values.meanX, 2), fmt, sign_count)));
     }
 
     tableView->setModel(model);
@@ -319,37 +325,45 @@ void fillCalculateTable(QTableView *tableView,
 
 // ----- Расчет значений для регрессионной модели ----- //
 // ОБЩЕЕ
-QString getRegressionRelationship(const double& r){
+QString getRegressionRelationship(const int& mode, const double& r){
     QString regr_description = "Характер связи: ";
     if (r == 0) {
         regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
-                                   "Характер связи: отсутствует.\n"
+                                   "Характер связи: Отсутствует.\n"
                                    "Интерпретация связи: -.")
                                .arg(QString::number(r, 'f', 2));
     }
     else if (r > 0 && r < 1) {
         regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
-                                   "Характер связи: вероятностная, прямая.\n"
-                                   "Интерпретация связи: С увеличением X увеличивается Y.")
-                               .arg(QString::number(r, 'f', 2));
+                                   "Характер связи: Вероятностная, прямая.\n%2")
+                               .arg(QString::number(r, 'f', 2))
+                               .arg((mode != 1) ? "Интерпретация связи: С увеличением X увеличивается Y."
+                                                : "Интерпретация связи: С увеличением Y увеличивается X.");
+
     }
     else if (r < 0 && r > -1){
         regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
-                                   "Характер связи: вероятностная, обратная.\n"
-                                   "Интерпретация связи: С увеличением X уменьшается Y, и наоборот.")
-                               .arg(QString::number(r, 'f', 2));
+                                   "Характер связи: Вероятностная, обратная.\n%2")
+                               .arg(QString::number(r, 'f', 2))
+                               .arg((mode != 1) ? "Интерпретация связи: С увеличением X уменьшается Y."
+                                                : "Интерпретация связи: С увеличением Y уменьшается X.");
+
     }
     else if (r == 1){
         regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
-                                   "Характер связи: функциональная, прямая.\n"
-                                   "Интерпретация связи: Каждому значению факторного признака строго соответствует одно значение функции, с увеличением X увеличивается Y.")
-                               .arg(QString::number(r, 'f', 2));
+                                   "Характер связи: Функциональная, прямая.\n"
+                                   "Интерпретация связи: Каждому значению факторного признака строго соответствует одно значение функции, %2")
+                               .arg(QString::number(r, 'f', 2))
+                               .arg((mode != 1) ? "с увеличением X увеличивается Y."
+                                                : "с увеличением Y увеличивается X.");
     }
     else if (r == -1){
         regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
-                                   "Характер связи: функциональная, обратная.\n"
-                                   "Интерпретация связи: Каждому значению факторного признака строго соответствует одно значение функции, увеличением X уменьшается Y, и наоборот.")
-                               .arg(QString::number(r, 'f', 2));
+                                   "Характер связи: Функциональная, обратная.\n"
+                                   "Интерпретация связи: Каждому значению факторного признака строго соответствует одно значение функции, %2)")
+                               .arg(QString::number(r, 'f', 2))
+                               .arg((mode != 1) ? "с увеличением X уменьшается Y, и наоборот."
+                                                : "с увеличением Y уменьшается X, и наоборот.");
     }
     else{
         regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
@@ -358,7 +372,7 @@ QString getRegressionRelationship(const double& r){
         return regr_description;
     }
 
-    // Характер связи.
+    // Характер связи
     if (std::abs(r) < 0.3)
         regr_description += QString("\nХарактер связи: Практически отсустствует.");
     else if (std::abs(r) >= 0.3 && std::abs(r) < 0.5)
@@ -371,21 +385,21 @@ QString getRegressionRelationship(const double& r){
     return regr_description;
 }
 QString getDeterminationDescription(const double& R2){
-    QString determination_descr = "Можно ли делать прогноз (>=75%): ";
+    QString determination_descr = "Можно ли использовать для прогнозирования (R\u00B2>=75%): ";
     if (R2 * 100 >= 75)
         determination_descr += "Да!";
     else
         determination_descr += "Не рекомендуется!";
     return determination_descr;
 }
-// ЛИНЕЙНАЯ РЕГРЕССИЯ
+// ЛИНЕЙНАЯ И ОБРАТНАЯ ЛИНЕЙНАЯ РЕГРЕССИЯ
 bool calculateLinearRegressionCoefficients(RegressionValues &values, QHash<QString, double> &coefficients, const double eps){
-    // y = a0 + a1*x
-    // Система:
-    // {a1n + a2*E(xi) = E(yi)
-    // {a1*E(xi) + a2*E(xi^2) = E(xi*yi)
+    // y = a0 + a1*x                        // y = b0 + b1*x
+    // Система:                             // Система:
+    // {a0*n + a1*E(xi) = E(yi)             // {b0*n + b1*E(yi) = E(xi)
+    // {a0*E(xi) + a1*E(xi^2) = E(xi*yi)    // {b0*E(yi) + b1*E(yi^2) = E(xi*yi)
 
-    // Решение СЛУ методом Крамера (A, A0, A1, a0, a1)
+    // Решение СЛУ методом Крамера (A, A0, A1, a0, a1, B, B0, B1, b0, b1)
     // A
     coefficients.insert("A", values.n * values.sumX2 - values.sumX * values.sumX);
     // A0
@@ -413,10 +427,22 @@ bool calculateLinearRegressionCoefficients(RegressionValues &values, QHash<QStri
 
     return std::abs(coefficients["r1"] - coefficients["r2"]) < eps;
 }
-void calculateLinearRegressionValues(const QVector<double> &numericDates, QVector<double> &yT,
+void calculateLinearRegressionValues(const int& mode, const QVector<double> &numericDates, QVector<double> &yT,
                                      const int &n, const QHash<QString, double> &coefficients){
-    // yT
+    // yT или xT
     yT.clear();
-    for (int i=0; i<n; ++i)
-        yT.append(coefficients["a0"] + coefficients["a1"] * numericDates[i]);
+    for (int i=0; i<n; ++i){
+        if (mode != 1)
+            yT.append(coefficients["a0"] + coefficients["a1"] * numericDates[i]);
+        else
+            yT.append(coefficients["b0"] + coefficients["b1"] * numericDates[i]);
+    }
+}
+void calculateInverseLinearRegressionValuesByDates(const QVector<double> &yReg, QVector<double> &xT,
+                                                   const int &n, const QHash<QString, double> &coefficients){
+    // xT
+    xT.clear();
+    for (int i = 0; i < n; ++i){
+        xT.append((yReg[i]/60/60/24/10000 - coefficients["b0"]) / coefficients["b1"]);
+    }
 }

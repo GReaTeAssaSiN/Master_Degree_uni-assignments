@@ -17,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_log_regr->setEnabled(false);
     ui->pushButton_power_regr->setEnabled(false);
     ui->pushButton_polynom_regr->setEnabled(false);
+
+    connect(ui->pushButton_linear_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
+    connect(ui->pushButton_inverse_linear_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
 }
 
 MainWindow::~MainWindow()
@@ -39,6 +42,12 @@ void MainWindow::on_pushButton_ChooseFile_clicked()
         ui->pushButton_log_regr->setEnabled(true);
         ui->pushButton_power_regr->setEnabled(true);
         ui->pushButton_polynom_regr->setEnabled(true);
+        ui->choosenFile_label->setCursor(Qt::IBeamCursor);
+        ui->choosenFile_label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+    }
+    else {
+        ui->choosenFile_label->setCursor(Qt::ArrowCursor);
+        ui->choosenFile_label->setTextInteractionFlags(Qt::NoTextInteraction);
     }
 }
 
@@ -46,9 +55,18 @@ void MainWindow::show_window(){
     this->show();
 }
 
-void MainWindow::on_pushButton_linear_regr_clicked()
+void MainWindow::regression_button_clicked()
 {
-    WorkplaceForm *workplace_form = new WorkplaceForm(0, ui->data_tableView);
+    QPushButton* button = qobject_cast<QPushButton*>(sender());
+    if (!button) return;
+
+    int idx{};
+    if (button->objectName() == "pushButton_linear_regr")
+        idx = 0;
+    else if (button->objectName() == "pushButton_inverse_linear_regr")
+        idx = 1;
+
+    WorkplaceForm *workplace_form = new WorkplaceForm(idx, ui->data_tableView);
     connect(workplace_form, &WorkplaceForm::backToMain, this, &MainWindow::show_window);
     this->hide();
     workplace_form->show();

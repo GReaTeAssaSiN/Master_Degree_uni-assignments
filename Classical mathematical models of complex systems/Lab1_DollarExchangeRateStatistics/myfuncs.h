@@ -15,11 +15,13 @@ void calculateRegressionTotalValues(const QVector<double> numericDates, const QV
                                     RegressionValues &values);
 
 // ----- Функции общих вычислений ----- //
-bool calculateRegressionCalcValues(const QVector<double> &cursValues,
+bool calculateRegressionCalcValues(const int& mode,
+                                   const QVector<double> &cursValues,
                                    const QVector<double> &yT,
                                    QVector<double> &Sost, QVector<double> &Sregr, QVector<double> Sfull,
                                    RegressionValues &values, QHash<QString, double> &coefficients, const double eps=1e-7);
 void fillTotalTable(QTableView *tableView,
+                    const int &mode,
                     const QVector<QString> &dataColumn,
                     const QVector<double> &numericDates,
                     const QVector<double> &cursValues,
@@ -27,6 +29,7 @@ void fillTotalTable(QTableView *tableView,
                     const QVector<double> &ySquared,
                     const QVector<double> &xyProduct);
 void fillCalculateTable(QTableView *tableView,
+                        const int &mode,
                         const QVector<QString> &dataColumn,
                         const QVector<double> &numericDates,
                         const QVector<double> &cursValues,
@@ -35,12 +38,14 @@ void fillCalculateTable(QTableView *tableView,
 
 // ----- Расчет значений для регрессионной модели ----- //
 // ОБЩЕЕ
-QString getRegressionRelationship(const double& r);
+QString getRegressionRelationship(const int &mode, const double& r);
 QString getDeterminationDescription(const double& R2);
 // РЕГРЕССИИ
-// Линейная регрессия
+// Линейная и обратная линейная регрессия
 bool calculateLinearRegressionCoefficients(RegressionValues &values, QHash<QString, double> &coefficients, const double eps=1e-9);
-void calculateLinearRegressionValues(const QVector<double> &numericDates, QVector<double> &yT,
+void calculateLinearRegressionValues(const int &mode, const QVector<double> &numericDates, QVector<double> &yT,
                                      const int &n, const QHash<QString, double> &coefficients);
+void calculateInverseLinearRegressionValuesByDates(const QVector<double> &numericDates, QVector<double> &xT,
+                                                   const int &n, const QHash<QString, double> &coefficients);
 
 #endif // MYFUNCS_H
