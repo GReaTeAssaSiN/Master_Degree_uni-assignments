@@ -8,7 +8,7 @@
 // ----- Общие функии ----- //
 void centerTableItems(QTableView *tableView);
 bool loadDataFromExcel(const QString &filePath, QTableView *tableView);
-void readDataAndCurs(const QTableView *tableView,
+bool readDataAndCurs(const QTableView *tableView,
                      QVector<QString> &dataColumn, QVector<double> &numericDates, QVector<double> &cursValues);
 void calculateRegressionTotalValues(const QVector<double> numericDates, const QVector<double> &cursValues,
                                     QVector<double> &xSquared, QVector<double> &ySquared, QVector<double> &xyProduct,

@@ -121,10 +121,10 @@ bool loadDataFromExcel(const QString &filePath, QTableView *tableView)
     return true;
 }
 //Чтение исходных данных из таблицы и приведение к нужному виду
-void readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, QVector<double> &numericDates, QVector<double> &cursValues)
+bool readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, QVector<double> &numericDates, QVector<double> &cursValues)
 {
     const QAbstractItemModel *model = tableView->model();
-    if (!model) return;
+    if (!model) return false;
 
     int colData = -1;
     int colCurs = -1;
@@ -136,7 +136,7 @@ void readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
 
     if (colData == -1 && colCurs == -1){
         QMessageBox::critical(nullptr, "Ошибка", "Отсутствуют столбцы 'data' и 'curs' для вычислений!");
-        return;
+        return false;
     }
 
     numericDates.clear();
@@ -154,7 +154,7 @@ void readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
         } else {
             numericDates.append(0);
             QMessageBox::critical(nullptr, "Ошибка", QString("Не удалось корректно обработать дату:%1!").arg(valData.toString()));
-            return;
+            return false;
         }
 
         // Конвертация курса в число
@@ -166,9 +166,11 @@ void readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
         } else {
             cursValues.append(0.0);
             QMessageBox::critical(nullptr, "Ошибка", QString("Не удалось корректно обработать курс:%1!").arg(valCurs.toString()));
-            return;
+            return false;
         }
     }
+
+    return true;
 }
 
 // ----- Функции общих вычислений ----- //
@@ -440,9 +442,10 @@ void calculateLinearRegressionValues(const int& mode, const QVector<double> &num
 }
 void calculateInverseLinearRegressionValuesByDates(const QVector<double> &yReg, QVector<double> &xT,
                                                    const int &n, const QHash<QString, double> &coefficients){
-    // xT
+    // xT - курс доллара США
     xT.clear();
     for (int i = 0; i < n; ++i){
+        // [количество дней в секундах]/60/60/24/10000 -> [количество дней в днях]/10000
         xT.append((yReg[i]/60/60/24/10000 - coefficients["b0"]) / coefficients["b1"]);
     }
 }

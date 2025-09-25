@@ -16,7 +16,8 @@ class WorkplaceForm : public QWidget
     Q_OBJECT
 
 public:
-    explicit WorkplaceForm(const int &mode, const QTableView *data_tableView, QWidget *parent = nullptr);
+    explicit WorkplaceForm(const int &mode, const QVector<QString> &dataColumns, const QVector<double> &numericDates, const QVector<double> &cursValues,
+                           QWidget *parent = nullptr);
     ~WorkplaceForm();
 
 signals:
@@ -32,7 +33,7 @@ private slots:
 private:
     Ui::WorkplaceForm *ui;
     int mode{}; // Тип регрессии
-    QVector<QString> dataColumn{};
+    QVector<QString> dataColumns{};
     QVector<double> numericDates{};
     QVector<double> cursValues{};
     QVector<double> xSquared{};

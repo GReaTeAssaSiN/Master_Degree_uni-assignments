@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    // Деактивация кнопок
     ui->pushButton_linear_regr->setEnabled(false);
     ui->pushButton_inverse_linear_regr->setEnabled(false);
     ui->pushButton_exp_regr->setEnabled(false);
@@ -17,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_log_regr->setEnabled(false);
     ui->pushButton_power_regr->setEnabled(false);
     ui->pushButton_polynom_regr->setEnabled(false);
-
+    // Подключение сигналов
     connect(ui->pushButton_linear_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
     connect(ui->pushButton_inverse_linear_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
 }
@@ -57,6 +58,7 @@ void MainWindow::show_window(){
 
 void MainWindow::regression_button_clicked()
 {
+    // Определение нажатой кнопки
     QPushButton* button = qobject_cast<QPushButton*>(sender());
     if (!button) return;
 
@@ -66,8 +68,16 @@ void MainWindow::regression_button_clicked()
     else if (button->objectName() == "pushButton_inverse_linear_regr")
         idx = 1;
 
-    WorkplaceForm *workplace_form = new WorkplaceForm(idx, ui->data_tableView);
-    connect(workplace_form, &WorkplaceForm::backToMain, this, &MainWindow::show_window);
-    this->hide();
-    workplace_form->show();
+    // Переменные для записи эксперементальных данных из .xlsx файла
+    QVector<QString> dataColumns{};
+    QVector<double> numericDates{};
+    QVector<double> cursValues{};
+    // Проверка загруженной таблицы перед построением регрессионной модели
+    bool check = readDataAndCurs(ui->data_tableView, dataColumns, numericDates, cursValues);
+    if (check){
+        WorkplaceForm *workplace_form = new WorkplaceForm(idx, dataColumns, numericDates, cursValues);
+        connect(workplace_form, &WorkplaceForm::backToMain, this, &MainWindow::show_window);
+        this->hide();
+        workplace_form->show();
+    }
 }

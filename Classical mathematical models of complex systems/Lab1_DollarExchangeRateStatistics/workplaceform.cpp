@@ -4,10 +4,14 @@
 #include "myfuncs.h"
 #include <QMessageBox>
 
-WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, QWidget *parent)
+WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumns, const QVector<double> &numericDates, const QVector<double> &cursValues,
+                             QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::WorkplaceForm)
     , mode(mode)
+    , dataColumns(dataColumns)
+    , numericDates(numericDates)
+    , cursValues(cursValues)
 {
     ui->setupUi(this);
 
@@ -21,15 +25,11 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
         lbl->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     }
 
-    // ----- ПРЕДОБРАБОТКА ДАННЫХ ----- //
-    // Чтение исходных данных и преобразование к нужному виду
-    readDataAndCurs(data_tableView, this->dataColumn, this->numericDates, this->cursValues);
-
     // ----- ОБЩАЯ ТАБЛИЦА ----- //
     // Вычисление значений квадратов, сумм и средних значений + количества экспериментов (n)
     calculateRegressionTotalValues(this->numericDates, this->cursValues, this->xSquared, this->ySquared, this->xyProduct, this->values);
     // Заполнение общей таблицы
-    fillTotalTable(ui->total_tableView, mode, this->dataColumn, this->numericDates, this->cursValues,
+    fillTotalTable(ui->total_tableView, mode, this->dataColumns, this->numericDates, this->cursValues,
                    this->xSquared, this->ySquared, this->xyProduct);
 
     // ----- ВНЕ ОБЩЕЙ ТАБЛИЦЫ ----- //
@@ -129,7 +129,7 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
 
     // ----- ВЫЧИСЛЯЕМАЯ ТАБЛИЦА ----- //
     // Заполнение вычисляемой таблицы
-    fillCalculateTable(ui->calculate_tableView, mode, this->dataColumn, this->numericDates, this->cursValues, this->yT, this->values);
+    fillCalculateTable(ui->calculate_tableView, mode, this->dataColumns, this->numericDates, this->cursValues, this->yT, this->values);
 
     // ----- ВНЕ ВЫЧИСЛЯЕМОЙ ТАБЛИЦЫ ----- //
     // Уравнение регрессии
@@ -152,7 +152,7 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
     ui->Sfull_label->setText("S<sub>полн.</sub>=" + QString::number(this->values.sumFull, 'g', 5));
 
     // ----- УСТАНОВКА ВЫБИРАЕМОЙ ДАТЫ ----- //
-    this->default_date = QDate::fromString(this->dataColumn.first(), "dd.MM.yyyy").addDays(1);
+    this->default_date = QDate::fromString(this->dataColumns.first(), "dd.MM.yyyy").addDays(1);
     ui->selectDate_dateEdit->setDate(this->default_date);
     ui->selectDate_dateEdit->setMinimumDate(this->default_date);
 
@@ -164,7 +164,7 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QTableView *data_tableView, 
 void WorkplaceForm::MakePlot()
 {
     // Проверка данных
-    if (this->dataColumn.isEmpty() || this->cursValues.isEmpty() || this->yT.isEmpty())
+    if (this->dataColumns.isEmpty() || this->cursValues.isEmpty() || this->yT.isEmpty())
         return;
 
     // Очистка графика
@@ -178,7 +178,7 @@ void WorkplaceForm::MakePlot()
 
     for (int i = 0; i < n; ++i)
     {
-        QDate date = QDate::fromString(this->dataColumn[i], "dd.MM.yyyy");
+        QDate date = QDate::fromString(this->dataColumns[i], "dd.MM.yyyy");
         dateTimes[i] = QDateTime(date, QTime(0,0));
 
         x[i] = dateTimes[i].toSecsSinceEpoch(); // ось абсисс
@@ -374,7 +374,7 @@ void WorkplaceForm::MakePlot()
 void WorkplaceForm::MakeInversePlot()
 {
     // Проверка данных
-    if (this->dataColumn.isEmpty() || this->cursValues.isEmpty() || this->yT.isEmpty())
+    if (this->dataColumns.isEmpty() || this->cursValues.isEmpty() || this->yT.isEmpty())
         return;
 
     // Очистка графика
@@ -388,7 +388,7 @@ void WorkplaceForm::MakeInversePlot()
 
     for (int i = 0; i < n; ++i)
     {
-        QDate date = QDate::fromString(this->dataColumn[i], "dd.MM.yyyy");
+        QDate date = QDate::fromString(this->dataColumns[i], "dd.MM.yyyy");
         dateTimes[i] = QDateTime(date, QTime(0,0));
 
         x[i] = this->cursValues[i];             // ось абсисс
