@@ -67,6 +67,8 @@ void MainWindow::regression_button_clicked()
         idx = 0;
     else if (button->objectName() == "pushButton_inverse_linear_regr")
         idx = 1;
+    else if (button->objectName() == "pushButton_exp_regr")
+        idx = 2;
 
     // Переменные для записи эксперементальных данных из .xlsx файла
     QVector<QString> dataColumns{};

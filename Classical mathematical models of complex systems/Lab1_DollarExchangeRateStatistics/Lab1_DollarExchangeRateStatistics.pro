@@ -23,7 +23,6 @@ SOURCES += \
 
 HEADERS += \
     qcustomplot.h \
-    RegressionValues.h \
     mainwindow.h \
     myfuncs.h \
     workplaceform.h

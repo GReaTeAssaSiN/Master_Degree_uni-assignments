@@ -5,7 +5,6 @@
 #include <QTableView>
 #include <QHash>
 #include <QDate>
-#include "RegressionValues.h"
 
 namespace Ui {
 class WorkplaceForm;
@@ -32,19 +31,19 @@ private slots:
 
 private:
     Ui::WorkplaceForm *ui;
+    // Исходные данные
     int mode{}; // Тип регрессии
     QVector<QString> dataColumns{};
     QVector<double> numericDates{};
     QVector<double> cursValues{};
-    QVector<double> xSquared{};
-    QVector<double> ySquared{};
-    QVector<double> xyProduct{};
-    QVector<double> yT{};
-    QVector<double> Sost{};
-    QVector<double> Sregr{};
-    QVector<double> Sfull{};
-    RegressionValues values{}; // Хранит суммы и значения для оценки адекватности модели
-    QHash<QString, double> coefficients{}; // Хранит коэффициенты регрессии
+
+    // Переменные и структуры для хранения значений при построении регрессии
+    int n{};                                           // Количество экспериментов
+    QHash<QString, QVector<double>> vector_values{};   // Все вычисляемые значения в виде векторов
+    QHash<QString, double> values{};                   // Все вычисляемые значения из значений вычисляемых векторов
+    QHash<QString, double> coefficients{};             // Все коэффициенты регрессии + MSE
+
+    // Вспомогательные ременные для хранения значений, связанных с выбором даты и графиком
     QDate select_date{}; // Выбранная дата
     QDate default_date{}; // Дата по умолчанию
     QString trend_eq{}; // Уравнение регрессии

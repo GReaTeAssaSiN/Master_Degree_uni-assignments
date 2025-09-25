@@ -175,20 +175,18 @@ bool readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
 
 // ----- Функции общих вычислений ----- //
 //Вычисление значений, необходимых для построения регрессии
-void calculateRegressionTotalValues(const QVector<double> numericDates, const QVector<double> &cursValues,
-                                    QVector<double> &xSquared, QVector<double> &ySquared, QVector<double> &xyProduct,
-                                    RegressionValues &values)
+void calculateRegressionTotalValues(const QVector<double> &numericDates, const QVector<double> &cursValues, int &n,
+                                    QHash<QString, QVector<double>> &vector_values, QHash<QString, double> &values)
 {
-    values.n = numericDates.size();
-    if (values.n==0) return;
+    n = numericDates.size();
+    if (n==0) return;
 
-    xSquared.clear();
-    ySquared.clear();
-    xyProduct.clear();
+    vector_values["x2"].clear();
+    vector_values["y2"].clear();
+    vector_values["xy"].clear();
+    values["sumX"] = values["sumY"] = values["sumX2"] = values["sumY2"] = values["sumXY"] = 0.0;
 
-    values.sumX = values.sumY = values.sumX2 = values.sumY2 = values.sumXY = 0.0;
-
-    for (int i = 0; i < values.n; ++i){
+    for (int i = 0; i < n; ++i){
         double x = numericDates[i];
         double y = cursValues[i];
 
@@ -196,58 +194,57 @@ void calculateRegressionTotalValues(const QVector<double> numericDates, const QV
         double y2 = y * y;
         double xy = x * y;
 
-        xSquared.append(x2);
-        ySquared.append(y2);
-        xyProduct.append(xy);
+        vector_values["x2"].append(x2);
+        vector_values["y2"].append(y2);
+        vector_values["xy"].append(xy);
 
-        values.sumX  += x;
-        values.sumY  += y;
-        values.sumX2 += x2;
-        values.sumY2 += y2;
-        values.sumXY += xy;
+        values["sumX"] += x;
+        values["sumY"] += y;
+        values["sumX2"] += x2;
+        values["sumY2"] += y2;
+        values["sumXY"] += xy;
     }
 
-    values.meanX = values.sumX / values.n;
-    values.meanY = values.sumY / values.n;
+    values["meanX"] = values["sumX"] / n;
+    values["meanY"] = values["sumY"] / n;
 }
 //Вычисление значений, необходимых для проверки регрессии
-bool calculateRegressionCalcValues(const int& mode,
+bool calculateRegressionCalcValues(const int& mode, const int& n,
                                    const QVector<double> &cursValues,
-                                   const QVector<double> &yT,
-                                   QVector<double> &Sost, QVector<double> &Sregr, QVector<double> Sfull,
-                                   RegressionValues &values, QHash<QString, double> &coefficients, const double eps)
+                                   QHash<QString, QVector<double>> &vector_values, QHash<QString, double> &values,
+                                   QHash<QString, double> &coefficients, const double eps)
 {
-    Sost.clear();
-    Sregr.clear();
-    Sfull.clear();
+    vector_values["Sost"].clear();
+    vector_values["Sregr"].clear();
+    vector_values["Sfull"].clear();
 
-    values.sumOst = values.sumRegr = values.sumFull = 0.0;
+    values["sumOst"] = values["sumRegr"] = values["sumFull"] = 0.0;
 
-    for (int i = 0; i < values.n; ++i){
-        double elem_of_Sost = std::pow(cursValues[i] - yT[i], 2);
-        double elem_of_Sregr = std::pow((mode != 1) ? (yT[i] - values.meanY) : (yT[i] - values.meanX), 2);
-        double elem_of_Sfull = std::pow((mode != 1) ? (cursValues[i] - values.meanY) : (cursValues[i] - values.meanX), 2);
+    for (int i = 0; i < n; ++i){
+        double elem_of_Sost = std::pow((mode != 1) ? (cursValues[i] - vector_values["yT"][i]) : (cursValues[i] - vector_values["xT"][i]), 2);
+        double elem_of_Sregr = std::pow((mode != 1) ? (vector_values["yT"][i] - values["meanY"]) : (vector_values["xT"][i] - values["meanX"]), 2);
+        double elem_of_Sfull = std::pow((mode != 1) ? (cursValues[i] - values["meanY"]) : (cursValues[i] - values["meanX"]), 2);
 
-        Sost.append(elem_of_Sost);
-        Sregr.append(elem_of_Sregr);
-        Sfull.append(elem_of_Sfull);
+        vector_values["Sost"].append(elem_of_Sost);
+        vector_values["Sregr"].append(elem_of_Sregr);
+        vector_values["Sfull"].append(elem_of_Sfull);
 
-        values.sumOst += elem_of_Sost;
-        values.sumRegr += elem_of_Sregr;
-        values.sumFull += elem_of_Sfull;
+        values["sumOst"] += elem_of_Sost;
+        values["sumRegr"] += elem_of_Sregr;
+        values["sumFull"] += elem_of_Sfull;
     }
 
     // Коэффииент детерминации и MSE
-    coefficients.insert("R2", 1 - values.sumOst / values.sumFull);
-    coefficients.insert("MSE", values.sumOst / values.n);
+    coefficients["R2"] =  1 - values["sumOst"] / values["sumFull"];
+    coefficients.insert("MSE", values["sumOst"] / n);
 
     // Несмещенная дисперсия и среднее кв. отклонение выборочнного среднего
-    values.Sx2 = 1.0 / (values.n - 1.0) * (values.sumX2 - 1.0 / values.n * std::pow(values.sumX, 2));
-    values.Sy2 = 1.0 / (values.n - 1.0) * (values.sumY2 - 1.0 / values.n * std::pow(values.sumY, 2));
-    values.meanSx = std::sqrt(values.Sx2 / values.n);
-    values.meanSy = std::sqrt(values.Sy2 / values.n);
+    values["Sx2"] = 1.0 / (n - 1.0) * (values["sumX2"] - 1.0 / n * std::pow(values["sumX"], 2));
+    values["Sy2"] = 1.0 / (n - 1.0) * (values["sumY2"] - 1.0 / values["n"] * std::pow(values["sumY"], 2));
+    values["meanSx"] = std::sqrt(values["Sx2"] / n);
+    values["meanSy"] = std::sqrt(values["Sy2"] / n);
 
-    return std::abs(values.sumOst + values.sumRegr - values.sumFull) < eps;
+    return std::abs(values["sumOst"] + values["sumRegr"] - values["sumFull"]) < eps;
 }
 
 //Заполнение общей таблицы значениями
@@ -256,9 +253,7 @@ void fillTotalTable(QTableView *tableView,
                     const QVector<QString> &dataColumn,
                     const QVector<double> &numericDates,
                     const QVector<double> &cursValues,
-                    const QVector<double> &xSquared,
-                    const QVector<double> &ySquared,
-                    const QVector<double> &xyProduct)
+                    const QHash<QString, QVector<double>> &vector_values)
 {
     int rowCount = numericDates.size();
     int colCount = 6; // data, xi, yi, xi^2, yi^2, xi*yi или data, yi, xi, yi^2, xi^2, yi*xi
@@ -277,9 +272,9 @@ void fillTotalTable(QTableView *tableView,
         model->setItem(r, 0, new QStandardItem(dataColumn[r]));
         model->setItem(r, 1, new QStandardItem(QString::number((mode != 1) ? numericDates[r] : cursValues[r], 'f', 5)));
         model->setItem(r, 2, new QStandardItem(QString::number((mode != 1) ? cursValues[r] : numericDates[r], 'f', 5)));
-        model->setItem(r, 3, new QStandardItem(QString::number((mode != 1) ? xSquared[r] : ySquared[r], 'f', 5)));
-        model->setItem(r, 4, new QStandardItem(QString::number((mode != 1) ? ySquared[r] : xSquared[r], 'f', 5)));
-        model->setItem(r, 5, new QStandardItem(QString::number(xyProduct[r], 'f', 5)));
+        model->setItem(r, 3, new QStandardItem(QString::number((mode != 1) ? vector_values["x2"][r] : vector_values["y2"][r], 'f', 5)));
+        model->setItem(r, 4, new QStandardItem(QString::number((mode != 1) ? vector_values["y2"][r] : vector_values["x2"][r], 'f', 5)));
+        model->setItem(r, 5, new QStandardItem(QString::number(vector_values["xy"][r], 'f', 5)));
     }
 
     tableView->setModel(model);
@@ -291,8 +286,8 @@ void fillCalculateTable(QTableView *tableView,
                         const QVector<QString> &dataColumn,
                         const QVector<double> &numericDates,
                         const QVector<double> &cursValues,
-                        const QVector<double> &yT,
-                        const RegressionValues &values)
+                        const QHash<QString, QVector<double>> &vector_values,
+                        const QHash<QString, double> &values)
 {
     int rowCount = numericDates.size();
     int colCount = 7; // data, xi, yi, yi^T, (yi-yi^T)^2, (yi^T - mean(y))^2, (yi - mean(y))^2
@@ -315,10 +310,10 @@ void fillCalculateTable(QTableView *tableView,
         model->setItem(r, 0, new QStandardItem(dataColumn[r]));
         model->setItem(r, 1, new QStandardItem(QString::number((mode != 1) ? numericDates[r] : cursValues[r], fmt, sign_count)));
         model->setItem(r, 2, new QStandardItem(QString::number((mode != 1) ? cursValues[r] : numericDates[r], fmt, sign_count)));
-        model->setItem(r, 3, new QStandardItem(QString::number(yT[r], 'f', 6)));
-        model->setItem(r, 4, new QStandardItem(QString::number((mode != 1) ? std::pow(cursValues[r]-yT[r], 2) : std::pow(numericDates[r]-yT[r], 2), fmt, sign_count)));
-        model->setItem(r, 5, new QStandardItem(QString::number((mode != 1) ? std::pow(yT[r]-values.meanY, 2) : std::pow(yT[r]-values.meanX, 2), fmt, sign_count)));
-        model->setItem(r, 6, new QStandardItem(QString::number((mode != 1) ? std::pow(cursValues[r]-values.meanY, 2) : std::pow(numericDates[r]-values.meanX, 2), fmt, sign_count)));
+        model->setItem(r, 3, new QStandardItem(QString::number((mode != 1) ? vector_values["yT"][r] : vector_values["xT"][r], 'f', 6)));
+        model->setItem(r, 4, new QStandardItem(QString::number((mode != 1) ? std::pow(cursValues[r]-vector_values["yT"][r], 2) : std::pow(numericDates[r]-vector_values["xT"][r], 2), fmt, sign_count)));
+        model->setItem(r, 5, new QStandardItem(QString::number((mode != 1) ? std::pow(vector_values["yT"][r]-values["meanY"], 2) : std::pow(vector_values["xT"][r]-values["meanX"], 2), fmt, sign_count)));
+        model->setItem(r, 6, new QStandardItem(QString::number((mode != 1) ? std::pow(cursValues[r]-values["meanY"], 2) : std::pow(numericDates[r]-values["meanX"], 2), fmt, sign_count)));
     }
 
     tableView->setModel(model);
@@ -395,7 +390,7 @@ QString getDeterminationDescription(const double& R2){
     return determination_descr;
 }
 // ЛИНЕЙНАЯ И ОБРАТНАЯ ЛИНЕЙНАЯ РЕГРЕССИЯ
-bool calculateLinearRegressionCoefficients(RegressionValues &values, QHash<QString, double> &coefficients, const double eps){
+bool calculateLinearRegressionCoefficients(const int& n, const QHash<QString, double> &values, QHash<QString, double> &coefficients, const double eps){
     // y = a0 + a1*x                        // y = b0 + b1*x
     // Система:                             // Система:
     // {a0*n + a1*E(xi) = E(yi)             // {b0*n + b1*E(yi) = E(xi)
@@ -403,41 +398,41 @@ bool calculateLinearRegressionCoefficients(RegressionValues &values, QHash<QStri
 
     // Решение СЛУ методом Крамера (A, A0, A1, a0, a1, B, B0, B1, b0, b1)
     // A
-    coefficients.insert("A", values.n * values.sumX2 - values.sumX * values.sumX);
+    coefficients["A"] = n * values["sumX2"] - values["sumX"] * values["sumX"];
     // A0
-    coefficients.insert("A0", values.sumY * values.sumX2 - values.sumX * values.sumXY);
+    coefficients["A0"] = values["sumY"] * values["sumX2"] - values["sumX"] * values["sumXY"];
     // A1
-    coefficients.insert("A1", values.n * values.sumXY - values.sumY * values.sumX);
+    coefficients["A1"] = n * values["sumXY"] - values["sumY"] * values["sumX"];
     // B
-    coefficients.insert("B" , values.n * values.sumY2 - values.sumY * values.sumY);
+    coefficients["B"] = n * values["sumY2"] - values["sumY"] * values["sumY"];
     // B0
-    coefficients.insert("B0", values.sumX * values.sumY2 - values.sumY * values.sumXY);
+    coefficients["B0"] = values["sumX"] * values["sumY2"] - values["sumY"] * values["sumXY"];
     // B1
-    coefficients.insert("B1", values.n * values.sumXY - values.sumY * values.sumX);
+    coefficients["B1"] = n * values["sumXY"] - values["sumY"] * values["sumX"];
     // a0
-    coefficients.insert("a0", coefficients["A0"] / coefficients["A"]);
+    coefficients["a0"] = coefficients["A0"] / coefficients["A"];
     // a1
-    coefficients.insert("a1", coefficients["A1"] / coefficients["A"]);
+    coefficients["a1"] = coefficients["A1"] / coefficients["A"];
     // b0
-    coefficients.insert("b0", coefficients["B0"] / coefficients["B"]);
+    coefficients["b0"] = coefficients["B0"] / coefficients["B"];
     // b1
-    coefficients.insert("b1", coefficients["B1"] / coefficients["B"]);
+    coefficients["b1"] = coefficients["B1"] / coefficients["B"];
     // r1
-    coefficients.insert("r1", coefficients["A1"] / std::sqrt(coefficients["A"] * coefficients["B"]));
+    coefficients["r1"] = coefficients["A1"] / std::sqrt(coefficients["A"] * coefficients["B"]);
     // r2
-    coefficients.insert("r2", coefficients["B1"] / std::sqrt(coefficients["A"] * coefficients["B"]));
+    coefficients["r2"] = coefficients["B1"] / std::sqrt(coefficients["A"] * coefficients["B"]);
 
     return std::abs(coefficients["r1"] - coefficients["r2"]) < eps;
 }
-void calculateLinearRegressionValues(const int& mode, const QVector<double> &numericDates, QVector<double> &yT,
-                                     const int &n, const QHash<QString, double> &coefficients){
+void calculateLinearRegressionValues(const int &mode, const QVector<double> &numericDates, const int &n,
+                                     QVector<double> &pred_vector_values, const QHash<QString, double> &coefficients){
     // yT или xT
-    yT.clear();
+    pred_vector_values.clear();
     for (int i=0; i<n; ++i){
         if (mode != 1)
-            yT.append(coefficients["a0"] + coefficients["a1"] * numericDates[i]);
+            pred_vector_values.append(coefficients["a0"] + coefficients["a1"] * numericDates[i]);
         else
-            yT.append(coefficients["b0"] + coefficients["b1"] * numericDates[i]);
+            pred_vector_values.append(coefficients["b0"] + coefficients["b1"] * numericDates[i]);
     }
 }
 void calculateInverseLinearRegressionValuesByDates(const QVector<double> &yReg, QVector<double> &xT,
