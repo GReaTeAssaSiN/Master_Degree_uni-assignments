@@ -32,11 +32,11 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
     fillTotalTable(ui->total_tableView, this->mode, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
 
     // ----- ВНЕ ОБЩЕЙ ТАБЛИЦЫ ----- //
-    ui->sumX_label->setText(((mode != 1) ? "∑x=" : "∑y=") + QString::number((mode != 1) ? this->values["sumX"] : this->values["sumY"], 'f', 5));
-    ui->sumY_label->setText(((mode != 1) ? "∑y=" : "∑x=") + QString::number((mode != 1) ? this->values["sumY"] : this->values["sumX"], 'f', 5));
-    ui->sumX2_label->setText(((mode != 1) ? "∑x\u00B2=" : "∑y\u00B2=") + QString::number((mode != 1) ? this->values["sumX2"] : this->values["sumY2"], 'f', 5));
-    ui->sumY2_label->setText(((mode != 1) ? "∑y\u00B2=" : "∑x\u00B2=") + QString::number((mode != 1) ? this->values["sumY2"] : this->values["sumX2"], 'f', 5));
-    ui->sumXY_label->setText("∑xy=" + QString::number(this->values["sumXY"], 'f', 5));
+    ui->totalTable_info_textEdit->append(((mode != 1) ? "∑x=" : "∑y=") + QString::number((mode != 1) ? this->values["sumX"] : this->values["sumY"], 'f', 5));
+    ui->totalTable_info_textEdit->append(((mode != 1) ? "∑y=" : "∑x=") + QString::number((mode != 1) ? this->values["sumY"] : this->values["sumX"], 'f', 5));
+    ui->totalTable_info_textEdit->append(((mode != 1) ? "∑x\u00B2=" : "∑y\u00B2=") + QString::number((mode != 1) ? this->values["sumX2"] : this->values["sumY2"], 'f', 5));
+    ui->totalTable_info_textEdit->append(((mode != 1) ? "∑y\u00B2=" : "∑x\u00B2=") + QString::number((mode != 1) ? this->values["sumY2"] : this->values["sumX2"], 'f', 5));
+    ui->totalTable_info_textEdit->append("∑xy=" + QString::number(this->values["sumXY"], 'f', 5));
     ui->meanX_label->setText(((mode != 1) ? "x\u0304=" : "y\u0304=") + QString::number((mode != 1) ? this->values["meanX"] : this->values["meanY"], 'f', 5));
     ui->meanY_label->setText(((mode != 1) ? "y\u0304=" : "x\u0304=") + QString::number((mode != 1) ? this->values["meanY"] : this->values["meanX"], 'f', 5));
 
@@ -56,18 +56,18 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         // Корреляция
         ui->correlation_textEdit->append(getRegressionRelationship(mode, this->coefficients["r1"]));
         // Коэффициенты
-        ui->coefficients_textEdit->append("Вспомогательные величины:");
-        ui->coefficients_textEdit->append("A=" + QString::number(this->coefficients["A"], 'f', 5) + "\t" + "B=" +
-                                          QString::number(this->coefficients["B"], 'f', 5));
-        ui->coefficients_textEdit->append("A\u2080=" + QString::number(this->coefficients["A0"], 'f', 5) + "\t" + "B\u2080=" +
-                                          QString::number(this->coefficients["B0"], 'f', 5));
-        ui->coefficients_textEdit->append("A\u2081=" + QString::number(this->coefficients["A1"], 'f', 5) + "\t" + "B\u2081=" +
-                                          QString::number(this->coefficients["B1"], 'f', 5));
-        ui->coefficients_textEdit->append("\nКоэффициенты:");
-        ui->coefficients_textEdit->append("a\u2080=" + QString::number(this->coefficients["a0"], 'f', 5) + "\t" + "b\u2080=" +
-                                          QString::number(this->coefficients["b0"], 'f', 5));
-        ui->coefficients_textEdit->append("a\u2081=" + QString::number(this->coefficients["a1"], 'f', 5) + "\t" + "b\u2081=" +
-                                          QString::number(this->coefficients["b1"], 'f', 5));
+        ui->coefficients_textEdit->append("<b>Вспомогательные величины:</b>");
+        ui->coefficients_textEdit->append("A = " + QString::number(this->coefficients["A"], 'f', 5));
+        ui->coefficients_textEdit->append("A\u2080 = " + QString::number(this->coefficients["A0"], 'f', 5));
+        ui->coefficients_textEdit->append("A\u2081 = " + QString::number(this->coefficients["A1"], 'f', 5));
+        ui->coefficients_textEdit->append("<br>B = " + QString::number(this->coefficients["B"], 'f', 5));
+        ui->coefficients_textEdit->append("B\u2080 = " + QString::number(this->coefficients["B0"], 'f', 5));
+        ui->coefficients_textEdit->append("B\u2081 = " + QString::number(this->coefficients["B1"], 'f', 5));
+        ui->coefficients_textEdit->append("<br><b>Коэффициенты:</b>");
+        ui->coefficients_textEdit->append("a\u2080 = " + QString::number(this->coefficients["a0"], 'f', 5));
+        ui->coefficients_textEdit->append("a\u2081 = " + QString::number(this->coefficients["a1"], 'f', 5));
+        ui->coefficients_textEdit->append("b\u2080 = " + QString::number(this->coefficients["b0"], 'f', 5));
+        ui->coefficients_textEdit->append("b\u2081 = " + QString::number(this->coefficients["b1"], 'f', 5));
         // Уравнение регрессии
         this->trend_eq = QString("y = %1 + %2 \u00B7 x").arg(coefficients["a0"], 0, 'g', 6).arg(coefficients["a1"], 0, 'f', 2);
         break;
@@ -82,18 +82,18 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         // Корреляция
         ui->correlation_textEdit->append(getRegressionRelationship(mode, this->coefficients["r1"]));
         // Коэффициенты
-        ui->coefficients_textEdit->append("Вспомогательные величины:");
-        ui->coefficients_textEdit->append("A=" + QString::number(this->coefficients["A"], 'f', 5) + "\t" + "B=" +
-                                          QString::number(this->coefficients["B"], 'f', 5));
-        ui->coefficients_textEdit->append("A\u2080=" + QString::number(this->coefficients["A0"], 'f', 5) + "\t" + "B\u2080=" +
-                                          QString::number(this->coefficients["B0"], 'f', 5));
-        ui->coefficients_textEdit->append("A\u2081=" + QString::number(this->coefficients["A1"], 'f', 5) + "\t" + "B\u2081=" +
-                                          QString::number(this->coefficients["B1"], 'f', 5));
-        ui->coefficients_textEdit->append("\nКоэффициенты:");
-        ui->coefficients_textEdit->append("a\u2080=" + QString::number(this->coefficients["a0"], 'f', 5) + "\t" + "b\u2080=" +
-                                          QString::number(this->coefficients["b0"], 'f', 5));
-        ui->coefficients_textEdit->append("a\u2081=" + QString::number(this->coefficients["a1"], 'f', 5) + "\t" + "b\u2081=" +
-                                          QString::number(this->coefficients["b1"], 'f', 5));
+        ui->coefficients_textEdit->append("<b>Вспомогательные величины:</b>");
+        ui->coefficients_textEdit->append("A = " + QString::number(this->coefficients["A"], 'f', 5));
+        ui->coefficients_textEdit->append("A\u2080 = " + QString::number(this->coefficients["A0"], 'f', 5));
+        ui->coefficients_textEdit->append("A\u2081 = " + QString::number(this->coefficients["A1"], 'f', 5));
+        ui->coefficients_textEdit->append("<br>B = " + QString::number(this->coefficients["B"], 'f', 5));
+        ui->coefficients_textEdit->append("B\u2080 = " + QString::number(this->coefficients["B0"], 'f', 5));
+        ui->coefficients_textEdit->append("B\u2081 = " + QString::number(this->coefficients["B1"], 'f', 5));
+        ui->coefficients_textEdit->append("<br><b>Коэффициенты:</b>");
+        ui->coefficients_textEdit->append("a\u2080 = " + QString::number(this->coefficients["a0"], 'f', 5));
+        ui->coefficients_textEdit->append("a\u2081 = " + QString::number(this->coefficients["a1"], 'f', 5));
+        ui->coefficients_textEdit->append("b\u2080 = " + QString::number(this->coefficients["b0"], 'f', 5));
+        ui->coefficients_textEdit->append("b\u2081 = " + QString::number(this->coefficients["b1"], 'f', 5));
         // Уравнение регрессии
         this->trend_eq = QString("x = %1 + %2 \u00B7 y").arg(coefficients["b0"], 0, 'g', 6).arg(coefficients["b1"], 0, 'g', 2);
         break;

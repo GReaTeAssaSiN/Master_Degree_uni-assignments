@@ -240,7 +240,7 @@ bool calculateRegressionCalcValues(const int& mode, const int& n,
 
     // Несмещенная дисперсия и среднее кв. отклонение выборочнного среднего
     values["Sx2"] = 1.0 / (n - 1.0) * (values["sumX2"] - 1.0 / n * std::pow(values["sumX"], 2));
-    values["Sy2"] = 1.0 / (n - 1.0) * (values["sumY2"] - 1.0 / values["n"] * std::pow(values["sumY"], 2));
+    values["Sy2"] = 1.0 / (n - 1.0) * (values["sumY2"] - 1.0 / n * std::pow(values["sumY"], 2));
     values["meanSx"] = std::sqrt(values["Sx2"] / n);
     values["meanSy"] = std::sqrt(values["Sy2"] / n);
 
@@ -323,70 +323,70 @@ void fillCalculateTable(QTableView *tableView,
 // ----- Расчет значений для регрессионной модели ----- //
 // ОБЩЕЕ
 QString getRegressionRelationship(const int& mode, const double& r){
-    QString regr_description = "Характер связи: ";
+    QString regr_description{};
     if (r == 0) {
-        regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
-                                   "Характер связи: Отсутствует.\n"
-                                   "Интерпретация связи: -.")
+        regr_description = QString("<b>Значение линейного коэффициента связи:</b><br><i>r = %1</i><br>"
+                                   "<b>Характер связи:</b> <i>Отсутствует.</i><br>"
+                                   "<b>Интерпретация связи:</b> <i>-.</i>")
                                .arg(QString::number(r, 'f', 2));
     }
     else if (r > 0 && r < 1) {
-        regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
-                                   "Характер связи: Вероятностная, прямая.\n%2")
+        regr_description = QString("<b>Значение линейного коэффициента связи:</b><br><i>r = %1</i><br>"
+                                   "<b>Характер связи:</b> <i>Вероятностная, прямая.</i><br>"
+                                   "<b>Интерпретация связи:</b> <i>%2</i>")
                                .arg(QString::number(r, 'f', 2))
-                               .arg((mode != 1) ? "Интерпретация связи: С увеличением X увеличивается Y."
-                                                : "Интерпретация связи: С увеличением Y увеличивается X.");
-
+                               .arg((mode != 1) ? "С увеличением X увеличивается Y."
+                                                : "С увеличением Y увеличивается X.");
     }
     else if (r < 0 && r > -1){
-        regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
-                                   "Характер связи: Вероятностная, обратная.\n%2")
+        regr_description = QString("<b>Значение линейного коэффициента связи:</b><br><i>r = %1</i><br>"
+                                   "<b>Характер связи:</b> <i>Вероятностная, обратная.</i><br>"
+                                   "<b>Интерпретация связи:</b> <i>%2</i>")
                                .arg(QString::number(r, 'f', 2))
-                               .arg((mode != 1) ? "Интерпретация связи: С увеличением X уменьшается Y."
-                                                : "Интерпретация связи: С увеличением Y уменьшается X.");
-
+                               .arg((mode != 1) ? "С увеличением X уменьшается Y."
+                                                : "С увеличением Y уменьшается X.");
     }
     else if (r == 1){
-        regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
-                                   "Характер связи: Функциональная, прямая.\n"
-                                   "Интерпретация связи: Каждому значению факторного признака строго соответствует одно значение функции, %2")
+        regr_description = QString("<b>Значение линейного коэффициента связи:</b><br><i>r = %1</i><br>"
+                                   "<b>Характер связи:</b> <i>Функциональная, прямая.</i><br>"
+                                   "<b>Интерпретация связи:</b> <i>Каждому значению факторного признака строго соответствует одно значение функции, %2</i>")
                                .arg(QString::number(r, 'f', 2))
                                .arg((mode != 1) ? "с увеличением X увеличивается Y."
                                                 : "с увеличением Y увеличивается X.");
     }
     else if (r == -1){
-        regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
-                                   "Характер связи: Функциональная, обратная.\n"
-                                   "Интерпретация связи: Каждому значению факторного признака строго соответствует одно значение функции, %2)")
+        regr_description = QString("<b>Значение линейного коэффициента связи:</b><br><i>r = %1</i><br>"
+                                   "<b>Характер связи:</b> <i>Функциональная, обратная.</i><br>"
+                                   "<b>Интерпретация связи:</b> <i>Каждому значению факторного признака строго соответствует одно значение функции, %2</i>")
                                .arg(QString::number(r, 'f', 2))
                                .arg((mode != 1) ? "с увеличением X уменьшается Y, и наоборот."
                                                 : "с увеличением Y уменьшается X, и наоборот.");
     }
     else{
-        regr_description = QString("Значение линейного коэффициента связи: r = %1\n"
-                                   "Ошибка вычислений.")
+        regr_description = QString("<b>Значение линейного коэффициента связи:</b><br><i>r = %1</i><br>"
+                                   "<b>Ошибка вычислений.</b>")
                                .arg(QString::number(r, 'f', 2));
         return regr_description;
     }
 
-    // Характер связи
+    // Характер силы связи
     if (std::abs(r) < 0.3)
-        regr_description += QString("\nХарактер связи: Практически отсустствует.");
+        regr_description += QString("<br><b>Характер силы связи:</b> <i>Практически отсутствует.</i>");
     else if (std::abs(r) >= 0.3 && std::abs(r) < 0.5)
-        regr_description += QString("\nХарактер связи: Слабая.");
+        regr_description += QString("<br><b>Характер силы связи:</b> <i>Слабая.</i>");
     else if (std::abs(r) >= 0.5 && std::abs(r) < 0.7)
-        regr_description += QString("\nХарактер связи: Умеренная.");
+        regr_description += QString("<br><b>Характер силы связи:</b> <i>Умеренная.</i>");
     else
-        regr_description += QString("\nХарактер связи: Сильная.");
+        regr_description += QString("<br><b>Характер силы связи:</b> <i>Сильная.</i>");
 
     return regr_description;
 }
 QString getDeterminationDescription(const double& R2){
-    QString determination_descr = "Можно ли использовать для прогнозирования (R\u00B2>=75%): ";
+    QString determination_descr = "<b>Можно ли использовать для прогнозирования (R\u00B2>=75%):</b> ";
     if (R2 * 100 >= 75)
-        determination_descr += "Да!";
+        determination_descr += "<i>Да!</i>";
     else
-        determination_descr += "Не рекомендуется!";
+        determination_descr += "<i>Не рекомендуется!</i>";
     return determination_descr;
 }
 // ЛИНЕЙНАЯ И ОБРАТНАЯ ЛИНЕЙНАЯ РЕГРЕССИЯ
