@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Подключение сигналов
     connect(ui->pushButton_linear_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
     connect(ui->pushButton_inverse_linear_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
+    connect(ui->pushButton_exp_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
 }
 
 MainWindow::~MainWindow()
@@ -77,6 +78,7 @@ void MainWindow::regression_button_clicked()
     // Проверка загруженной таблицы перед построением регрессионной модели
     bool check = readDataAndCurs(ui->data_tableView, dataColumns, numericDates, cursValues);
     if (check){
+        qDebug() << "here";
         WorkplaceForm *workplace_form = new WorkplaceForm(idx, dataColumns, numericDates, cursValues);
         connect(workplace_form, &WorkplaceForm::backToMain, this, &MainWindow::show_window);
         this->hide();

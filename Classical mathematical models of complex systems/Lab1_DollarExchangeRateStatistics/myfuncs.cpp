@@ -175,38 +175,72 @@ bool readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
 
 // ----- Функции общих вычислений ----- //
 //Вычисление значений, необходимых для построения регрессии
-void calculateRegressionTotalValues(const QVector<double> &numericDates, const QVector<double> &cursValues, int &n,
+void calculateRegressionTotalValues(const int& mode, const QVector<double> &numericDates, const QVector<double> &cursValues, int &n,
                                     QHash<QString, QVector<double>> &vector_values, QHash<QString, double> &values)
 {
     n = numericDates.size();
     if (n==0) return;
 
-    vector_values["x2"].clear();
-    vector_values["y2"].clear();
-    vector_values["xy"].clear();
-    values["sumX"] = values["sumY"] = values["sumX2"] = values["sumY2"] = values["sumXY"] = 0.0;
+    if (mode == 0 || mode == 1)
+    {
+        vector_values["x2"].clear();
+        vector_values["y2"].clear();
+        vector_values["xy"].clear();
+        values["sumX"] = values["sumY"] = values["sumX2"] = values["sumY2"] = values["sumXY"] = 0.0;
 
-    for (int i = 0; i < n; ++i){
-        double x = numericDates[i];
-        double y = cursValues[i];
+        for (int i = 0; i < n; ++i){
+            double x = numericDates[i];
+            double y = cursValues[i];
 
-        double x2 = x * x;
-        double y2 = y * y;
-        double xy = x * y;
+            double x2 = x * x;
+            double y2 = y * y;
+            double xy = x * y;
 
-        vector_values["x2"].append(x2);
-        vector_values["y2"].append(y2);
-        vector_values["xy"].append(xy);
+            vector_values["x2"].append(x2);
+            vector_values["y2"].append(y2);
+            vector_values["xy"].append(xy);
 
-        values["sumX"] += x;
-        values["sumY"] += y;
-        values["sumX2"] += x2;
-        values["sumY2"] += y2;
-        values["sumXY"] += xy;
+            values["sumX"] += x;
+            values["sumY"] += y;
+            values["sumX2"] += x2;
+            values["sumY2"] += y2;
+            values["sumXY"] += xy;
+        }
+
+        values["meanX"] = values["sumX"] / n;
+        values["meanY"] = values["sumY"] / n;
     }
+    else if (mode == 2){
+        vector_values["lny"].clear();
+        vector_values["x2"].clear();
+        vector_values["lny2"].clear();
+        vector_values["xlny"].clear();
 
-    values["meanX"] = values["sumX"] / n;
-    values["meanY"] = values["sumY"] / n;
+        values["sumX"] = values["sumLnY"] = values["sumX2"] = values["sumLnY2"] = values["sumXLnY"] = 0.0;
+
+        for (int i = 0; i < n; ++i){
+            double x = numericDates[i];
+            double lny = std::log(cursValues[i]);
+
+            double x2 = x * x;
+            double lny2 = lny * lny;
+            double xlny = x * lny;
+
+            vector_values["lny"].append(lny);
+            vector_values["x2"].append(x2);
+            vector_values["lny2"].append(lny2);
+            vector_values["xlny"].append(xlny);
+
+            values["sumX"] += x;
+            values["sumLnY"] += lny;
+            values["sumX2"] += x2;
+            values["sumLnY2"] += lny2;
+            values["sumXLnY"] += xlny;
+        }
+
+        values["meanX"] = values["sumX"] / n;
+        values["meanLnY"] = values["sumLnY"] / n;
+    }
 }
 //Вычисление значений, необходимых для проверки регрессии
 bool calculateRegressionCalcValues(const int& mode, const int& n,
@@ -221,9 +255,17 @@ bool calculateRegressionCalcValues(const int& mode, const int& n,
     values["sumOst"] = values["sumRegr"] = values["sumFull"] = 0.0;
 
     for (int i = 0; i < n; ++i){
-        double elem_of_Sost = std::pow((mode != 1) ? (cursValues[i] - vector_values["yT"][i]) : (cursValues[i] - vector_values["xT"][i]), 2);
-        double elem_of_Sregr = std::pow((mode != 1) ? (vector_values["yT"][i] - values["meanY"]) : (vector_values["xT"][i] - values["meanX"]), 2);
-        double elem_of_Sfull = std::pow((mode != 1) ? (cursValues[i] - values["meanY"]) : (cursValues[i] - values["meanX"]), 2);
+        double elem_of_Sost{}, elem_of_Sregr{}, elem_of_Sfull{};
+        if (mode == 0 || mode == 1){
+            elem_of_Sost = std::pow((mode != 1) ? (cursValues[i] - vector_values["yT"][i]) : (cursValues[i] - vector_values["xT"][i]), 2);
+            elem_of_Sregr = std::pow((mode != 1) ? (vector_values["yT"][i] - values["meanY"]) : (vector_values["xT"][i] - values["meanX"]), 2);
+            elem_of_Sfull = std::pow((mode != 1) ? (cursValues[i] - values["meanY"]) : (cursValues[i] - values["meanX"]), 2);
+        }
+        else if (mode == 2){
+            elem_of_Sost = std::pow(vector_values["lny"][i] - vector_values["lnyT"][i], 2);
+            elem_of_Sregr = std::pow(vector_values["lnyT"][i] - values["meanLnY"], 2);
+            elem_of_Sfull = std::pow(vector_values["lny"][i] - values["meanLnY"], 2);
+        }
 
         vector_values["Sost"].append(elem_of_Sost);
         vector_values["Sregr"].append(elem_of_Sregr);
@@ -236,13 +278,21 @@ bool calculateRegressionCalcValues(const int& mode, const int& n,
 
     // Коэффииент детерминации и MSE
     coefficients["R2"] =  1 - values["sumOst"] / values["sumFull"];
-    coefficients.insert("MSE", values["sumOst"] / n);
+    coefficients["MSE"] =  values["sumOst"] / n;
 
     // Несмещенная дисперсия и среднее кв. отклонение выборочнного среднего
-    values["Sx2"] = 1.0 / (n - 1.0) * (values["sumX2"] - 1.0 / n * std::pow(values["sumX"], 2));
-    values["Sy2"] = 1.0 / (n - 1.0) * (values["sumY2"] - 1.0 / n * std::pow(values["sumY"], 2));
-    values["meanSx"] = std::sqrt(values["Sx2"] / n);
-    values["meanSy"] = std::sqrt(values["Sy2"] / n);
+    if (mode == 0 || mode == 1){
+        values["Sx2"] = 1.0 / (n - 1.0) * (values["sumX2"] - 1.0 / n * std::pow(values["sumX"], 2));
+        values["Sy2"] = 1.0 / (n - 1.0) * (values["sumY2"] - 1.0 / n * std::pow(values["sumY"], 2));
+        values["meanSx"] = std::sqrt(values["Sx2"] / n);
+        values["meanSy"] = std::sqrt(values["Sy2"] / n);
+    }
+    else if (mode == 2){
+        values["Sx2"] = 1.0 / (n - 1.0) * (values["sumX2"] - 1.0 / n * std::pow(values["sumX"], 2));
+        values["Slny2"] = 1.0 / (n - 1.0) * (values["sumLnY2"] - 1.0 / n * std::pow(values["sumLnY"], 2));
+        values["meanSx"] = std::sqrt(values["Sx2"] / n);
+        values["meanSlny"] = std::sqrt(values["Slny2"] / n);
+    }
 
     return std::abs(values["sumOst"] + values["sumRegr"] - values["sumFull"]) < eps;
 }
@@ -256,25 +306,54 @@ void fillTotalTable(QTableView *tableView,
                     const QHash<QString, QVector<double>> &vector_values)
 {
     int rowCount = numericDates.size();
-    int colCount = 6; // data, xi, yi, xi^2, yi^2, xi*yi или data, yi, xi, yi^2, xi^2, yi*xi
+    int colCount{};
+    QStandardItemModel *model{};
 
-    QStandardItemModel *model = new QStandardItemModel(rowCount, colCount, tableView);
+    if (mode == 0 || mode == 1) {
+        colCount = 6; // data, xi, yi, xi^2, yi^2, xi*yi или data, yi, xi, yi^2, xi^2, yi*xi
 
-    // Заголовки
-    model->setHeaderData(0, Qt::Horizontal, "data");
-    model->setHeaderData(1, Qt::Horizontal, (mode != 1) ? "x\u1D62" : "y\u1D62");
-    model->setHeaderData(2, Qt::Horizontal, (mode != 1) ? "y\u1D62" : "x\u1D62");
-    model->setHeaderData(3, Qt::Horizontal, (mode != 1) ? "x\u1D62\u00B2" : "y\u1D62\u00B2");
-    model->setHeaderData(4, Qt::Horizontal, (mode != 1) ? "y\u1D62\u00B2" : "x\u1D62\u00B2");
-    model->setHeaderData(5, Qt::Horizontal, (mode != 1) ? "x\u1D62 \u00B7 y\u1D62" : "y\u1D62 \u00B7 x\u1D62");
+        model = new QStandardItemModel(rowCount, colCount, tableView);
 
-    for (int r = 0; r < rowCount; ++r) {
-        model->setItem(r, 0, new QStandardItem(dataColumn[r]));
-        model->setItem(r, 1, new QStandardItem(QString::number((mode != 1) ? numericDates[r] : cursValues[r], 'f', 5)));
-        model->setItem(r, 2, new QStandardItem(QString::number((mode != 1) ? cursValues[r] : numericDates[r], 'f', 5)));
-        model->setItem(r, 3, new QStandardItem(QString::number((mode != 1) ? vector_values["x2"][r] : vector_values["y2"][r], 'f', 5)));
-        model->setItem(r, 4, new QStandardItem(QString::number((mode != 1) ? vector_values["y2"][r] : vector_values["x2"][r], 'f', 5)));
-        model->setItem(r, 5, new QStandardItem(QString::number(vector_values["xy"][r], 'f', 5)));
+        // Заголовки
+        model->setHeaderData(0, Qt::Horizontal, "data");
+        model->setHeaderData(1, Qt::Horizontal, (mode != 1) ? "x\u1D62" : "y\u1D62");
+        model->setHeaderData(2, Qt::Horizontal, (mode != 1) ? "y\u1D62" : "x\u1D62");
+        model->setHeaderData(3, Qt::Horizontal, (mode != 1) ? "x\u1D62\u00B2" : "y\u1D62\u00B2");
+        model->setHeaderData(4, Qt::Horizontal, (mode != 1) ? "y\u1D62\u00B2" : "x\u1D62\u00B2");
+        model->setHeaderData(5, Qt::Horizontal, (mode != 1) ? "x\u1D62 \u00B7 y\u1D62" : "y\u1D62 \u00B7 x\u1D62");
+
+        for (int r = 0; r < rowCount; ++r) {
+            model->setItem(r, 0, new QStandardItem(dataColumn[r]));
+            model->setItem(r, 1, new QStandardItem(QString::number((mode != 1) ? numericDates[r] : cursValues[r], 'f', 5)));
+            model->setItem(r, 2, new QStandardItem(QString::number((mode != 1) ? cursValues[r] : numericDates[r], 'f', 5)));
+            model->setItem(r, 3, new QStandardItem(QString::number((mode != 1) ? vector_values["x2"][r] : vector_values["y2"][r], 'f', 5)));
+            model->setItem(r, 4, new QStandardItem(QString::number((mode != 1) ? vector_values["y2"][r] : vector_values["x2"][r], 'f', 5)));
+            model->setItem(r, 5, new QStandardItem(QString::number(vector_values["xy"][r], 'f', 5)));
+        }
+    }
+    else if (mode == 2){
+        colCount = 7; // data, xi, yi, lnyi, xi^2, (lnyi)^2, xi*lnyi
+
+        model = new QStandardItemModel(rowCount, colCount, tableView);
+
+        // Заголовки
+        model->setHeaderData(0, Qt::Horizontal, "data");
+        model->setHeaderData(1, Qt::Horizontal, "x\u1D62");
+        model->setHeaderData(2, Qt::Horizontal, "y\u1D62");
+        model->setHeaderData(3, Qt::Horizontal, "lny\u1D62");
+        model->setHeaderData(4, Qt::Horizontal, "x\u1D62\u00B2");
+        model->setHeaderData(5, Qt::Horizontal, "(lny\u1D62)\u00B2");
+        model->setHeaderData(6, Qt::Horizontal, "x\u1D62 \u00B7 lny\u1D62");
+
+        for (int r = 0; r < rowCount; ++r) {
+            model->setItem(r, 0, new QStandardItem(dataColumn[r]));
+            model->setItem(r, 1, new QStandardItem(QString::number(numericDates[r], 'f', 5)));
+            model->setItem(r, 2, new QStandardItem(QString::number(cursValues[r], 'f', 5)));
+            model->setItem(r, 3, new QStandardItem(QString::number(vector_values["lny"][r], 'f', 5)));
+            model->setItem(r, 4, new QStandardItem(QString::number(vector_values["x2"][r], 'f', 5)));
+            model->setItem(r, 5, new QStandardItem(QString::number(vector_values["lny2"][r], 'f', 5)));
+            model->setItem(r, 6, new QStandardItem(QString::number(vector_values["xlny"][r], 'f', 5)));
+        }
     }
 
     tableView->setModel(model);
@@ -290,30 +369,59 @@ void fillCalculateTable(QTableView *tableView,
                         const QHash<QString, double> &values)
 {
     int rowCount = numericDates.size();
-    int colCount = 7; // data, xi, yi, yi^T, (yi-yi^T)^2, (yi^T - mean(y))^2, (yi - mean(y))^2
+    int colCount{};
+    QStandardItemModel *model{};
+
+    if (mode == 0 || mode == 1){
+        colCount = 7; // data, xi, yi, yi^T, (yi-yi^T)^2, (yi^T - mean(y))^2, (yi - mean(y))^2
                       // data, yi, xi, xi^T, (xi-xi^T)^2, (xi^T - mean(x))^2, (xi - mean(x))^2
 
-    QStandardItemModel *model = new QStandardItemModel(rowCount, colCount, tableView);
+        model = new QStandardItemModel(rowCount, colCount, tableView);
 
-    // Заголовки
-    model->setHeaderData(0, Qt::Horizontal, "data");
-    model->setHeaderData(1, Qt::Horizontal, (mode != 1) ? "x\u1D62" : "y\u1D62");
-    model->setHeaderData(2, Qt::Horizontal, (mode != 1) ? "y\u1D62" : "x\u1D62");
-    model->setHeaderData(3, Qt::Horizontal, (mode != 1) ? "y\u1D62\u1D40" : "x\u1D62\u1D40");
-    model->setHeaderData(4, Qt::Horizontal, (mode != 1) ? "(y\u1D62 - y\u1D62\u1D40)\u00B2" : "(x\u1D62 - x\u1D62\u1D40)\u00B2");
-    model->setHeaderData(5, Qt::Horizontal, (mode != 1) ? "(y\u1D62\u1D40 - y\u0304)\u00B2" : "(x\u1D62\u1D40 - x\u0304)\u00B2");
-    model->setHeaderData(6, Qt::Horizontal, (mode != 1) ? "(y\u1D62 - y\u0304)\u00B2" : "(x\u1D62 - x\u0304)\u00B2");
+        // Заголовки
+        model->setHeaderData(0, Qt::Horizontal, "data");
+        model->setHeaderData(1, Qt::Horizontal, (mode != 1) ? "x\u1D62" : "y\u1D62");
+        model->setHeaderData(2, Qt::Horizontal, (mode != 1) ? "y\u1D62" : "x\u1D62");
+        model->setHeaderData(3, Qt::Horizontal, (mode != 1) ? "y\u1D62\u1D40" : "x\u1D62\u1D40");
+        model->setHeaderData(4, Qt::Horizontal, (mode != 1) ? "(y\u1D62 - y\u1D62\u1D40)\u00B2" : "(x\u1D62 - x\u1D62\u1D40)\u00B2");
+        model->setHeaderData(5, Qt::Horizontal, (mode != 1) ? "(y\u1D62\u1D40 - y\u0304)\u00B2" : "(x\u1D62\u1D40 - x\u0304)\u00B2");
+        model->setHeaderData(6, Qt::Horizontal, (mode != 1) ? "(y\u1D62 - y\u0304)\u00B2" : "(x\u1D62 - x\u0304)\u00B2");
 
-    for (int r = 0; r < rowCount; ++r) {
-        const char fmt = (mode != 1) ? 'f' : 'g';
-        const int sign_count = (mode != 1) ? 6 : 8;
-        model->setItem(r, 0, new QStandardItem(dataColumn[r]));
-        model->setItem(r, 1, new QStandardItem(QString::number((mode != 1) ? numericDates[r] : cursValues[r], fmt, sign_count)));
-        model->setItem(r, 2, new QStandardItem(QString::number((mode != 1) ? cursValues[r] : numericDates[r], fmt, sign_count)));
-        model->setItem(r, 3, new QStandardItem(QString::number((mode != 1) ? vector_values["yT"][r] : vector_values["xT"][r], 'f', 6)));
-        model->setItem(r, 4, new QStandardItem(QString::number((mode != 1) ? std::pow(cursValues[r]-vector_values["yT"][r], 2) : std::pow(numericDates[r]-vector_values["xT"][r], 2), fmt, sign_count)));
-        model->setItem(r, 5, new QStandardItem(QString::number((mode != 1) ? std::pow(vector_values["yT"][r]-values["meanY"], 2) : std::pow(vector_values["xT"][r]-values["meanX"], 2), fmt, sign_count)));
-        model->setItem(r, 6, new QStandardItem(QString::number((mode != 1) ? std::pow(cursValues[r]-values["meanY"], 2) : std::pow(numericDates[r]-values["meanX"], 2), fmt, sign_count)));
+        for (int r = 0; r < rowCount; ++r) {
+            const char fmt = (mode != 1) ? 'f' : 'g';
+            const int sign_count = (mode != 1) ? 6 : 8;
+            model->setItem(r, 0, new QStandardItem(dataColumn[r]));
+            model->setItem(r, 1, new QStandardItem(QString::number((mode != 1) ? numericDates[r] : cursValues[r], fmt, sign_count)));
+            model->setItem(r, 2, new QStandardItem(QString::number((mode != 1) ? cursValues[r] : numericDates[r], fmt, sign_count)));
+            model->setItem(r, 3, new QStandardItem(QString::number((mode != 1) ? vector_values["yT"][r] : vector_values["xT"][r], fmt, sign_count)));
+            model->setItem(r, 4, new QStandardItem(QString::number((mode != 1) ? std::pow(cursValues[r]-vector_values["yT"][r], 2) : std::pow(numericDates[r]-vector_values["xT"][r], 2), fmt, sign_count)));
+            model->setItem(r, 5, new QStandardItem(QString::number((mode != 1) ? std::pow(vector_values["yT"][r]-values["meanY"], 2) : std::pow(vector_values["xT"][r]-values["meanX"], 2), fmt, sign_count)));
+            model->setItem(r, 6, new QStandardItem(QString::number((mode != 1) ? std::pow(cursValues[r]-values["meanY"], 2) : std::pow(numericDates[r]-values["meanX"], 2), fmt, sign_count)));
+        }
+    }
+    else if (mode == 2){
+        colCount = 7; // data, xi, yi, lnyi^T, (lnyi-lnyi^T)^2, (lnyi^T - mean(lny))^2, (lnyi - mean(lny))^2
+
+        model = new QStandardItemModel(rowCount, colCount, tableView);
+
+        // Заголовки
+        model->setHeaderData(0, Qt::Horizontal, "data");
+        model->setHeaderData(1, Qt::Horizontal, "x\u1D62");
+        model->setHeaderData(2, Qt::Horizontal, "y\u1D62");
+        model->setHeaderData(3, Qt::Horizontal, "(lny\u1D62)\u1D40");
+        model->setHeaderData(4, Qt::Horizontal, "(lny\u1D62 - (lny\u1D62)\u1D40)\u00B2");
+        model->setHeaderData(5, Qt::Horizontal, "((lny\u1D62)\u1D40 - l\u0305n\u0305y\u0305)\u00B2");
+        model->setHeaderData(6, Qt::Horizontal, "(lny\u1D62 - l\u0305n\u0305y\u0305)\u00B2");
+
+        for (int r = 0; r < rowCount; ++r) {
+            model->setItem(r, 0, new QStandardItem(dataColumn[r]));
+            model->setItem(r, 1, new QStandardItem(QString::number(numericDates[r], 'f', 6)));
+            model->setItem(r, 2, new QStandardItem(QString::number(cursValues[r], 'f', 6)));
+            model->setItem(r, 3, new QStandardItem(QString::number(vector_values["lnyT"][r], 'f', 6)));
+            model->setItem(r, 4, new QStandardItem(QString::number(std::pow(vector_values["lny"][r] - vector_values["lnyT"][r], 2), 'g', 6)));
+            model->setItem(r, 5, new QStandardItem(QString::number(std::pow(vector_values["lnyT"][r]-values["meanLnY"], 2), 'g', 6)));
+            model->setItem(r, 6, new QStandardItem(QString::number(std::pow(vector_values["lny"][r]-values["meanLnY"], 2), 'g', 6)));
+        }
     }
 
     tableView->setModel(model);
@@ -389,6 +497,27 @@ QString getDeterminationDescription(const double& R2){
         determination_descr += "<i>Не рекомендуется!</i>";
     return determination_descr;
 }
+void calculateCorrelationCoefficientByClassic(const int& n, const QVector<double> &numericDates, double &r,
+                                              const QHash<QString, QVector<double>> &vector_values, const QHash<QString, double> &values){
+    const double meanX = values["meanX"];
+    const double meanLnY = values["meanLnY"];
+    const QVector<double>& lny = vector_values["lny"];
+
+    double numerator = 0.0;
+    double sum_x2 = 0.0;
+    double sum_lny2 = 0.0;
+
+    for (int i = 0; i < n; ++i) {
+        double dx = numericDates[i] - meanX;
+        double dy = lny[i] - meanLnY;
+
+        numerator += dx * dy;
+        sum_x2 += dx * dx;
+        sum_lny2 += dy * dy;
+    }
+
+    r = numerator / std::sqrt(sum_x2 * sum_lny2);
+}
 // ЛИНЕЙНАЯ И ОБРАТНАЯ ЛИНЕЙНАЯ РЕГРЕССИЯ
 bool calculateLinearRegressionCoefficients(const int& n, const QHash<QString, double> &values, QHash<QString, double> &coefficients, const double eps){
     // y = a0 + a1*x                        // y = b0 + b1*x
@@ -442,5 +571,40 @@ void calculateInverseLinearRegressionValuesByDates(const QVector<double> &yReg, 
     for (int i = 0; i < n; ++i){
         // [количество дней в секундах]/60/60/24/10000 -> [количество дней в днях]/10000
         xT.append((yReg[i]/60/60/24/10000 - coefficients["b0"]) / coefficients["b1"]);
+    }
+}
+// ЭКСПОНЕНЦИАЛЬНАЯ РЕГРЕССИЯ
+void calculateExponentialRegressionCoefficients(const int &n, const QHash<QString, double> &values, QHash<QString, double> &coefficients){
+    // y = a0 * e^(a1*x)
+    // lny = lna0 + a1*x
+    // lny = bo + b1*x
+    // Система:
+    // {b0*n + b1*E(xi) = E(lnyi)
+    // {b0*E(xi) + b1*E(xi^2) = E(xi*lnyi)
+
+    // Решение СЛУ методом Крамера (B, B0, B1, b0, b1, a0, a1)
+    // B
+    coefficients["B"] = n * values["sumX2"] - values["sumX"] * values["sumX"];
+    // B0
+    coefficients["B0"] = values["sumLnY"] * values["sumX2"] - values["sumX"] * values["sumXLnY"];
+    // B1
+    coefficients["B1"] = n * values["sumXLnY"] - values["sumLnY"] * values["sumX"];
+    // b0
+    coefficients["b0"] = coefficients["B0"] / coefficients["B"];
+    // b1
+    coefficients["b1"] = coefficients["B1"] / coefficients["B"];
+    // a0
+    coefficients["a0"] = std::exp(coefficients["b0"]);
+    // a1
+    coefficients["a1"] = coefficients["b1"];
+}
+void calculateExponentialRegressionValues(const QVector<double> &numericDates, const int &n, QVector<double> &ln_pred_vector_values,
+                                          QVector<double> &pred_vector_values, const QHash<QString, double> &coefficients){
+    // lnyT и yT
+    ln_pred_vector_values.clear();
+    pred_vector_values.clear();
+    for (int i=0; i<n; ++i){
+        pred_vector_values.append(coefficients["a0"] * std::exp(coefficients["a1"] * numericDates[i]));
+        ln_pred_vector_values.append(coefficients["b0"] + coefficients["b1"] * numericDates[i]);
     }
 }

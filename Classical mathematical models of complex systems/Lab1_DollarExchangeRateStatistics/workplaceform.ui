@@ -175,13 +175,13 @@ QTableView::item:hover {
         <property name="minimumSize">
          <size>
           <width>341</width>
-          <height>161</height>
+          <height>155</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
           <width>341</width>
-          <height>161</height>
+          <height>155</height>
          </size>
         </property>
         <property name="styleSheet">
@@ -209,13 +209,13 @@ QTableView::item:hover {
         <property name="minimumSize">
          <size>
           <width>165</width>
-          <height>24</height>
+          <height>31</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
           <width>165</width>
-          <height>24</height>
+          <height>31</height>
          </size>
         </property>
         <property name="font">
@@ -255,14 +255,14 @@ QTableView::item:hover {
        <widget class="QLabel" name="meanY_label">
         <property name="minimumSize">
          <size>
-          <width>165</width>
-          <height>24</height>
+          <width>164</width>
+          <height>31</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>165</width>
-          <height>24</height>
+          <width>164</width>
+          <height>31</height>
          </size>
         </property>
         <property name="font">
@@ -295,6 +295,9 @@ QTableView::item:hover {
         </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::AutoText</enum>
         </property>
        </widget>
       </item>

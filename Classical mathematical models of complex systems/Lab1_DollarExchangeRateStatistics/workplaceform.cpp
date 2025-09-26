@@ -26,19 +26,30 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
     }
 
     // ----- ОБЩАЯ ТАБЛИЦА ----- //
-    // Вычисление значений квадратов, сумм и средних значений + количества экспериментов (n)
-    calculateRegressionTotalValues(this->numericDates, this->cursValues, this->n, this->vector_values, this->values);
+    // Вычисление значений для общей таблицы
+    calculateRegressionTotalValues(this->mode, this->numericDates, this->cursValues, this->n, this->vector_values, this->values);
     // Заполнение общей таблицы
     fillTotalTable(ui->total_tableView, this->mode, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
 
     // ----- ВНЕ ОБЩЕЙ ТАБЛИЦЫ ----- //
-    ui->totalTable_info_textEdit->append(((mode != 1) ? "∑x=" : "∑y=") + QString::number((mode != 1) ? this->values["sumX"] : this->values["sumY"], 'f', 5));
-    ui->totalTable_info_textEdit->append(((mode != 1) ? "∑y=" : "∑x=") + QString::number((mode != 1) ? this->values["sumY"] : this->values["sumX"], 'f', 5));
-    ui->totalTable_info_textEdit->append(((mode != 1) ? "∑x\u00B2=" : "∑y\u00B2=") + QString::number((mode != 1) ? this->values["sumX2"] : this->values["sumY2"], 'f', 5));
-    ui->totalTable_info_textEdit->append(((mode != 1) ? "∑y\u00B2=" : "∑x\u00B2=") + QString::number((mode != 1) ? this->values["sumY2"] : this->values["sumX2"], 'f', 5));
-    ui->totalTable_info_textEdit->append("∑xy=" + QString::number(this->values["sumXY"], 'f', 5));
-    ui->meanX_label->setText(((mode != 1) ? "x\u0304=" : "y\u0304=") + QString::number((mode != 1) ? this->values["meanX"] : this->values["meanY"], 'f', 5));
-    ui->meanY_label->setText(((mode != 1) ? "y\u0304=" : "x\u0304=") + QString::number((mode != 1) ? this->values["meanY"] : this->values["meanX"], 'f', 5));
+    if (this->mode == 0 || this->mode == 1){
+        ui->totalTable_info_textEdit->append(((mode != 1) ? "∑x = " : "∑y = ") + QString::number((mode != 1) ? this->values["sumX"] : this->values["sumY"], 'f', 5));
+        ui->totalTable_info_textEdit->append(((mode != 1) ? "∑y = " : "∑x = ") + QString::number((mode != 1) ? this->values["sumY"] : this->values["sumX"], 'f', 5));
+        ui->totalTable_info_textEdit->append(((mode != 1) ? "∑x\u00B2 = " : "∑y\u00B2 = ") + QString::number((mode != 1) ? this->values["sumX2"] : this->values["sumY2"], 'f', 5));
+        ui->totalTable_info_textEdit->append(((mode != 1) ? "∑y\u00B2 = " : "∑x\u00B2 = ") + QString::number((mode != 1) ? this->values["sumY2"] : this->values["sumX2"], 'f', 5));
+        ui->totalTable_info_textEdit->append("∑xy = " + QString::number(this->values["sumXY"], 'f', 5));
+        ui->meanX_label->setText(((mode != 1) ? "x\u0304 = " : "y\u0304 = ") + QString::number((mode != 1) ? this->values["meanX"] : this->values["meanY"], 'f', 5));
+        ui->meanY_label->setText(((mode != 1) ? "y\u0304 = " : "x\u0304 = ") + QString::number((mode != 1) ? this->values["meanY"] : this->values["meanX"], 'f', 5));
+    }
+    else if (this->mode == 2){
+        ui->totalTable_info_textEdit->append("∑x = " + QString::number(this->values["sumX"], 'f', 5));
+        ui->totalTable_info_textEdit->append("∑lny = " + QString::number(this->values["sumLnY"], 'f', 5));
+        ui->totalTable_info_textEdit->append("∑x\u00B2 = " + QString::number(this->values["sumX2"], 'f', 5));
+        ui->totalTable_info_textEdit->append("∑(lny)\u00B2 = " + QString::number(this->values["sumLnY2"], 'f', 5));
+        ui->totalTable_info_textEdit->append("∑xlny = " + QString::number(this->values["sumXLnY"], 'f', 5));
+        ui->meanX_label->setText("x\u0304 = " + QString::number(this->values["meanX"], 'f', 5));
+        ui->meanY_label->setText("l\u0305n\u0305y\u0305 = " + QString::number(this->values["meanLnY"], 'f', 5));
+    }
 
     // ----- ВЫЧИСЛЕНИЯ ----- //
     // Флаги для проверки корректности корреляции и Sполн. для коэффициента детерминации
@@ -98,8 +109,29 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         this->trend_eq = QString("x = %1 + %2 \u00B7 y").arg(coefficients["b0"], 0, 'g', 6).arg(coefficients["b1"], 0, 'g', 2);
         break;
     case 2: // Экспоненциальная
-        setWindowTitle("Экспонениальная регрессия");
-
+        setWindowTitle("Экспоненциальная регрессия");
+        calculateExponentialRegressionCoefficients(this->n, this->values, this->coefficients); // Без коэффициента корреляции
+        calculateExponentialRegressionValues(this->numericDates, this->n, this->vector_values["lnyT"], this->vector_values["yT"], this->coefficients);
+        // --- ВЫВОД ВЫЧИСЛЕННЫХ ЗНАЧЕНИЙ --- //
+        // Корреляция
+        calculateCorrelationCoefficientByClassic(this->n, this->numericDates, this->coefficients["r"], this->vector_values, this->values);
+        ui->correlation_textEdit->append(getRegressionRelationship(mode, this->coefficients["r"]));
+        // Коэффициенты
+        ui->coefficients_textEdit->append("<b>Вспомогательные величины:</b>");
+        ui->coefficients_textEdit->append("B = " + QString::number(this->coefficients["B"], 'f', 5));
+        ui->coefficients_textEdit->append("B\u2080 = " + QString::number(this->coefficients["B0"], 'f', 5));
+        ui->coefficients_textEdit->append("B\u2081 = " + QString::number(this->coefficients["B1"], 'f', 5));
+        ui->coefficients_textEdit->append("<br><b>Коэффициенты:</b>");
+        ui->coefficients_textEdit->append("b\u2080 = " + QString::number(this->coefficients["b0"], 'f', 5));
+        ui->coefficients_textEdit->append("b\u2081 = " + QString::number(this->coefficients["b1"], 'f', 5));
+        ui->coefficients_textEdit->append("a\u2080 = " + QString::number(this->coefficients["a0"], 'g', 7));
+        ui->coefficients_textEdit->append("a\u2081 = " + QString::number(this->coefficients["a1"], 'g', 7));
+        // Уравнение регрессии
+        this->trend_eq = QString("lny = %1 + %2 \u00B7 x или y = %3 \u00B7 e^(%4 \u00B7 x)")
+                             .arg(coefficients["b0"], 0, 'g', 6)
+                             .arg(coefficients["b1"], 0, 'f', 2)
+                             .arg(coefficients["a0"], 0, 'g', 6)
+                             .arg(coefficients["a1"], 0, 'f', 2);
         break;
     case 3: // Гиперболическая
         setWindowTitle("Гиперболическая регрессия");
@@ -135,21 +167,31 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
     // Уравнение регрессии
     ui->equation_label->setText(trend_eq);
     // Величины
-    ui->n_label->setText("n=" + QString::number(this->n));
-    ui->MSE_label->setText("MSE=" + QString::number(this->coefficients["MSE"], 'g', 5));
-    ui->R2_label->setText("R\u00B2=" + QString::number(this->coefficients["R2"], 'g', 5));
+    ui->n_label->setText("n = " + QString::number(this->n));
+    ui->MSE_label->setText("MSE = " + QString::number(this->coefficients["MSE"], 'g', 5));
+    ui->R2_label->setText("R\u00B2 = " + QString::number(this->coefficients["R2"], 'g', 5));
     ui->descr_R2_label->setText(getDeterminationDescription(this->coefficients["R2"]));
-    ui->Sx2_label->setText(((mode != 1) ? "(S<sub>x</sub>)\u00B2=" : "(S<sub>y</sub>)\u00B2=") +
-                           QString::number((mode != 1) ? this->values["Sx2"] : this->values["Sy2"], 'g', 5));
-    ui->Sy2_label->setText(((mode != 1) ? "(S<sub>y</sub>)\u00B2=" : "(S<sub>x</sub>)\u00B2=") +
-                           QString::number((mode != 1) ? this->values["Sy2"] : this->values["Sx2"], 'g', 5));
-    ui->meanSx_label->setText(((mode != 1) ? "S<sub>x\u0304</sub>=" : "S<sub>y\u0304</sub>=") +
-                              QString::number((mode != 1) ? this->values["meanSx"] : this->values["meanSy"], 'g', 5));
-    ui->meanSy_label->setText(((mode != 1) ? "S<sub>y\u0304</sub>=" : "S<sub>x\u0304</sub>=") +
-                              QString::number((mode != 1) ? this->values["meanSy"] : this->values["meanSx"], 'g', 5));
-    ui->Sregr_label->setText("S<sub>регр.</sub>=" + QString::number(this->values["sumRegr"], 'g', 5));
-    ui->Sost_label->setText("S<sub>ост.</sub>=" + QString::number(this->values["sumOst"], 'g', 5));
-    ui->Sfull_label->setText("S<sub>полн.</sub>=" + QString::number(this->values["sumFull"], 'g', 5));
+
+    if (mode == 0 || mode == 1){
+        ui->Sx2_label->setText(((mode != 1) ? "(S<sub>x</sub>)\u00B2 = " : "(S<sub>y</sub>)\u00B2 = ") +
+                               QString::number((mode != 1) ? this->values["Sx2"] : this->values["Sy2"], 'g', 5));
+        ui->Sy2_label->setText(((mode != 1) ? "(S<sub>y</sub>)\u00B2 = " : "(S<sub>x</sub>)\u00B2 = ") +
+                               QString::number((mode != 1) ? this->values["Sy2"] : this->values["Sx2"], 'g', 5));
+        ui->meanSx_label->setText(((mode != 1) ? "S<sub>x\u0304</sub> = " : "S<sub>y\u0304</sub> = ") +
+                                  QString::number((mode != 1) ? this->values["meanSx"] : this->values["meanSy"], 'g', 5));
+        ui->meanSy_label->setText(((mode != 1) ? "S<sub>y\u0304</sub> = " : "S<sub>x\u0304</sub> = ") +
+                                  QString::number((mode != 1) ? this->values["meanSy"] : this->values["meanSx"], 'g', 5));
+    }
+    else if (mode == 2){
+        ui->Sx2_label->setText("(S<sub>x</sub>)\u00B2 = " + QString::number(this->values["Sx2"], 'g', 5));
+        ui->Sy2_label->setText("(S<sub>lny</sub>)\u00B2 = " + QString::number(this->values["Slny2"], 'g', 5));
+        ui->meanSx_label->setText("S<sub>x\u0304</sub> = " + QString::number(this->values["meanSx"], 'g', 5));
+        ui->meanSy_label->setText("S<sub>l\u0305n\u0305y\u0305</sub> = " + QString::number(this->values["meanSlny"], 'g', 5));
+    }
+
+    ui->Sregr_label->setText("S<sub>регр.</sub> = " + QString::number(this->values["sumRegr"], 'g', 5));
+    ui->Sost_label->setText("S<sub>ост.</sub> = " + QString::number(this->values["sumOst"], 'g', 5));
+    ui->Sfull_label->setText("S<sub>полн.</sub> = " + QString::number(this->values["sumFull"], 'g', 5));
 
     // ----- УСТАНОВКА ВЫБИРАЕМОЙ ДАТЫ ----- //
     this->default_date = QDate::fromString(this->dataColumns.first(), "dd.MM.yyyy").addDays(1);
@@ -208,7 +250,10 @@ void WorkplaceForm::MakePlot()
             // Значения даты в днях для расчета предсказанного моделью значения (по убыванию идут)
             temp_numericDates.prepend(epoch.daysTo(lastDate)/10000.0);
         }
-        calculateLinearRegressionValues(this->mode, temp_numericDates, temp_n, temp_yReg, this->coefficients);
+        if (mode == 0 || mode == 1)
+            calculateLinearRegressionValues(this->mode, temp_numericDates, temp_n, temp_yReg, this->coefficients);
+        else if (mode == 2)
+            calculateExponentialRegressionValues(temp_numericDates, temp_n, this->vector_values["lnyT"], temp_yReg, this->coefficients);
         // minDate остается той же, maxDate изменилась
         maxDate = QDateTime(lastDate, QTime(0,0));
     }
@@ -406,9 +451,6 @@ void WorkplaceForm::MakeInversePlot()
     QVector<double> temp_numericDates = this->numericDates;
     QVector<double> temp_yReg = yReg;
 
-    qDebug() << "WAS:";
-    for (int i=0; i < n; ++i)
-        qDebug() << temp_x[i] << temp_yReg[i];
     if (this->select_date.isValid()){
         QDate lastDate = maxDate.date();
         // Пока последняя дата < введенной, добавляем значения
