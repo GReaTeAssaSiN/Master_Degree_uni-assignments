@@ -371,8 +371,8 @@ void WorkplaceForm::MakePlot()
     ui->customPlot->rescaleAxes(); // Автоматическое изменение диапазона осей
     auto xRange = ui->customPlot->xAxis->range();
     auto yRange = ui->customPlot->yAxis->range();
-    ui->customPlot->xAxis->setRange(xRange.lower - 86400, xRange.upper + 86400); // 1 день отступ
-    ui->customPlot->yAxis->setRange(yRange.lower - 0.5, yRange.upper + 0.5);     // 0.5 отступ
+    ui->customPlot->xAxis->setRange(xRange.lower - ((temp_x.first() - x.first()) / 10 + 86400), xRange.upper + ((temp_x.first() - x.first()) / 10 + 86400));         // 1 день отступ
+    ui->customPlot->yAxis->setRange(yRange.lower - ((temp_yReg.first() - yReg.first()) / 10 + 0.5), yRange.upper + ((temp_yReg.first() - yReg.first()) / 10 + 0.5)); // 0.5 отступ
 
     // ----------------- Масштабирование и drag ----------------- //
     ui->customPlot->setInteraction(QCP::iRangeDrag, true);        // Перетаскивание мышью
@@ -586,8 +586,8 @@ void WorkplaceForm::MakeInversePlot()
     ui->customPlot->rescaleAxes(); // Автоматическое изменение диапазона осей
     auto xRange = ui->customPlot->xAxis->range();
     auto yRange = ui->customPlot->yAxis->range();
-    ui->customPlot->xAxis->setRange(xRange.lower - 0.5, xRange.upper + 0.5);     // 0.5 отступ
-    ui->customPlot->yAxis->setRange(yRange.lower - 86400, yRange.upper + 86400); // 1 день отступ
+    ui->customPlot->xAxis->setRange(xRange.lower - ((temp_x.first() - x.first()) / 10 + 0.5), xRange.upper + ((temp_x.first() - x.first()) / 10 + 0.5));               // 0.5 отступ
+    ui->customPlot->yAxis->setRange(yRange.lower - ((temp_yReg.first() - yReg.first())/ 10 + 86400), yRange.upper + ((temp_yReg.first() - yReg.first())/ 10 + 86400)); // 1 день отступ
 
     // ----------------- Масштабирование и drag ----------------- //
     ui->customPlot->setInteraction(QCP::iRangeDrag, true);        // Перетаскивание мышью
