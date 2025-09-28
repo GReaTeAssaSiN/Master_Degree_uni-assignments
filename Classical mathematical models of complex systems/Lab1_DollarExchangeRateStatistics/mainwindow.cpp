@@ -22,6 +22,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButton_linear_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
     connect(ui->pushButton_inverse_linear_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
     connect(ui->pushButton_exp_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
+    connect(ui->pushButton_hyper_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
+    connect(ui->pushButton_parab_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
+    connect(ui->pushButton_log_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
+    connect(ui->pushButton_power_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
+    connect(ui->pushButton_parab_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
+    connect(ui->pushButton_polynom_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
 }
 
 MainWindow::~MainWindow()
@@ -70,6 +76,16 @@ void MainWindow::regression_button_clicked()
         idx = 1;
     else if (button->objectName() == "pushButton_exp_regr")
         idx = 2;
+    else if (button->objectName() == "pushButton_hyper_regr")
+        idx = 3;
+    else if (button->objectName() == "pushButton_parab_regr")
+        idx = 4;
+    else if (button->objectName() == "pushButton_log_regr")
+        idx = 5;
+    else if (button->objectName() == "pushButton_power_regr")
+        idx = 6;
+    else if (button->objectName() == "pushButton_polynom_regr")
+        idx = 7;
 
     // Переменные для записи эксперементальных данных из .xlsx файла
     QVector<QString> dataColumns{};
@@ -78,7 +94,6 @@ void MainWindow::regression_button_clicked()
     // Проверка загруженной таблицы перед построением регрессионной модели
     bool check = readDataAndCurs(ui->data_tableView, dataColumns, numericDates, cursValues);
     if (check){
-        qDebug() << "here";
         WorkplaceForm *workplace_form = new WorkplaceForm(idx, dataColumns, numericDates, cursValues);
         connect(workplace_form, &WorkplaceForm::backToMain, this, &MainWindow::show_window);
         this->hide();

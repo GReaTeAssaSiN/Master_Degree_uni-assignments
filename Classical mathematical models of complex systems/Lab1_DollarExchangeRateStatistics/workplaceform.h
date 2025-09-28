@@ -31,22 +31,28 @@ private slots:
 
 private:
     Ui::WorkplaceForm *ui;
-    // Исходные данные
-    int mode{}; // Тип регрессии
+
+    // ИСХОДНЫЕ ДАННЫЕ И ИДЕНТИФИКАТОР ТИПА РЕГРЕССИИ
+    int mode{};
     QVector<QString> dataColumns{};
     QVector<double> numericDates{};
     QVector<double> cursValues{};
 
-    // Переменные и структуры для хранения значений при построении регрессии
-    int n{};                                           // Количество экспериментов
-    QHash<QString, QVector<double>> vector_values{};   // Все вычисляемые значения в виде векторов
-    QHash<QString, double> values{};                   // Все вычисляемые значения из значений вычисляемых векторов
-    QHash<QString, double> coefficients{};             // Все коэффициенты регрессии + MSE
+    // ПЕРЕМЕННЫЕ И СТРУКТУРЫ
+    int n{};                                         // Количество экспериментов
+    int degree{};                                    // Степень полинома
 
-    // Вспомогательные ременные для хранения значений, связанных с выбором даты и графиком
-    QDate select_date{}; // Выбранная дата
+    QHash<QString, QVector<double>> vector_values{}; // Структура хранения векторов значений
+    QHash<QString, double> values{};                 // Структура хранения значений
+    // Общее
+    QHash<QString, double> coefficients{};           // Структура хранения коэффициентов регрессии
+    QString r_descr{};                               // Описание коэффициента Пирсона (коэффициента корреляции)
+    QString regCoefStr{};                            // Вывод коэффициентов регрессии
+
+    // ГРАФИК
+    QDate select_date{};  // Выбранная дата
     QDate default_date{}; // Дата по умолчанию
-    QString trend_eq{}; // Уравнение регрессии
+    QString trend_eq{};   // Уравнение регрессии
 
 protected:
     void closeEvent(QCloseEvent *event) override;
