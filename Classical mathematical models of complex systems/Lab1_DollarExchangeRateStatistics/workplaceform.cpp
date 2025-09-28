@@ -312,32 +312,43 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         fillCalculateTable(ui->calculate_tableView, this->mode, this->n, this->dataColumns, this->numericDates, this->cursValues, predicts, this->values);
     // Отображение найденных значений под таблицей
     double Sx2{this->values["Sx2"]}, Sy2{this->values["Sy2"]}, SxMean{this->values["SxMean"]}, SyMean{this->values["SyMean"]};
+    QString str_Sx2{"S<sub>x</sub><sup>2</sup> = "}, str_Sy2{"S<sub>y</sub><sup>2</sup> = "}, str_SxMean{"S<sub>x\u0304</sub> = "}, str_SyMean{"S<sub>y\u0304</sub> = "};
     if (mode == 2){
+        str_Sy2 = "S<sub>lny</sub><sup>2</sup> = ";
+        str_SyMean = "S<sub>l\u0304n\u0304y\u0304</sub> = ";
         Sy2 = this->values["Slny2"];
         SyMean = this->values["SlnyMean"];
     }
     if (mode == 3){
+        str_Sx2 = "S<sub>z</sub><sup>2</sup> = ";
+        str_SxMean = "S<sub>z\u0304</sub> = ";
         Sx2 = this->values["Sz2"];
         SxMean = this->values["SzMean"];
     }
     if (mode == 5){
-        Sx2 = this->values["Slnx"];
+        str_Sx2 = "S<sub>lnx</sub><sup>2</sup> = ";
+        str_SxMean = "S<sub>l\u0304n\u0304x\u0304</sub> = ";
+        Sx2 = this->values["Slnx2"];
         SxMean = this->values["SlnxMean"];
     }
     if (mode == 6){
-        Sx2 = this->values["Slnx"];
+        str_Sx2 = "S<sub>lnx</sub><sup>2</sup> = ";
+        str_SxMean = "S<sub>l\u0304n\u0304x\u0304</sub> = ";
+        str_Sy2 = "S<sub>lny</sub><sup>2</sup> = ";
+        str_SyMean = "S<sub>l\u0304n\u0304y\u0304</sub> = ";
+        Sx2 = this->values["Slnx2"];
         SxMean = this->values["SlnxMean"];
-        Sy2 = this->values["Slny"];
+        Sy2 = this->values["Slny2"];
         SyMean = this->values["SlnyMean"];
     }
     ui->n_label->setText("n = " + QString::number(this->n));
     ui->equation_label->setText(this->trend_eq);
     ui->coefficients_textEdit->setText(this->regCoefStr);
     ui->correlation_textEdit->setText(this->r_descr);
-    ui->Sx2_label->setText(((mode != 1) ? "S<sub>x</sub><sup>2</sup> = " : "S<sub>y</sub><sup>2</sup> = ") + QString::number(Sx2, 'g', 6));
-    ui->Sy2_label->setText(((mode != 1) ? "S<sub>y</sub><sup>2</sup> = " : "S<sub>x</sub><sup>2</sup> = ") + QString::number(Sy2, 'g', 6));
-    ui->meanSx_label->setText(((mode != 1) ? "S<sub>x\u0304</sub> = " : "S<sub>y\u0304</sub> = ") + QString::number(SxMean, 'g', 6));
-    ui->meanSy_label->setText(((mode != 1) ? "S<sub>y\u0304</sub> = "  : "S<sub>x\u0304</sub> = ") + QString::number(SyMean, 'g', 6));
+    ui->Sx2_label->setText(((mode != 1) ? str_Sx2 : str_Sy2) + QString::number(Sx2, 'g', 6));
+    ui->Sy2_label->setText(((mode != 1) ? str_Sy2 : str_Sx2) + QString::number(Sy2, 'g', 6));
+    ui->meanSx_label->setText(((mode != 1) ? str_SxMean : str_SyMean) + QString::number(SxMean, 'g', 6));
+    ui->meanSy_label->setText(((mode != 1) ? str_SyMean  : str_SxMean) + QString::number(SyMean, 'g', 6));
     ui->R2_label->setText("R<sup>2</sup> = " + QString::number(this->values["R2"], 'g', 6));
     ui->Sfull_label->setText("S<sub>полн.</sub> = " + QString::number(this->values["Spoln"], 'g', 6));
     ui->Sost_label->setText("S<sub>ост.</sub> = " + QString::number(this->values["Sost"], 'g', 6));

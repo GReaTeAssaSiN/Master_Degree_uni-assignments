@@ -1246,7 +1246,7 @@ void calculatePowerRegression(const QVector<double> &lnx, const QVector<double> 
     // --- ДИСПЕРСИЯ И ОТКЛОНЕНИЯ ---
     values["Slnx2"] = 1.0 / (n - 1.0) * (values["sumLNX2"] - 1.0 / n * std::pow(values["sumLNX"], 2));
     values["Slny2"] = 1.0 / (n - 1.0) * (values["sumLNY2"] - 1.0 / n * std::pow(values["sumLNY"], 2));
-    values["SlnxMean"] = std::sqrt(values["Sx2"])/std::sqrt(n);
+    values["SlnxMean"] = std::sqrt(values["Slnx2"])/std::sqrt(n);
     values["SlnyMean"] = std::sqrt(values["Slny2"])/std::sqrt(n);
 
     // --- ПРЕДСКАЗАНИЯ И СУММЫ КВАДРАТОВ ---
