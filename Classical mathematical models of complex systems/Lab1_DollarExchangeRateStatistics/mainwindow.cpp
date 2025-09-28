@@ -26,7 +26,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButton_parab_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
     connect(ui->pushButton_log_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
     connect(ui->pushButton_power_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
-    connect(ui->pushButton_parab_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
     connect(ui->pushButton_polynom_regr, &QPushButton::clicked, this, &MainWindow::regression_button_clicked);
 }
 

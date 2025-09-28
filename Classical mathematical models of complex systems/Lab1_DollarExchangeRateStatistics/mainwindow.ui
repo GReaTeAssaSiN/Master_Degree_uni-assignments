@@ -281,7 +281,7 @@
       <property name="font">
        <font>
         <family>Segoe UI</family>
-        <pointsize>12</pointsize>
+        <pointsize>10</pointsize>
         <italic>false</italic>
         <bold>false</bold>
        </font>
@@ -290,32 +290,83 @@
        <cursorShape>PointingHandCursor</cursorShape>
       </property>
       <property name="styleSheet">
-       <string notr="true">QTableView {
-    background-color: rgb(245, 245, 245);           /* светлый фон таблицы */
-    alternate-background-color: rgb(235, 235, 235); /* чередующиеся строки */
-    gridline-color: rgb(200, 200, 200);            /* цвет сетки */
-    font: 12pt &quot;Segoe UI&quot;;                          /* корпоративный шрифт */
-    color: rgb(28, 28, 28);                         /* тёмный текст */
-    selection-background-color: rgb(180, 180, 180); /* цвет выделенной строки */
-    selection-color: rgb(28, 28, 28);               /* цвет текста выделения */
+       <string notr="true">/* ------------------- QTableView ------------------- */
+QTableView {
+    background-color: #f8f8f8;
+    alternate-background-color: #e8e8e8;
+    gridline-color: #c0c0c0;
+    font: 10pt &quot;Segoe UI&quot;;
+    color: #1c1c1c;
 }
 
+/* Заголовки */
 QHeaderView::section {
-    background-color: rgb(208, 208, 208);          /* фон заголовка */
-    color: rgb(28, 28, 28);                         /* текст заголовка */
+    background-color: #3a3a3a;
+    color: #ffffff;
     padding: 4px;
-    border: 1px solid rgb(176, 176, 176);          /* рамка заголовка */
+    border: 1px solid #2a2a2a;
     font-weight: bold;
-    text-align: center;                             /* выравнивание текста по центру */
 }
 
+/* Выделенные элементы */
 QTableView::item:selected {
-    background-color: rgb(176, 176, 176);          /* выделение строки */
-    color: rgb(28, 28, 28);
+    background-color: #a0a0a0;
+    color: #ffffff;
 }
 
+/* Эффект при наведении */
 QTableView::item:hover {
-    background-color: rgb(216, 216, 216);          /* подсветка при наведении */
+    background-color: #d0d0d0;
+}
+
+/* ------------------- Вертикальный ползунок ------------------- */
+QTableView QScrollBar:vertical {
+    background-color: #f0f0f0;
+    width: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+
+QTableView QScrollBar::handle:vertical {
+    background-color: #888888;
+    min-height: 20px;
+    border-radius: 6px;
+}
+
+QTableView QScrollBar::add-line:vertical,
+QTableView QScrollBar::sub-line:vertical {
+    background: none;
+    height: 0px;
+}
+
+QTableView QScrollBar::add-page:vertical,
+QTableView QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+/* ------------------- Горизонтальный ползунок ------------------- */
+QTableView QScrollBar:horizontal {
+    background-color: #f0f0f0;
+    height: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+
+QTableView QScrollBar::handle:horizontal {
+    background-color: #888888;
+    min-width: 20px;
+    border-radius: 6px;
+}
+
+QTableView QScrollBar::add-line:horizontal,
+QTableView QScrollBar::sub-line:horizontal {
+    background: none;
+    width: 0px;
+}
+
+QTableView QScrollBar::add-page:horizontal,
+QTableView QScrollBar::sub-page:horizontal {
+    background: none;
 }
 </string>
       </property>

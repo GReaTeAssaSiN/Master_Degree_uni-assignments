@@ -51,6 +51,7 @@ QString toSuperscript(const int &number)
     return result;
 }
 
+
 /*------------------
  |  Главное окно  |
  -----------------*/
@@ -169,6 +170,7 @@ bool readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
     cursValues.clear();
 
     QDate epoch(1970, 1, 1);
+    QVector<int> rawDates{}; // Временное хранилище дат в днях
 
     for (int r = 0; r < model->rowCount(); ++r){
         // Конвертация даты в число дней
@@ -176,9 +178,9 @@ bool readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
         QDate date = QDate::fromString(valData.toString(), "dd.MM.yyyy");
         if (date.isValid()) {
             dataColumn.append(date.toString("dd.MM.yyyy"));
-            numericDates.append(epoch.daysTo(date)/10000.0); // Чтобы не работать с большими числами, уменьшим в 10000 раз число дней
+            rawDates.append(epoch.daysTo(date));
         } else {
-            numericDates.append(0);
+            rawDates.append(0);
             QMessageBox::critical(nullptr, "Ошибка", QString("Не удалось корректно обработать дату:%1!").arg(valData.toString()));
             return false;
         }
@@ -196,6 +198,18 @@ bool readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
         }
     }
 
+    // --- Нормализация дат ---
+    if (!rawDates.isEmpty())
+    {
+        int minDateDays = *std::min_element(rawDates.begin(), rawDates.end());
+        int maxDateDays = *std::max_element(rawDates.begin(), rawDates.end());
+        int range = maxDateDays - minDateDays;
+
+        numericDates.resize(rawDates.size());
+        for (int i = 0; i < rawDates.size(); ++i)
+            numericDates[i] = 0.01 + 0.99 * double(rawDates[i] - minDateDays) / double(range);
+    }
+
     return true;
 }
 
@@ -205,72 +219,6 @@ bool readDataAndCurs(const QTableView *tableView, QVector<QString> &dataColumn, 
  -----------------*/
 // --- Функции заполнения виджетов --- //
 // 1)
-// Заполнение таблицы значениями для полиномиальных регрессий (линейная, обратная, параболическая, полиномиальная)
-void fillTotalTableForPolynomialRegressions(QTableView *tableView, const int &mode, const int& n, const int& degree,
-                                            const QVector<QString> &dataColumns, const QVector<double> &numericDates, const QVector<double> &cursValues,
-                                            const QHash<QString, QVector<double>> vector_values){
-    int rowCount{n};
-    int calcColCount{static_cast<int>(vector_values.size())};
-    int colCount{3 + calcColCount}; // data, x, y + вычисляемые
-
-    QStandardItemModel *model = new QStandardItemModel(rowCount, colCount, tableView);
-
-    // --- Заголовки ---
-    // Базовые
-    model->setHeaderData(0, Qt::Horizontal, "data");
-    model->setHeaderData(1, Qt::Horizontal, (mode != 1) ? "x\u1D62" : "y\u1D62");
-    model->setHeaderData(2, Qt::Horizontal, (mode != 1) ? "y\u1D62" : "x\u1D62");
-    // Автоматические для vector_values
-    int c = 3; // Итератор номера столбца
-    for (int k=0; k<calcColCount; ++k){
-        QString header{};
-        if (k < 2 * degree - 1){
-            int power{k+2};
-            header = QString((mode != 1) ? "x\u1D62" : "y\u1D62") + toSuperscript(power);
-        }
-        else{
-            int power{k - (2 * degree - 1) + 1};
-            if (mode != 1)
-                header = "x\u1D62" + ((power == 1) ? "" : toSuperscript(power)) + "y\u1D62";
-            else
-                header = "y\u1D62" + ((power == 1) ? "" : toSuperscript(power)) + "x\u1D62";
-        }
-
-        model->setHeaderData(c++, Qt::Horizontal, header);
-
-        // Вывод y^2 отдельно.
-        if (k == 0)
-        {
-            header = QString((mode != 1) ? "y\u1D62" : "x\u1D62") + toSuperscript(2);
-            model->setHeaderData(c++, Qt::Horizontal, header);
-        }
-    }
-
-    // --- Заполнение таблицы ---
-    for (int r=0; r<rowCount; ++r){
-        model->setItem(r, 0, new QStandardItem(dataColumns[r]));
-        model->setItem(r, 1, new QStandardItem(QString::number(numericDates[r], 'f', 6)));
-        model->setItem(r, 2, new QStandardItem(QString::number(cursValues[r], 'f', 6)));
-
-        // Значения vector_values
-        int c = 3;
-        for (int k=0; k<calcColCount - 1; ++k) // Т.к. y^2 учитывается отдельно
-        {
-            if (k < 2 * degree - 1) // k=2,...,degree+degree
-                model->setItem(r, c++, new QStandardItem(QString::number(vector_values["x" + QString::number(k+2)][r], 'f', 6)));
-            else                    // k=1,...,degree
-                model->setItem(r, c++, new QStandardItem(QString::number(vector_values["x" + QString::number(k - (2 * degree - 1) + 1) + "y"][r], 'f', 6)));
-            if (c == 4)
-                model->setItem(r, c++, new QStandardItem(QString::number(vector_values["y2"][r], 'f', 6)));
-        }
-    }
-
-    tableView->setModel(model);
-    tableView->resizeColumnsToContents();
-
-    // Центрирование
-    centerTableItems(tableView);
-}
 // Получение названий вычисляемых столбцов для неполиномиальных регрессий (экспонениальная, гиперболическая, степенная, логарифмическая)
 QString getColumnNameForNotPolynomialRegressions(const QString& key){
     QString header;
@@ -290,45 +238,78 @@ QString getColumnNameForNotPolynomialRegressions(const QString& key){
 
     return header;
 }
-// Заполнение таблицы значениями для неполиномиальных регрессий (экспонениальная, гиперболическая, степенная, логарифмическая)
-void fillTotalTableForNotPolynomialRegressions(QTableView *tableView, const int& n, const int& mode,
-                                               const QVector<QString> &dataColumns, const QVector<double> &numericDates, const QVector<double> &cursValues,
-                                               const QHash<QString, QVector<double>> vector_values){
+// Заполнение таблицы значениями для регрессий
+void fillTotalTable(QTableView *tableView, const int &mode, const int& n, const int& degree,
+                    const QVector<QString> &dataColumns, const QVector<double> &numericDates, const QVector<double> &cursValues,
+                    const QHash<QString, QVector<double>> vector_values){
     int rowCount{n};
     int calcColCount{static_cast<int>(vector_values.size())};
     int colCount{3 + calcColCount}; // data, x, y + вычисляемые
-
-    // Определяем ключи для текущего режима
-    QVector<QString> keys;
-    switch(mode){
-    case 2: keys = {"lny", "x2", "lny2", "xlny"}; break;
-    case 3: keys = {"z", "z2", "y2", "zy"}; break;
-    case 5: keys = {"lnx", "lnx2", "y2", "lnxy"}; break;
-    case 6: keys = {"lnx", "lny", "lnx2", "lny2", "lnxlny"}; break;
-    default: break;
-    }
 
     QStandardItemModel *model = new QStandardItemModel(rowCount, colCount, tableView);
 
     // --- Заголовки ---
     // Базовые
     model->setHeaderData(0, Qt::Horizontal, "data");
-    model->setHeaderData(1, Qt::Horizontal, "x\u1D62");
-    model->setHeaderData(2, Qt::Horizontal, "y\u1D62");
-    // Названия из vector_values
-    for (int c = 0; c < keys.size(); ++c) {
-        model->setHeaderData(3 + c, Qt::Horizontal, getColumnNameForNotPolynomialRegressions(keys[c]));
+    model->setHeaderData(1, Qt::Horizontal, (mode != 1) ? "x\u1D62" : "y\u1D62");
+    model->setHeaderData(2, Qt::Horizontal, (mode != 1) ? "y\u1D62" : "x\u1D62");
+
+    // Автоматические для vector_values
+    QVector<QString> keys{};
+    if (mode == 0 || mode == 1 || mode == 4 || mode == 7){ // Полиномиальные
+        int c = 3; // Итератор номера столбца
+        for (int k=0; k<calcColCount; ++k){
+            QString header{};
+            if (k < 2 * degree - 1){ // k=2,...,degree+degree
+                int power{k+2};
+                header = QString((mode != 1) ? "x\u1D62" : "y\u1D62") + toSuperscript(power);
+                keys.append("x" + QString::number(power));
+            }
+            else{
+                int power{k - (2 * degree - 1) + 1};
+                if (mode != 1) // k=1,...,degree
+                    header = "x\u1D62" + ((power == 1) ? "" : toSuperscript(power)) + "y\u1D62";
+                else
+                    header = "y\u1D62" + ((power == 1) ? "" : toSuperscript(power)) + "x\u1D62";
+                keys.append("x" + QString::number(power) + "y");
+            }
+
+            model->setHeaderData(c++, Qt::Horizontal, header);
+
+            // Вывод y^2 отдельно.
+            if (k == 0)
+            {
+                header = QString((mode != 1) ? "y\u1D62" : "x\u1D62") + toSuperscript(2);
+                model->setHeaderData(c++, Qt::Horizontal, header);
+                keys.append("y2");
+            }
+        }
+    }
+    else{
+        // Определяем ключи для текущего режима
+        switch(mode){
+        case 2: keys = {"lny", "x2", "lny2", "xlny"}; break;
+        case 3: keys = {"z", "z2", "y2", "zy"}; break;
+        case 5: keys = {"lnx", "lnx2", "y2", "lnxy"}; break;
+        case 6: keys = {"lnx", "lny", "lnx2", "lny2", "lnxlny"}; break;
+        default: break;
+        }
+        // Названия из vector_values
+        for (int c = 0; c < keys.size(); ++c)
+            model->setHeaderData(3 + c, Qt::Horizontal, getColumnNameForNotPolynomialRegressions(keys[c]));
     }
 
     // --- Заполнение таблицы ---
-    for (int r = 0; r < rowCount; ++r) {
+    for (int r=0; r<rowCount; ++r) {
         model->setItem(r, 0, new QStandardItem(dataColumns[r]));
         model->setItem(r, 1, new QStandardItem(QString::number(numericDates[r], 'f', 6)));
         model->setItem(r, 2, new QStandardItem(QString::number(cursValues[r], 'f', 6)));
 
+        // Значения vector_values
         for (int c = 0; c < keys.size(); ++c) {
             const QString &key = keys[c];
-            model->setItem(r, 3 + c, new QStandardItem(QString::number(vector_values[key][r], 'f', 6)));
+            if (vector_values.contains(key))
+                model->setItem(r, 3 + c, new QStandardItem(QString::number(vector_values[key][r], 'f', 6)));
         }
     }
 
@@ -339,36 +320,7 @@ void fillTotalTableForNotPolynomialRegressions(QTableView *tableView, const int&
     centerTableItems(tableView);
 }
 // 2)
-// Заполнение текстового поля с суммами для полиномиальных регрессий (линейная, обратная, параболическая, полиномиальная)
-QString fillTextEditWithSumsForPolynomialRegression(const int &mode, const QHash<QString, double> &values, const int& degree){
-    QString info{};
-
-    info += QString((mode != 1) ? "\u2211x = %1\n" : "\u2211y = %1\n").arg(QString::number(values["sumX"], 'f', 6));
-    info += QString((mode != 1) ? "\u2211y = %1\n" : "\u2211x = %1\n").arg(QString::number(values["sumY"], 'f', 6));
-
-    // sumXk, k=2,...,2*degree
-    for (int k=2; k<=2*degree; ++k){
-        info += QString((mode != 1) ? "\u2211x%1 = %2\n" : "\u2211y%1 = %2\n")
-                    .arg(toSuperscript(k))
-                    .arg(QString::number(values["sumX" + QString::number(k)], 'f', 6));
-        // sumY2 отдельно выводится
-        if (k == 2){
-            info += QString((mode != 1) ? "\u2211y%1 = %2\n" : "\u2211x%1 = %2\n")
-                        .arg(toSuperscript(k))
-                        .arg(QString::number(values["sumY2"], 'f', 6));
-        }
-    }
-
-    // sumXkY, k=1,...,degree
-    for (int k=1; k<=degree; ++k){
-        info += QString((mode != 1) ? "\u2211x%1y = %2\n" : "\u2211y%1x = %2\n")
-                    .arg(k == 1 ? "" : toSuperscript(k))
-                    .arg(QString::number(values["sumX" + QString::number(k) + "Y"], 'f', 6));
-    }
-
-    return info;
-}
-// Получение названий выражений сумм для для неполиномиальных регрессиий (экспоненциальная, гиперболическая, степенная, логарифмическая)
+// Получение названий левых выражений сумм для для неполиномиальных регрессиий (экспоненциальная, гиперболическая, степенная, логарифмическая)
 QString getSumLHSForNotPolynomialRegressions(const QString& key){
     QString LHS_current_sum{};
     if (key == "sumX") LHS_current_sum = "\u2211x";
@@ -389,78 +341,58 @@ QString getSumLHSForNotPolynomialRegressions(const QString& key){
 
     return LHS_current_sum;
 }
-// Заполнение текстового поля с суммами для неполиномиальных регрессиий (экспоненциальная, гиперболическая, степенная, логарифмическая)
-QString fillTextEditWithSumsForNotPolynomialRegression(const int &mode, const QHash<QString, double> &values){
+// Заполнение текстового поля с суммами для регрессий
+QString fillTextEditWithSums(const int &mode, const QHash<QString, double> &values, const int &degree){
     QString info{};
 
-    // Определяем ключи для текущего режима
-    QVector<QString> keys;
-    switch (mode) {
-    case 2: keys = {"sumX", "sumLNY", "sumX2", "sumLNY2", "sumXLNY"}; break;
-    case 3: keys = {"sumZ", "sumY", "sumZ2", "sumY2", "sumZY"}; break;
-    case 5: keys = {"sumLNX", "sumY", "sumLNX2", "sumY2", "sumLNXY"}; break;
-    case 6: keys = {"sumLNX", "sumLNY", "sumLNX2", "sumLNY2", "sumLNXLNY"}; break;
-    default: break;
-    }
+    if (mode == 0 || mode == 1 || mode == 4 || mode == 7){
+        info += QString((mode != 1) ? "\u2211x = %1\n" : "\u2211y = %1\n").arg(QString::number(values["sumX"], 'f', 6));
+        info += QString((mode != 1) ? "\u2211y = %1\n" : "\u2211x = %1\n").arg(QString::number(values["sumY"], 'f', 6));
 
-    // Заполнение текстового поля
-    for (const QString &key : keys) {
-        info += getSumLHSForNotPolynomialRegressions(key) + QString(" = %1\n").arg(values.value(key, 0.0));
+        // sumXk, k=2,...,2*degree
+        for (int k=2; k<=2*degree; ++k){
+            info += QString((mode != 1) ? "\u2211x%1 = %2\n" : "\u2211y%1 = %2\n")
+                        .arg(toSuperscript(k))
+                        .arg(QString::number(values["sumX" + QString::number(k)], 'f', 6));
+            // sumY2 отдельно выводится
+            if (k == 2){
+                info += QString((mode != 1) ? "\u2211y%1 = %2\n" : "\u2211x%1 = %2\n")
+                            .arg(toSuperscript(k))
+                            .arg(QString::number(values["sumY2"], 'f', 6));
+            }
+        }
+
+        // sumXkY, k=1,...,degree
+        for (int k=1; k<=degree; ++k){
+            info += QString((mode != 1) ? "\u2211x%1y = %2\n" : "\u2211y%1x = %2\n")
+                        .arg(k == 1 ? "" : toSuperscript(k))
+                        .arg(QString::number(values["sumX" + QString::number(k) + "Y"], 'f', 6));
+        }
+    }
+    else{ // mode == 2 || mode == 3 || mode == 5 || mode == 6
+        // Определяем ключи для текущего режима
+        QVector<QString> keys;
+        switch (mode) {
+        case 2: keys = {"sumX", "sumLNY", "sumX2", "sumLNY2", "sumXLNY"}; break;
+        case 3: keys = {"sumZ", "sumY", "sumZ2", "sumY2", "sumZY"}; break;
+        case 5: keys = {"sumLNX", "sumY", "sumLNX2", "sumY2", "sumLNXY"}; break;
+        case 6: keys = {"sumLNX", "sumLNY", "sumLNX2", "sumLNY2", "sumLNXLNY"}; break;
+        default: break;
+        }
+
+        // Заполнение текстового поля
+        for (const QString &key : keys) {
+            info += getSumLHSForNotPolynomialRegressions(key) + QString(" = %1\n").arg(QString::number(values[key], 'f', 6));
+        }
     }
 
     return info;
 }
 
 // --- Функии вычисления для соответствующего типа регрессии --- //
-// 1)
-// Вычисление сумм и средних значений у полиномиальных регрессий (линейная, обратная, парабола, полиномиальная)
-void calculatePolynomialRegressionsSums(const QVector<double> &numericDates, const QVector<double> &cursValues,
-                                        int &n, const int &degree, QHash<QString, QVector<double>> &vector_values, QHash<QString, double> &values){
-    n = numericDates.size();
-    if (n == 0) return;
-
-    vector_values.clear();
-    values.clear();
-
-    // Количество столбцов:
-    // * data, x, y выводятся отдельно;
-    // * все степени x от 2 до (degree + degree) включительно;
-    // * y^2;
-    // * произведения степеней x до degree включительно на y кроме 0.
-    // Итого: (degree + degree - 1) + 1 + degree = 3*degree.
-
-    for (int i = 0; i < n; ++i){
-        // Исходные данные
-        double x = numericDates[i];
-        double y = cursValues[i];
-
-        values["sumX"] += x;
-        values["sumY"] += y;
-        vector_values["y2"].append(y * y);
-        values["sumY2"] += y * y;
-
-        // 1) x^k, k=(2,..,2*degree)
-        for (int k=2; k <= degree + degree; ++k){
-            double xk{std::pow(x, k)};
-            vector_values["x" + QString::number(k)].append(xk);
-            values["sumX" + QString::number(k)] += xk;
-        }
-
-        // 2) x^k * y, k=(1,...,degree)
-        for (int k=1; k <= degree; ++k){
-            double xky{std::pow(x,k)*y};
-            vector_values["x" + QString::number(k) + "y"].append(xky);
-            values["sumX" + QString::number(k) + "Y"] += xky;
-        }
-    }
-
-    values["meanX"] = values["sumX"] / n;
-    values["meanY"] = values["sumY"] / n;
-}
-// 2)
-// Вычисление сумм и средних значений у неполиномиальных регрессиий (экспоненциальная, гиперболическая, степенная, логарифмическая)
-void calculateNotPolynomialRegressionsSums(const QVector<double> &numericDates, const QVector<double> &cursValues,
-                                           int &n, const int& mode, QHash<QString, QVector<double>> &vector_values, QHash<QString, double> &values){
+// Вычисление сумм и средних значений у регрессий
+void calculateRegressionsSums(const int& mode, const QVector<double> &numericDates, const QVector<double> &cursValues,
+                              int &n, const int &degree, QHash<QString, QVector<double>> &vector_values, QHash<QString, double> &values){
     n = numericDates.size();
     if (n == 0) return;
 
@@ -473,46 +405,53 @@ void calculateNotPolynomialRegressionsSums(const QVector<double> &numericDates, 
         values["sum" + key.toUpper()] += val;
     };
 
-    // Цикл вычислений сумм
-    for (int i = 0; i < n; ++i) {
+    for (int i=0; i<n; ++i){
+        // Исходные данные
         double x = numericDates[i];
         double y = cursValues[i];
 
-        switch(mode) {
-        case 2: { // Экспоненциальная: data, x, y, lny, x^2, (lny)^2, xlny
+        // Общие для всех
+        values["sumX"] += x;
+        values["sumY"] += y;
+
+        if (mode == 0 || mode == 1 || mode == 4 || mode == 7){
+            // 1) x^k, k=(2,..,2*degree)
+            for (int k=2; k <= degree + degree; ++k){
+                double xk{std::pow(x, k)};
+                vector_values["x" + QString::number(k)].append(xk);
+                values["sumX" + QString::number(k)] += xk;
+            }
+
+            // 2) x^k * y, k=(1,...,degree)
+            for (int k=1; k <= degree; ++k){
+                double xky{std::pow(x,k)*y};
+                vector_values["x" + QString::number(k) + "y"].append(xky);
+                values["sumX" + QString::number(k) + "Y"] += xky;
+            }
+            addValue("y2", y*y);
+        }
+        else if (mode == 2){ // Экспоненциальная: data, x, y, lny, x^2, (lny)^2, xlny
             double lny = std::log(y);
             addValue("lny", lny);
             addValue("x2", x*x);
             addValue("lny2", lny*lny);
             addValue("xlny", x*lny);
-
-            values["sumX"] += x;
-
-            break;
         }
-        case 3: { // Гиперболическая: data, x, y, z, z^2, y^2, zy
+        else if (mode == 3){ // Гиперболическая: data, x, y, z, z^2, y^2, zy
             double z = 1/x;
             addValue("z", z);
             addValue("z2", z*z);
             addValue("y2", y*y);
             addValue("zy", z*y);
-
-            values["sumY"] += y;
-
-            break;
         }
-        case 5: { // Логарифмическая: data, x, y, lnx, (lnx)^2, y^2, lnxy
+        else if (mode == 5){ // Логарифмическая: data, x, y, lnx, (lnx)^2, y^2, lnxy
             double lnx = std::log(x);
             addValue("lnx", lnx);
             addValue("lnx2", lnx*lnx);
             addValue("y2", y*y);
             addValue("lnxy", lnx*y);
-
-            values["sumY"] += y;
-
-            break;
         }
-        case 6: { // Степенная: data, x, y, lnx, lny, (lnx)^2, (lny)^2, lnx * lny
+        else{ // Степенная: data, x, y, lnx, lny, (lnx)^2, (lny)^2, lnx * lny
             double lnx = std::log(x);
             double lny = std::log(y);
             addValue("lnx", lnx);
@@ -520,110 +459,258 @@ void calculateNotPolynomialRegressionsSums(const QVector<double> &numericDates, 
             addValue("lnx2", lnx*lnx);
             addValue("lny2", lny*lny);
             addValue("lnxlny", lnx*lny);
-            break;
-        }
-        default:
-            break;
         }
     }
     // Вычисление средних значений
-    switch(mode){
-    case 2:
+    if (mode == 0 || mode == 1 || mode == 4 || mode == 7){
+        values["meanX"] = values["sumX"] / n;
+        values["meanY"] = values["sumY"] / n;
+    }
+    else if (mode == 2){
         values["meanX"] = values["sumX"] / n;
         values["meanLNY"] = values["sumLNY"] / n;
-        break;
-    case 3:
+    }
+    else if (mode == 3){
         values["meanZ"] = values["sumZ"] / n;
         values["meanY"] = values["sumY"] / n;
-        break;
-    case 5:
+    }
+    else if (mode == 5){
         values["meanLNX"] = values["sumLNX"] / n;
         values["meanY"] = values["sumY"] / n;
-        break;
-    case 6:
+    }
+    else{ // mode == 6
         values["meanLNX"] = values["sumLNX"] / n;
         values["meanLNY"] = values["sumLNY"] / n;
-        break;
-    default:
-        break;
     }
 }
+
 
 /*------------------
  |     БЛОК 2      |
  -----------------*/
 // --- Функции заполнения виджетов и описания --- //
-// Заполнение таблицы с предсказаниями значениями для регрессий кроме экспоненциальной и степенной
+// Заполнение таблицы с предсказаниями значениями для регрессий
 void fillCalculateTable(QTableView* tableView, const int &mode, const int &n,
                         const QVector<QString> &dataColumns, const QVector<double> &numericDates, const QVector<double> &cursValues,
-                        const QVector<double> &predicts, const QHash<QString, double> &values){
+                        const QVector<double> &predicts, const QHash<QString, double> &values,
+                        const QVector<double> &lny)
+{
     int rowCount = n;
-    int colCount = 7; // data, xi, yi, yi^T, (yi-yi^T)^2, (yi^T-mean(y))^2, (yi-mean(y))^2
+    int colCount = (mode != 2 && mode != 6) ? 7 : 8; // data, xi, yi, yi^T, (yi-yi^T)^2, (yi^T-mean(y))^2, (yi-mean(y))^2
+                                                     // data, xi, yi, lnyi, lnyi^T, (lnyi-lnyi^T)^2, (lnyi^T-mean(lny))^2, (lnyi^T-mean(lny))^2
 
     QStandardItemModel *model = new QStandardItemModel(rowCount, colCount, tableView);
 
-    // Заголовки.
-    model->setHeaderData(0, Qt::Horizontal, "data");
-    model->setHeaderData(1, Qt::Horizontal, (mode != 1) ? "x\u1D62" : "y\u1D62");
-    model->setHeaderData(2, Qt::Horizontal, (mode != 1) ? "y\u1D62" : "x\u1D62");
-    model->setHeaderData(3, Qt::Horizontal, (mode != 1) ? "y\u1D62\u1D40" : "x\u1D62\u1D40");
-    model->setHeaderData(4, Qt::Horizontal, (mode != 1) ? "(y\u1D62 - y\u1D62\u1D40)\u00B2" : "(x\u1D62 - x\u1D62\u1D40)\u00B2");
-    model->setHeaderData(5, Qt::Horizontal, (mode != 1) ? "(y\u1D62\u1D40 - y\u0304)\u00B2" : "(x\u1D62\u1D40 - x\u0304)\u00B2");
-    model->setHeaderData(6, Qt::Horizontal, (mode != 1) ? "(y\u1D62 - y\u0304)\u00B2" : "(x\u1D62 - x\u0304)\u00B2");
+    // Заголовки
+    if (mode != 2 && mode != 6) {
+        model->setHeaderData(0, Qt::Horizontal, "data");
+        model->setHeaderData(1, Qt::Horizontal, (mode != 1) ? "x\u1D62" : "y\u1D62");
+        model->setHeaderData(2, Qt::Horizontal, (mode != 1) ? "y\u1D62" : "x\u1D62");
+        model->setHeaderData(3, Qt::Horizontal, (mode != 1) ? "y\u1D62\u1D40" : "x\u1D62\u1D40");
+        model->setHeaderData(4, Qt::Horizontal, (mode != 1) ? "(y\u1D62 - y\u1D62\u1D40)\u00B2" : "(x\u1D62 - x\u1D62\u1D40)\u00B2");
+        model->setHeaderData(5, Qt::Horizontal, (mode != 1) ? "(y\u1D62\u1D40 - y\u0304)\u00B2" : "(x\u1D62\u1D40 - x\u0304)\u00B2");
+        model->setHeaderData(6, Qt::Horizontal, (mode != 1) ? "(y\u1D62 - y\u0304)\u00B2" : "(x\u1D62 - x\u0304)\u00B2");
+    } else { // Экспоненциальная или степенная
+        model->setHeaderData(0, Qt::Horizontal, "data");
+        model->setHeaderData(1, Qt::Horizontal, "x\u1D62");
+        model->setHeaderData(2, Qt::Horizontal, "y\u1D62");
+        model->setHeaderData(3, Qt::Horizontal, "lny\u1D62");
+        model->setHeaderData(4, Qt::Horizontal, "lny\u1D62\u1D40");
+        model->setHeaderData(5, Qt::Horizontal, "(lny\u1D62 - (lny\u1D62)\u1D40)\u00B2");
+        model->setHeaderData(6, Qt::Horizontal, "((lny\u1D62)\u1D40 - l\u0304n\u0304y\u0304)\u00B2");
+        model->setHeaderData(7, Qt::Horizontal, "(lny\u1D62 - l\u0304n\u0304y\u0304)\u00B2");
+    }
 
-    for (int r = 0; r < rowCount; ++r)
-    {
+    // Заполнение строк
+    for (int r = 0; r < rowCount; ++r) {
         model->setItem(r, 0, new QStandardItem(dataColumns[r]));
         model->setItem(r, 1, new QStandardItem(QString::number(numericDates[r], 'f', 6)));
         model->setItem(r, 2, new QStandardItem(QString::number(cursValues[r], 'f', 6)));
-        model->setItem(r, 3, new QStandardItem(QString::number(predicts[r], 'f', 6)));
-        model->setItem(r, 4, new QStandardItem(QString::number(std::pow(cursValues[r]-predicts[r], 2), 'f', 6)));
-        model->setItem(r, 5, new QStandardItem(QString::number(std::pow(predicts[r] - values["meanY"], 2), 'f', 6)));
-        model->setItem(r, 6, new QStandardItem(QString::number(std::pow(cursValues[r]-values["meanY"], 2), 'f', 6)));
+
+        if (mode != 2 && mode != 6) {
+            model->setItem(r, 3, new QStandardItem(QString::number(predicts[r], 'f', 6)));
+            model->setItem(r, 4, new QStandardItem(QString::number(std::pow(cursValues[r] - predicts[r], 2), 'f', 6)));
+            model->setItem(r, 5, new QStandardItem(QString::number(std::pow(predicts[r] - values["meanY"], 2), 'f', 6)));
+            model->setItem(r, 6, new QStandardItem(QString::number(std::pow(cursValues[r] - values["meanY"], 2), 'f', 6)));
+        } else {
+            model->setItem(r, 3, new QStandardItem(QString::number(lny[r], 'f', 6)));
+            model->setItem(r, 4, new QStandardItem(QString::number(predicts[r], 'f', 6)));
+            model->setItem(r, 5, new QStandardItem(QString::number(std::pow(lny[r] - predicts[r], 2), 'g', 6)));
+            model->setItem(r, 6, new QStandardItem(QString::number(std::pow(predicts[r] - values["meanLNY"], 2), 'g', 6)));
+            model->setItem(r, 7, new QStandardItem(QString::number(std::pow(lny[r] - values["meanLNY"], 2), 'g', 6)));
+        }
     }
 
     tableView->setModel(model);
     tableView->resizeColumnsToContents();
 
-    // Центрирование.
+    // Центрирование
     centerTableItems(tableView);
 }
-// Заполнение таблицы с предсказаниями значениями для экспонениальной и степенной
-void fillCalculateTableForExpOrPowerRegression(QTableView* tableView, const int &n,
-                                               const QVector<QString> &dataColumns, const QVector<double> &numericDates, const QVector<double> &cursValues,
-                                               const QVector<double> &lny, const QVector<double> &predicts, const QHash<QString, double> &values){
-    int rowCount = n;
-    int colCount = 8; // data, xi, yi, lnyi, lnyi^T, (lnyi-lnyi^T)^2, (lnyi^T-mean(lny))^2, (lnyi^T-mean(lny))^2
-
-    QStandardItemModel *model = new QStandardItemModel(rowCount, colCount, tableView);
-
-    // Заголовки.
-    model->setHeaderData(0, Qt::Horizontal, "data");
-    model->setHeaderData(1, Qt::Horizontal, "x\u1D62");
-    model->setHeaderData(2, Qt::Horizontal, "y\u1D62");
-    model->setHeaderData(3, Qt::Horizontal,"lny\u1D62");
-    model->setHeaderData(4, Qt::Horizontal,"lny\u1D62\u1D40");
-    model->setHeaderData(5, Qt::Horizontal,"(lny\u1D62 - (lny\u1D62)\u1D40)\u00B2");
-    model->setHeaderData(6, Qt::Horizontal,"((lny\u1D62)\u1D40 - l\u0304n\u0304y\u0304)\u00B2");
-    model->setHeaderData(7, Qt::Horizontal,"(lny\u1D62 - l\u0304n\u0304y\u0304)\u00B2");
-
-    for (int r = 0; r < rowCount; ++r)
-    {
-        model->setItem(r, 0, new QStandardItem(dataColumns[r]));
-        model->setItem(r, 1, new QStandardItem(QString::number(numericDates[r], 'f', 6)));
-        model->setItem(r, 2, new QStandardItem(QString::number(cursValues[r], 'f', 6)));
-        model->setItem(r, 3, new QStandardItem(QString::number(lny[r], 'f', 6)));
-        model->setItem(r, 4, new QStandardItem(QString::number(predicts[r], 'f', 6)));
-        model->setItem(r, 5, new QStandardItem(QString::number(std::pow(lny[r]-predicts[r], 2), 'g', 6)));
-        model->setItem(r, 6, new QStandardItem(QString::number(std::pow(predicts[r] - values["meanLNY"], 2), 'g', 6)));
-        model->setItem(r, 7, new QStandardItem(QString::number(std::pow(lny[r]-values["meanLNY"], 2), 'g', 6)));
+// Сотавление вида функии и описания коэффициентов
+void getFuncCoefDescr(const int& mode, QHash<QString, double> &coefficients, QString& regCoefStr, QString& trend_eq){
+    // Описание коэффициентов
+    if (mode == 0 || mode == 1){
+        regCoefStr = QString("<b>Вспомогательные величины:</b><br>"
+                             "A = %1<br>"
+                             "A<sub>0</sub> = %2<br>"
+                             "A<sub>1</sub> = %3<br>"
+                             "<br>"
+                             "B = %4<br>"
+                             "B<sub>0</sub> = %5<br>"
+                             "B<sub>1</sub> = %6<br>"
+                             "<br>"
+                             "<b>Коэффициенты:</b><br>"
+                             "a<sub>0</sub> = %7<br>"
+                             "a<sub>1</sub> = %8<br>"
+                             "<br>"
+                             "b<sub>0</sub> = %9<br>"
+                             "b<sub>1</sub> = %10")
+                         .arg(QString::number(coefficients["A"], 'g', 6))
+                         .arg(QString::number(coefficients["A0"], 'g', 6))
+                         .arg(QString::number(coefficients["A1"], 'g', 6))
+                         .arg(QString::number(coefficients["B"], 'g', 6))
+                         .arg(QString::number(coefficients["B0"], 'g', 6))
+                         .arg(QString::number(coefficients["B1"], 'g', 6))
+                         .arg(QString::number(coefficients["a0"], 'g', 6))
+                         .arg(QString::number(coefficients["a1"], 'g', 6))
+                         .arg(QString::number(coefficients["b0"], 'g', 6))
+                         .arg(QString::number(coefficients["b1"], 'g', 6));
     }
+    else if (mode == 2 || mode == 6){
+        regCoefStr = QString("<b>Вспомогательные величины:</b><br>"
+                             "B = %1<br>"
+                             "B<sub>0</sub> = %2<br>"
+                             "B<sub>1</sub> = %3<br>"
+                             "<br>"
+                             "<b>Коэффициенты:</b><br>"
+                             "b<sub>0</sub> = %4<br>"
+                             "b<sub>1</sub> = %5<br>"
+                             "<br>"
+                             "a<sub>0</sub> = %6<br>"
+                             "a<sub>1</sub> = %7")
+                         .arg(QString::number(coefficients["B"], 'g', 6))
+                         .arg(QString::number(coefficients["B0"], 'g', 6))
+                         .arg(QString::number(coefficients["B1"], 'g', 6))
+                         .arg(QString::number(coefficients["b0"], 'g', 6))
+                         .arg(QString::number(coefficients["b1"], 'g', 6))
+                         .arg(QString::number(coefficients["a0"], 'g', 6))
+                         .arg(QString::number(coefficients["a1"], 'g', 6));
+    }
+    else if (mode == 3 || mode == 5){
+        regCoefStr = QString("<b>Вспомогательные величины:</b><br>"
+                             "A = %1<br>"
+                             "A<sub>0</sub> = %2<br>"
+                             "A<sub>1</sub> = %3<br>"
+                             "<br>"
+                             "<b>Коэффициенты:</b><br>"
+                             "a<sub>0</sub> = %4<br>"
+                             "a<sub>1</sub> = %5<br>")
+                         .arg(QString::number(coefficients["A"], 'g', 6))
+                         .arg(QString::number(coefficients["A0"], 'g', 6))
+                         .arg(QString::number(coefficients["A1"], 'g', 6))
+                         .arg(QString::number(coefficients["a0"], 'g', 6))
+                         .arg(QString::number(coefficients["a1"], 'g', 6));
+    }
+    // Заполнение итоговой функции
+    switch(mode){
+    case 0:{
+        double a0 = coefficients["a0"];
+        double a1 = coefficients["a1"];
 
-    tableView->setModel(model);
-    tableView->resizeColumnsToContents();
+        QString sign = (a1 >= 0) ? " + " : " - ";
+        trend_eq = QString("y = %1 %2 %3 \u00B7 x")
+                       .arg(QString::number(a0, 'g', 6))
+                       .arg(sign)
+                       .arg(QString::number(std::abs(a1), 'g', 6));
+        break;
+    }
+    case 1:{
+        double b0 = coefficients["b0"];
+        double b1 = coefficients["b1"];
 
-    // Центрирование.
-    centerTableItems(tableView);
+        QString sign_b = (b1 >= 0) ? " + " : " - ";
+        trend_eq = QString("x = %1 %2 %3 \u00B7 y")
+                       .arg(QString::number(b0, 'g', 6))
+                       .arg(sign_b)
+                       .arg(QString::number(std::abs(b1), 'g', 6));
+        break;
+    }
+    case 2:{
+        double b0 = coefficients["b0"];
+        double b1 = coefficients["b1"];
+
+        QString sign_b = (b1 >= 0) ? " + " : " - ";
+        trend_eq = QString("lny = %1 %2 %3 \u00B7 x")
+                       .arg(QString::number(b0, 'g', 6))
+                       .arg(sign_b)
+                       .arg(QString::number(std::abs(b1), 'g', 6));
+
+        double a0 = coefficients["a0"];
+        double a1 = coefficients["a1"];
+
+        QString sign_a = (a1 >= 0) ? "" : " - ";
+        trend_eq += QString(" или y = %1 \u00B7 e^(%2%3 \u00B7 x)")
+                        .arg(QString::number(a0, 'g', 6))
+                        .arg(sign_a)
+                        .arg(QString::number(std::abs(a1), 'g', 6));
+        break;
+    }
+    case 3:{
+        double a0 = coefficients["a0"];
+        double a1 = coefficients["a1"];
+
+        QString sign_a = (a1 >= 0) ? " + " : " - ";
+        trend_eq = QString("y = %1 %2 %3 \u00B7 z или y = %4 %5 %6/x")
+                       .arg(QString::number(a0, 'g', 6))
+                       .arg(sign_a)
+                       .arg(QString::number(std::abs(a1), 'g', 6))
+                       .arg(QString::number(a0, 'g', 6))
+                       .arg(sign_a)
+                       .arg(QString::number(std::abs(a1), 'g', 6));
+        break;
+    }
+    case 5:{
+        double a0 = coefficients["a0"];
+        double a1 = coefficients["a1"];
+
+        QString sign_a = (a1 >= 0) ? " + " : " - ";
+        trend_eq = QString("y = %1 %2 %3 \u00B7 lnx")
+                       .arg(QString::number(a0, 'g', 6))
+                       .arg(sign_a)
+                       .arg(QString::number(std::abs(a1), 'g', 6));
+        break;
+    }
+    case 6:{
+        double b0 = coefficients["b0"];
+        double b1 = coefficients["b1"];
+
+        QString sign_b = (b1 >= 0) ? " + " : " - ";
+        trend_eq = QString("lny = %1 %2 %3 \u00B7 lnx")
+                       .arg(QString::number(b0, 'f', 6))
+                       .arg(sign_b)
+                       .arg(QString::number(std::abs(b1), 'f', 6));
+
+        double a0 = coefficients["a0"];
+        double a1 = coefficients["a1"];
+
+        QString powerPart;
+        if (a1 >= 0) {
+            // Без скобок
+            powerPart = QString("x^%1").arg(QString::number(a1, 'f', 6));
+        } else {
+            // Со скобками вокруг степени
+            powerPart = QString("x^(%1)").arg(QString::number(a1, 'f', 6));
+        }
+
+        trend_eq += QString(" или y = %1 \u00B7 %2")
+                        .arg(QString::number(a0, 'f', 6))
+                        .arg(powerPart);
+        break;
+    }
+    default:
+        break;
+    }
 }
 // Получение выводов о коэффициенте Пирсона (коэффициенте корреляции)
 void getCorCoefDescription(QString &r_descr, const double &r)
@@ -719,61 +806,13 @@ void getCoefsForLinearOrInverse(const bool& inverse, const int& n, QHash<QString
     else values["r"] = coefficients["A1"] / std::sqrt(coefficients["A"] * coefficients["B"]);
 }
 // Вычисление для линейной и обратной линейной регрессии несмещенной дисперсии, коэф. детерминацции, MSE и т.д. + вывод
-void calculateLinearOrInverseRegression(const bool &inverse, const QVector<double> &numericDates, const QVector<double> &cursValues,
+void calculateLinearOrInverseRegression(const int &mode, const QVector<double> &numericDates, const QVector<double> &cursValues,
                                         QVector<double> &predicts, QHash<QString, double> &coefficients, QHash<QString, double> &values,
                                         const int& n, QString &trend_eq, QString &r_descr, QString &regCoefStr){
     predicts.clear();
 
     // --- ТЕКСТОВЫЕ ПОЛЯ ---
-    // Заполнение данных о коэффициентах
-    regCoefStr = QString("<b>Вспомогательные величины:</b><br>"
-                         "A = %1<br>"
-                         "A<sub>0</sub> = %2<br>"
-                         "A<sub>1</sub> = %3<br>"
-                         "<br>"
-                         "B = %4<br>"
-                         "B<sub>0</sub> = %5<br>"
-                         "B<sub>1</sub> = %6<br>"
-                         "<br>"
-                         "<b>Коэффициенты:</b><br>"
-                         "a<sub>0</sub> = %7<br>"
-                         "a<sub>1</sub> = %8<br>"
-                         "<br>"
-                         "b<sub>0</sub> = %9<br>"
-                         "b<sub>1</sub> = %10")
-                     .arg(QString::number(coefficients["A"], 'f', 6))
-                     .arg(QString::number(coefficients["A0"], 'f', 6))
-                     .arg(QString::number(coefficients["A1"], 'f', 6))
-                     .arg(QString::number(coefficients["B"], 'f', 6))
-                     .arg(QString::number(coefficients["B0"], 'f', 6))
-                     .arg(QString::number(coefficients["B1"], 'f', 6))
-                     .arg(QString::number(coefficients["a0"], 'f', 6))
-                     .arg(QString::number(coefficients["a1"], 'f', 6))
-                     .arg(QString::number(coefficients["b0"], 'f', 6))
-                     .arg(QString::number(coefficients["b1"], 'f', 6));
-    // Заполнение итоговой функции
-    if (!inverse)
-    {
-        double a0 = coefficients["a0"];
-        double a1 = coefficients["a1"];
-
-        QString sign = (a1 >= 0) ? " + " : " - ";
-        trend_eq = QString("y = %1 %2 %3 \u00B7 x")
-                       .arg(QString::number(a0, 'f', 6))
-                       .arg(sign)
-                       .arg(QString::number(std::abs(a1), 'f', 6));
-    }
-    else
-    {
-        double b0 = coefficients["b0"];
-        double b1 = coefficients["b1"];
-
-        QString sign_b = (b1 >= 0) ? " + " : " - ";
-        trend_eq = QString("x = %1 %2 %3 \u00B7 y")
-                       .arg(QString::number(b0, 'f', 6))
-                       .arg(sign_b)
-                       .arg(QString::number(std::abs(b1), 'f', 6));
-    }
+    getFuncCoefDescr(mode, coefficients, regCoefStr, trend_eq);
 
     // --- КОЭФФИЦИЕНТ ПИРСОНА ---
     // Заполнение описания коэффициента Пирсона
@@ -795,8 +834,8 @@ void calculateLinearOrInverseRegression(const bool &inverse, const QVector<doubl
         double x{ numericDates[i] };
         double y{ cursValues[i] };
         double y_pred{};
-        (inverse == false) ? y_pred = coefficients["a0"] + coefficients["a1"] * x
-                           : y_pred = coefficients["b0"] + coefficients["b1"] * x;
+        (mode != 1) ? y_pred = coefficients["a0"] + coefficients["a1"] * x
+                    : y_pred = coefficients["b0"] + coefficients["b1"] * x;
         predicts.append(y_pred);
 
         // Вычисление величин по предсказаниям
@@ -816,6 +855,7 @@ bool gaussSolve(QVector<QVector<double>> &A, QVector<double> &B, QVector<double>
     // Прямой ход (обнуление элементов под главной диагональю)
     for (int k=0; k<n; ++k){
         // Поиск опорного элемента (pivot)
+        // Чем он больше, тем устойчивее алгоритм
         int maxRow = k;
         for (int i=k+1; i<n; ++i){
             if (std::abs(A[i][k]) > std::abs(A[maxRow][k]))
@@ -1013,47 +1053,11 @@ void getCoefsForExponential(const int& n, const QVector<double> &numericDates, c
 // Вычисление для экспонениальной регрессии несмещенной дисперсии, коэф. детерминацции, MSE и т.д. + вывод
 void calculateExponentialRegression(const QVector<double> &numericDates, const QVector<double> &lny,
                                     QVector<double> &predicts, QVector<double> &y_predicts, QHash<QString, double> &coefficients, QHash<QString, double> &values,
-                                    const int& n, QString &trend_eq, QString &r_descr, QString &regCoefStr){
+                                    const int& n, const int&mode, QString &trend_eq, QString &r_descr, QString &regCoefStr){
     predicts.clear();
 
     // --- ТЕКСТОВЫЕ ПОЛЯ ---
-    // Заполнение данных о коэффициентах
-    regCoefStr = QString("<b>Вспомогательные величины:</b><br>"
-                         "B = %1<br>"
-                         "B<sub>0</sub> = %2<br>"
-                         "B<sub>1</sub> = %3<br>"
-                         "<br>"
-                         "<b>Коэффициенты:</b><br>"
-                         "b<sub>0</sub> = %4<br>"
-                         "b<sub>1</sub> = %5<br>"
-                         "<br>"
-                         "a<sub>0</sub> = %6<br>"
-                         "a<sub>1</sub> = %7")
-                     .arg(QString::number(coefficients["B"], 'f', 6))
-                     .arg(QString::number(coefficients["B0"], 'f', 6))
-                     .arg(QString::number(coefficients["B1"], 'f', 6))
-                     .arg(QString::number(coefficients["b0"], 'f', 6))
-                     .arg(QString::number(coefficients["b1"], 'f', 6))
-                     .arg(QString::number(coefficients["a0"], 'g', 6))
-                     .arg(QString::number(coefficients["a1"], 'g', 6));
-    // Заполнение итоговой функции
-    double b0 = coefficients["b0"];
-    double b1 = coefficients["b1"];
-
-    QString sign_b = (b1 >= 0) ? " + " : " - ";
-    trend_eq = QString("lny = %1 %2 %3 \u00B7 x")
-                   .arg(QString::number(b0, 'f', 6))
-                   .arg(sign_b)
-                   .arg(QString::number(std::abs(b1), 'f', 6));
-
-    double a0 = coefficients["a0"];
-    double a1 = coefficients["a1"];
-
-    QString sign_a = (a1 >= 0) ? "" : " - ";
-    trend_eq += QString(" или y = %1 \u00B7 e^(%2%3 \u00B7 x)")
-                   .arg(QString::number(a0, 'g', 6))
-                   .arg(sign_a)
-                   .arg(QString::number(std::abs(a1), 'g', 6));
+    getFuncCoefDescr(mode, coefficients, regCoefStr, trend_eq);
 
     // --- КОЭФФИЦИЕНТ ПИРСОНА ---
     // Заполнение описания коэффициента Пирсона
@@ -1108,36 +1112,11 @@ void getCoefsForHyperbolic(const int& n, const QVector<double> &z, const QVector
 // Вычисление для гиперболической регрессии несмещенной дисперсии, коэф. детерминацции, MSE и т.д. + вывод
 void calculateHyperbolicRegression(const QVector<double> &z, const QVector<double> &cursValues,
                                    QVector<double> &predicts, QHash<QString, double> &coefficients, QHash<QString, double> &values,
-                                   const int& n, QString &trend_eq, QString &r_descr, QString &regCoefStr){
+                                   const int& n, const int& mode, QString &trend_eq, QString &r_descr, QString &regCoefStr){
     predicts.clear();
 
     // --- ТЕКСТОВЫЕ ПОЛЯ ---
-    // Заполнение данных о коэффициентах
-    regCoefStr = QString("<b>Вспомогательные величины:</b><br>"
-                         "A = %1<br>"
-                         "A<sub>0</sub> = %2<br>"
-                         "A<sub>1</sub> = %3<br>"
-                         "<br>"
-                         "<b>Коэффициенты:</b><br>"
-                         "a<sub>0</sub> = %4<br>"
-                         "a<sub>1</sub> = %5<br>")
-                     .arg(QString::number(coefficients["A"], 'f', 6))
-                     .arg(QString::number(coefficients["A0"], 'f', 6))
-                     .arg(QString::number(coefficients["A1"], 'f', 6))
-                     .arg(QString::number(coefficients["a0"], 'f', 6))
-                     .arg(QString::number(coefficients["a1"], 'f', 6));
-    // Заполнение итоговой функции
-    double a0 = coefficients["a0"];
-    double a1 = coefficients["a1"];
-
-    QString sign_a = (a1 >= 0) ? " + " : " - ";
-    trend_eq = QString("y = %1 %2 %3 \u00B7 z или y = %4 %5 %6/x")
-                   .arg(QString::number(a0, 'f', 6))
-                   .arg(sign_a)
-                   .arg(QString::number(std::abs(a1), 'f', 6))
-                   .arg(QString::number(a0, 'f', 6))
-                   .arg(sign_a)
-                   .arg(QString::number(std::abs(a1), 'f', 6));
+    getFuncCoefDescr(mode, coefficients, regCoefStr, trend_eq);
 
     // --- КОЭФФИЦИЕНТ ПИРСОНА ---
     // Заполнение описания коэффициента Пирсона
@@ -1191,33 +1170,11 @@ void getCoefsForLogarithmic(const int& n, const QVector<double> &lnx, const QVec
 // Вычисление для логарифмической регрессии несмещенной дисперсии, коэф. детерминацции, MSE и т.д. + вывод
 void calculateLogarithmicRegression(const QVector<double> &lnx, const QVector<double> &cursValues,
                                    QVector<double> &predicts, QHash<QString, double> &coefficients, QHash<QString, double> &values,
-                                   const int& n, QString &trend_eq, QString &r_descr, QString &regCoefStr){
+                                   const int& n, const int &mode, QString &trend_eq, QString &r_descr, QString &regCoefStr){
     predicts.clear();
 
     // --- ТЕКСТОВЫЕ ПОЛЯ ---
-    // Заполнение данных о коэффициентах
-    regCoefStr = QString("<b>Вспомогательные величины:</b><br>"
-                         "A = %1<br>"
-                         "A<sub>0</sub> = %2<br>"
-                         "A<sub>1</sub> = %3<br>"
-                         "<br>"
-                         "<b>Коэффициенты:</b><br>"
-                         "a<sub>0</sub> = %4<br>"
-                         "a<sub>1</sub> = %5<br>")
-                     .arg(QString::number(coefficients["A"], 'f', 6))
-                     .arg(QString::number(coefficients["A0"], 'f', 6))
-                     .arg(QString::number(coefficients["A1"], 'f', 6))
-                     .arg(QString::number(coefficients["a0"], 'f', 6))
-                     .arg(QString::number(coefficients["a1"], 'f', 6));
-    // Заполнение итоговой функции
-    double a0 = coefficients["a0"];
-    double a1 = coefficients["a1"];
-
-    QString sign_a = (a1 >= 0) ? " + " : " - ";
-    trend_eq = QString("y = %1 %2 %3 \u00B7 lnx")
-                   .arg(QString::number(a0, 'f', 6))
-                   .arg(sign_a)
-                   .arg(QString::number(std::abs(a1), 'f', 6));
+    getFuncCoefDescr(mode, coefficients, regCoefStr, trend_eq);
 
     // --- КОЭФФИЦИЕНТ ПИРСОНА ---
     // Заполнение описания коэффициента Пирсона
@@ -1276,54 +1233,11 @@ void getCoefsForPower(const int& n, const QVector<double> &lnx, const QVector<do
 // Вычисление для степенной регрессии несмещенной дисперсии, коэф. детерминацции, MSE и т.д. + вывод
 void calculatePowerRegression(const QVector<double> &lnx, const QVector<double> &lny, const QVector<double> &numericDates,
                               QVector<double> &predicts, QVector<double> &y_predicts, QHash<QString, double> &coefficients, QHash<QString, double> &values,
-                              const int& n, QString &trend_eq, QString &r_descr, QString &regCoefStr){
+                              const int& n, const int&mode, QString &trend_eq, QString &r_descr, QString &regCoefStr){
     predicts.clear();
 
     // --- ТЕКСТОВЫЕ ПОЛЯ ---
-    // Заполнение данных о коэффициентах
-    regCoefStr = QString("<b>Вспомогательные величины:</b><br>"
-                         "B = %1<br>"
-                         "B<sub>0</sub> = %2<br>"
-                         "B<sub>1</sub> = %3<br>"
-                         "<br>"
-                         "<b>Коэффициенты:</b><br>"
-                         "b<sub>0</sub> = %4<br>"
-                         "b<sub>1</sub> = %5<br>"
-                         "<br>"
-                         "a<sub>0</sub> = %6<br>"
-                         "a<sub>1</sub> = %7")
-                     .arg(QString::number(coefficients["B"], 'f', 6))
-                     .arg(QString::number(coefficients["B0"], 'f', 6))
-                     .arg(QString::number(coefficients["B1"], 'f', 6))
-                     .arg(QString::number(coefficients["b0"], 'f', 6))
-                     .arg(QString::number(coefficients["b1"], 'f', 6))
-                     .arg(QString::number(coefficients["a0"], 'f', 6))
-                     .arg(QString::number(coefficients["a1"], 'f', 6));
-    // Заполнение итоговой функции
-    double b0 = coefficients["b0"];
-    double b1 = coefficients["b1"];
-
-    QString sign_b = (b1 >= 0) ? " + " : " - ";
-    trend_eq = QString("lny = %1 %2 %3 \u00B7 lnx")
-                   .arg(QString::number(b0, 'f', 6))
-                   .arg(sign_b)
-                   .arg(QString::number(std::abs(b1), 'f', 6));
-
-    double a0 = coefficients["a0"];
-    double a1 = coefficients["a1"];
-
-    QString powerPart;
-    if (a1 >= 0) {
-        // Без скобок
-        powerPart = QString("x^%1").arg(QString::number(a1, 'f', 6));
-    } else {
-        // Со скобками вокруг степени
-        powerPart = QString("x^(%1)").arg(QString::number(a1, 'f', 6));
-    }
-
-    trend_eq += QString(" или y = %1 \u00B7 %2")
-                    .arg(QString::number(a0, 'f', 6))
-                    .arg(powerPart);
+    getFuncCoefDescr(mode, coefficients, regCoefStr, trend_eq);
 
     // --- КОЭФФИЦИЕНТ ПИРСОНА ---
     // Заполнение описания коэффициента Пирсона

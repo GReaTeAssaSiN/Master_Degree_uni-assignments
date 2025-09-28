@@ -124,14 +124,16 @@
          <cursorShape>PointingHandCursor</cursorShape>
         </property>
         <property name="styleSheet">
-         <string notr="true">QTableView {
+         <string notr="true">/* ------------------- QTableView ------------------- */
+QTableView {
     background-color: #f8f8f8;
     alternate-background-color: #e8e8e8;
-    gridline-color: #c0c0c0; 
-    font: 10pt, &quot;Segoe UI&quot;;
+    gridline-color: #c0c0c0;
+    font: 10pt &quot;Segoe UI&quot;;
     color: #1c1c1c;
 }
 
+/* Заголовки */
 QHeaderView::section {
     background-color: #3a3a3a;
     color: #ffffff;
@@ -140,13 +142,65 @@ QHeaderView::section {
     font-weight: bold;
 }
 
+/* Выделенные элементы */
 QTableView::item:selected {
     background-color: #a0a0a0;
-    color: #ffffff; 
+    color: #ffffff;
 }
 
+/* Эффект при наведении */
 QTableView::item:hover {
     background-color: #d0d0d0;
+}
+
+/* ------------------- Вертикальный ползунок ------------------- */
+QTableView QScrollBar:vertical {
+    background-color: #f0f0f0;
+    width: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+
+QTableView QScrollBar::handle:vertical {
+    background-color: #888888;
+    min-height: 20px;
+    border-radius: 6px;
+}
+
+QTableView QScrollBar::add-line:vertical,
+QTableView QScrollBar::sub-line:vertical {
+    background: none;
+    height: 0px;
+}
+
+QTableView QScrollBar::add-page:vertical,
+QTableView QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+/* ------------------- Горизонтальный ползунок ------------------- */
+QTableView QScrollBar:horizontal {
+    background-color: #f0f0f0;
+    height: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+
+QTableView QScrollBar::handle:horizontal {
+    background-color: #888888;
+    min-width: 20px;
+    border-radius: 6px;
+}
+
+QTableView QScrollBar::add-line:horizontal,
+QTableView QScrollBar::sub-line:horizontal {
+    background: none;
+    width: 0px;
+}
+
+QTableView QScrollBar::add-page:horizontal,
+QTableView QScrollBar::sub-page:horizontal {
+    background: none;
 }
 </string>
         </property>
@@ -646,14 +700,16 @@ QPushButton:checked {
          <enum>Qt::StrongFocus</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">QTableView {
+         <string notr="true">/* ------------------- QTableView ------------------- */
+QTableView {
     background-color: #f8f8f8;
     alternate-background-color: #e8e8e8;
-    gridline-color: #c0c0c0; 
-    font: 10pt, &quot;Segoe UI&quot;;
+    gridline-color: #c0c0c0;
+    font: 10pt &quot;Segoe UI&quot;;
     color: #1c1c1c;
 }
 
+/* Заголовки */
 QHeaderView::section {
     background-color: #3a3a3a;
     color: #ffffff;
@@ -662,13 +718,65 @@ QHeaderView::section {
     font-weight: bold;
 }
 
+/* Выделенные элементы */
 QTableView::item:selected {
     background-color: #a0a0a0;
-    color: #ffffff; 
+    color: #ffffff;
 }
 
+/* Эффект при наведении */
 QTableView::item:hover {
     background-color: #d0d0d0;
+}
+
+/* ------------------- Вертикальный ползунок ------------------- */
+QTableView QScrollBar:vertical {
+    background-color: #f0f0f0;
+    width: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+
+QTableView QScrollBar::handle:vertical {
+    background-color: #888888;
+    min-height: 20px;
+    border-radius: 6px;
+}
+
+QTableView QScrollBar::add-line:vertical,
+QTableView QScrollBar::sub-line:vertical {
+    background: none;
+    height: 0px;
+}
+
+QTableView QScrollBar::add-page:vertical,
+QTableView QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+/* ------------------- Горизонтальный ползунок ------------------- */
+QTableView QScrollBar:horizontal {
+    background-color: #f0f0f0;
+    height: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+
+QTableView QScrollBar::handle:horizontal {
+    background-color: #888888;
+    min-width: 20px;
+    border-radius: 6px;
+}
+
+QTableView QScrollBar::add-line:horizontal,
+QTableView QScrollBar::sub-line:horizontal {
+    background: none;
+    width: 0px;
+}
+
+QTableView QScrollBar::add-page:horizontal,
+QTableView QScrollBar::sub-page:horizontal {
+    background: none;
 }
 </string>
         </property>
@@ -1472,7 +1580,7 @@ QPushButton:disabled {
   <customwidget>
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
-   <header location="global">qcustomplot.h</header>
+   <header>qcustomplot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

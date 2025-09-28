@@ -41,18 +41,18 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 1) ---- //
         this->degree = 1;
         // Вычисление сумм и средних значений
-        calculatePolynomialRegressionsSums(this->numericDates, this->cursValues, this->n, this->degree, this->vector_values, this->values);
+        calculateRegressionsSums(this->mode, this->numericDates, this->cursValues, this->n, this->degree, this->vector_values, this->values);
         // Заполнение таблицы
-        fillTotalTableForPolynomialRegressions(ui->total_tableView, this->mode, this->n, this->degree, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
+        fillTotalTable(ui->total_tableView, this->mode, this->n, this->degree, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
         // Заполнение текстового поля с суммами
-        QString info{fillTextEditWithSumsForPolynomialRegression(this->mode, this->values, this->degree)};
+        QString info{fillTextEditWithSums(this->mode, this->values, this->degree)};
         ui->totalTable_info_textEdit->setText(info);
 
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 2) ---- //
         // Вычисление вспомогательных величин (метод Крамера, коэффициент Пирсона) и коэффициентов регрессии
         getCoefsForLinearOrInverse(false, this->n, this->values, this->coefficients);
         // Подсчет величин регрессии
-        calculateLinearOrInverseRegression(false, this->numericDates, this->cursValues, this->vector_values["yT"],
+        calculateLinearOrInverseRegression(this->mode, this->numericDates, this->cursValues, this->vector_values["yT"],
                                            this->coefficients, this->values, this->n, this->trend_eq, this->r_descr, this->regCoefStr);
         break;
     }
@@ -69,18 +69,18 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 1) ---- //
         this->degree = 1;
         // Вычисление значений сумм и средних значений (входные данные уже перевернуты)
-        calculatePolynomialRegressionsSums(this->cursValues, this->numericDates, this->n, this->degree, this->vector_values, this->values);
+        calculateRegressionsSums(this->mode, this->cursValues, this->numericDates, this->n, this->degree, this->vector_values, this->values);
         // Заполнение таблицы (входные данные уже перевернуты)
-        fillTotalTableForPolynomialRegressions(ui->total_tableView, this->mode, this->n, this->degree, this->dataColumns, this->cursValues, this->numericDates, this->vector_values);
+        fillTotalTable(ui->total_tableView, this->mode, this->n, this->degree, this->dataColumns, this->cursValues, this->numericDates, this->vector_values);
         // Заполнение текстового поля с суммами (входные данные уже перевернуты)
-        QString info{fillTextEditWithSumsForPolynomialRegression(this->mode, this->values, this->degree)};
+        QString info{fillTextEditWithSums(this->mode, this->values, this->degree)};
         ui->totalTable_info_textEdit->setText(info);
 
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 2) ---- //
         // Вычисление вспомогательных величин (метод Крамера, коэффициент Пирсона) и коэффициентов регрессии
         getCoefsForLinearOrInverse(true, this->n, this->values, this->coefficients);
         // Подсчет величин регрессии
-        calculateLinearOrInverseRegression(true, this->cursValues, this->numericDates, this->vector_values["xT"],
+        calculateLinearOrInverseRegression(this->mode, this->cursValues, this->numericDates, this->vector_values["xT"],
                                            this->coefficients, this->values, this->n, this->trend_eq, this->r_descr, this->regCoefStr);
         break;
     }
@@ -96,12 +96,13 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         // {b0*E(xi) + b1*E(xi^2) = E(xi*lnyi)
 
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 1) ---- //
+        this->degree = 1;
         // Вычисление значений сумм и средних значений
-        calculateNotPolynomialRegressionsSums(this->numericDates, this->cursValues, this->n, this->mode, this->vector_values, this->values);
+        calculateRegressionsSums(this->mode, this->numericDates, this->cursValues, this->n, this->degree, this->vector_values, this->values);
         // Заполнение таблицы
-        fillTotalTableForNotPolynomialRegressions(ui->total_tableView, this->n, this->mode, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
+        fillTotalTable(ui->total_tableView, this->mode, this->n, this->degree, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
         // Заполнение текстового поля с суммами
-        QString info{fillTextEditWithSumsForNotPolynomialRegression(this->mode, this->values)};
+        QString info{fillTextEditWithSums(this->mode, this->values, this->degree)};
         ui->totalTable_info_textEdit->setText(info);
 
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 2) ---- //
@@ -109,7 +110,7 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         getCoefsForExponential(this->n, this->numericDates, this->vector_values["lny"], this->values, this->coefficients);
         // Подсчет величин регрессии
         calculateExponentialRegression(this->numericDates, this->vector_values["lny"], this->vector_values["lnyT"], this->vector_values["yT"],
-                                       this->coefficients, this->values, this->n, this->trend_eq, this->r_descr, this->regCoefStr);
+                                       this->coefficients, this->values, this->n, this->mode, this->trend_eq, this->r_descr, this->regCoefStr);
         break;
     }
     case 3:
@@ -123,12 +124,13 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         // {a0*E(zi) + a1*E(zi^2) = E(zi*yi)
 
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 1) ---- //
+        this->degree = 1;
         // Вычисление значений сумм и средних значений
-        calculateNotPolynomialRegressionsSums(this->numericDates, this->cursValues, this->n, this->mode, this->vector_values, this->values);
+        calculateRegressionsSums(this->mode, this->numericDates, this->cursValues, this->n, this->degree, this->vector_values, this->values);
         // Заполнение таблицы
-        fillTotalTableForNotPolynomialRegressions(ui->total_tableView, this->n, this->mode, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
+        fillTotalTable(ui->total_tableView, this->mode, this->n, this->degree, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
         // Заполнение текстового поля с суммами
-        QString info{fillTextEditWithSumsForNotPolynomialRegression(this->mode, this->values)};
+        QString info{fillTextEditWithSums(this->mode, this->values, this->degree)};
         ui->totalTable_info_textEdit->setText(info);
 
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 2) ---- //
@@ -136,7 +138,7 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         getCoefsForHyperbolic(this->n, this->vector_values["z"], this->cursValues, this->values, this->coefficients);
         // Подсчет величин регрессии
         calculateHyperbolicRegression(this->vector_values["z"], this->cursValues, this->vector_values["yT"],
-                                      this->coefficients, this->values, this->n, this->trend_eq, this->r_descr, this->regCoefStr);
+                                      this->coefficients, this->values, this->n, this->mode, this->trend_eq, this->r_descr, this->regCoefStr);
         break;
     }
     case 4:
@@ -153,11 +155,11 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 1) ---- //
         this->degree = 2;
         // Вычисление сумм и средних значений
-        calculatePolynomialRegressionsSums(this->numericDates, this->cursValues, this->n, this->degree, this->vector_values, this->values);
+        calculateRegressionsSums(this->mode, this->numericDates, this->cursValues, this->n, this->degree, this->vector_values, this->values);
         // Заполнение таблицы
-        fillTotalTableForPolynomialRegressions(ui->total_tableView, this->mode, this->n, this->degree, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
+        fillTotalTable(ui->total_tableView, this->mode, this->n, this->degree, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
         // Заполнение текстового поля с суммами
-        QString info{fillTextEditWithSumsForPolynomialRegression(this->mode, this->values, this->degree)};
+        QString info{fillTextEditWithSums(this->mode, this->values, this->degree)};
         ui->totalTable_info_textEdit->setText(info);
 
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 2) ---- //
@@ -182,12 +184,13 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         // {a0*E(lnxi) + a1*E(lnxi^2) = E(lnxi*yi)
 
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 1) ---- //
+        this->degree = 1;
         // Вычисление значений сумм и средних значений
-        calculateNotPolynomialRegressionsSums(this->numericDates, this->cursValues, this->n, this->mode, this->vector_values, this->values);
+        calculateRegressionsSums(this->mode, this->numericDates, this->cursValues, this->n, this->degree, this->vector_values, this->values);
         // Заполнение таблицы
-        fillTotalTableForNotPolynomialRegressions(ui->total_tableView, this->n, this->mode, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
+        fillTotalTable(ui->total_tableView, this->mode, this->n, this->degree, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
         // Заполнение текстового поля с суммами
-        QString info{fillTextEditWithSumsForNotPolynomialRegression(this->mode, this->values)};
+        QString info{fillTextEditWithSums(this->mode, this->values, this->degree)};
         ui->totalTable_info_textEdit->setText(info);
 
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 2) ---- //
@@ -195,7 +198,7 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         getCoefsForLogarithmic(this->n, this->vector_values["lnx"], this->cursValues, this->values, this->coefficients);
         // Подсчет величин регрессии
         calculateLogarithmicRegression(this->vector_values["lnx"], this->cursValues, this->vector_values["yT"],
-                                       this->coefficients, this->values, this->n, this->trend_eq, this->r_descr, this->regCoefStr);
+                                       this->coefficients, this->values, this->n, this->mode, this->trend_eq, this->r_descr, this->regCoefStr);
         break;
     }
     case 6:
@@ -210,12 +213,13 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         // {b0*E(lnxi) + b1*E(lnxi^2) = E(lnxi*lnyi)
 
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 1) ---- //
+        this->degree = 1;
         // Вычисление значений сумм и средних значений
-        calculateNotPolynomialRegressionsSums(this->numericDates, this->cursValues, this->n, this->mode, this->vector_values, this->values);
+        calculateRegressionsSums(this->mode, this->numericDates, this->cursValues, this->n, this->degree, this->vector_values, this->values);
         // Заполнение таблицы
-        fillTotalTableForNotPolynomialRegressions(ui->total_tableView, this->n, this->mode, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
+        fillTotalTable(ui->total_tableView, this->mode, this->n, this->degree, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
         // Заполнение текстового поля с суммами
-        QString info{fillTextEditWithSumsForNotPolynomialRegression(this->mode, this->values)};
+        QString info{fillTextEditWithSums(this->mode, this->values, this->degree)};
         ui->totalTable_info_textEdit->setText(info);
 
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 2) ---- //
@@ -223,7 +227,7 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         getCoefsForPower(this->n, this->vector_values["lnx"], this->vector_values["lny"], this->values, this->coefficients);
         // Подсчет величин регрессии
         calculatePowerRegression(this->vector_values["lnx"], this->vector_values["lny"], this->numericDates, this->vector_values["lnyT"], this->vector_values["yT"],
-                                 this->coefficients, this->values, this->n, this->trend_eq, this->r_descr, this->regCoefStr);
+                                 this->coefficients, this->values, this->n, this->mode, this->trend_eq, this->r_descr, this->regCoefStr);
         break;
     }
     case 7:
@@ -254,11 +258,11 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 1) ---- //
         this->degree = degree;
         // Вычисление сумм и средних значений
-        calculatePolynomialRegressionsSums(this->numericDates, this->cursValues, this->n, this->degree, this->vector_values, this->values);
+        calculateRegressionsSums(this->mode, this->numericDates, this->cursValues, this->n, this->degree, this->vector_values, this->values);
         // Заполнение таблицы
-        fillTotalTableForPolynomialRegressions(ui->total_tableView, this->mode, this->n, this->degree, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
+        fillTotalTable(ui->total_tableView, this->mode, this->n, this->degree, this->dataColumns, this->numericDates, this->cursValues, this->vector_values);
         // Заполнение текстового поля с суммами
-        QString info{fillTextEditWithSumsForPolynomialRegression(this->mode, this->values, this->degree)};
+        QString info{fillTextEditWithSums(this->mode, this->values, this->degree)};
         ui->totalTable_info_textEdit->setText(info);
 
         // ---- ОБРАБОТКА ДАННЫХ (БЛОК 2) ---- //
@@ -301,14 +305,11 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
         ui->meanY_label->setText(((mode != 1) ? "y\u0304 = " : "x\u0304 = ")  + QString::number(this->values["meanY"], 'g', 6));
     }
     // Заполнение таблицы предсказаний модели
+    QVector<double> predicts{(mode != 1) ? ((mode != 2 && mode != 6) ? this->vector_values["yT"] : this->vector_values["lnyT"]) : this->vector_values["xT"]};
     if (mode == 2 || mode == 6)
-        fillCalculateTableForExpOrPowerRegression(ui->calculate_tableView, this->n, this->dataColumns, this->numericDates,
-                                                  this->cursValues, this->vector_values["lny"], this->vector_values["lnyT"], this->values);
-    else{
-        QVector<double> predicts{(mode != 1) ? this->vector_values["yT"] : this->vector_values["xT"]};
-        fillCalculateTable(ui->calculate_tableView, this->mode, this->n,
-                           this->dataColumns, this->numericDates, this->cursValues, predicts, this->values);
-    }
+        fillCalculateTable(ui->calculate_tableView, this->mode, this->n, this->dataColumns, this->numericDates, this->cursValues, predicts, this->values, this->vector_values["lny"]);
+    else
+        fillCalculateTable(ui->calculate_tableView, this->mode, this->n, this->dataColumns, this->numericDates, this->cursValues, predicts, this->values);
     // Отображение найденных значений под таблицей
     double Sx2{this->values["Sx2"]}, Sy2{this->values["Sy2"]}, SxMean{this->values["SxMean"]}, SyMean{this->values["SyMean"]};
     if (mode == 2){
@@ -342,7 +343,7 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
     ui->Sost_label->setText("S<sub>ост.</sub> = " + QString::number(this->values["Sost"], 'g', 6));
     ui->Sregr_label->setText("S<sub>регр.</sub> = " + QString::number(this->values["Sregr"], 'g', 6));
     ui->MSE_label->setText("MSE = " + QString::number(this->values["MSE"], 'g', 6));
-    ui->descr_R2_label->setText("<b>Возможность прогноза (>=75%):</b> " + QString("<i>%1</i>").arg(this->values["R2"] * 100 >= 75 ? "имеется." : "отсутствует."));
+    ui->descr_R2_label->setText(QString("<b>Возможность прогноза (R%1>=75%):</b> ").arg(toSuperscript(2)) + QString("<i>%1</i>").arg(this->values["R2"] * 100 >= 75 ? "имеется." : "отсутствует."));
 
     // ---- ОТРИСОВКА ГРАФИКА ---- //
     (mode != 1) ? WorkplaceForm::MakePlot() : WorkplaceForm::MakeInversePlot();
@@ -373,8 +374,8 @@ void WorkplaceForm::MakePlot()
         QDate date = QDate::fromString(this->dataColumns[i], "dd.MM.yyyy");
         dateTimes[i] = QDateTime(date, QTime(0,0));
 
-        x[i] = dateTimes[i].toSecsSinceEpoch();            // ось абсисс
-        y[i] = this->cursValues[i];                        // ось ординат (эксперементальные)
+        x[i] = dateTimes[i].toSecsSinceEpoch(); // ось абсисс
+        y[i] = this->cursValues[i];             // ось ординат (эксперементальные)
         yReg[i] = this->vector_values["yT"][i]; // ось ординат (регрессия)
     }
 
@@ -396,7 +397,7 @@ void WorkplaceForm::MakePlot()
             // Значение даты в секундах для оси абсцисс (по убыванию идут)
             temp_x.prepend(QDateTime(lastDate, QTime(0,0)).toSecsSinceEpoch());
             // Значения даты в днях для расчета предсказанного моделью значения (по убыванию идут)
-            temp_numericDates.prepend(epoch.daysTo(lastDate)/10000.0);
+            temp_numericDates.prepend(0.01 + 0.99 * double(epoch.daysTo(lastDate) - epoch.daysTo(minDate.date())) / double(epoch.daysTo(maxDate.date()) - epoch.daysTo(minDate.date())));
             // Значения курса доллара США
             double temp_pred{};
             switch(this->mode){
@@ -458,7 +459,7 @@ void WorkplaceForm::MakePlot()
         ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsNone);
         ui->customPlot->graph(2)->setName("Прогноз");
         // Надпись
-        ui->forecastCurs_label->setText("Прогноз курса Доллара США: " + QString::number(yPos, 'f', 2) + " руб.");
+        ui->forecastCurs_label->setText("Прогноз курса Доллара США: " + QString::number(yPos, 'g', 6) + " руб.");
     }
 
     // ----------------- Подсветка графика ----------------- //
@@ -610,14 +611,20 @@ void WorkplaceForm::MakeInversePlot()
         QDate date = QDate::fromString(this->dataColumns[i], "dd.MM.yyyy");
         dateTimes[i] = QDateTime(date, QTime(0,0));
 
-        x[i] = this->cursValues[i];                                         // ось абсисс
-        y[i] = dateTimes[i].toSecsSinceEpoch();                             // ось ординат (экспереминатльные)
-        yReg[i] = (this->vector_values["xT"][i])*10000*24*60*60; // ось ординат (регрессия) [Кол-во дней/10000] * 10000 * 24 * 60 * 60
+        x[i] = this->cursValues[i];              // ось абсисс
+        y[i] = dateTimes[i].toSecsSinceEpoch();  // ось ординат (экспереминатльные)
     }
 
     // Определение минимальных и максимальных значений даты
     QDateTime minDate = *std::min_element(dateTimes.constBegin(), dateTimes.constEnd());
     QDateTime maxDate = *std::max_element(dateTimes.constBegin(), dateTimes.constEnd());
+
+    //
+    for (int i=0; i<n; ++i){
+        QDate epoch(1970, 1, 1);
+        // Ось ординат (регрессия) [норм. кол-во дней -> кол-во дней] * 24 * 60 * 60
+        yReg[i] = ((this->vector_values["xT"][i] - 0.01) / 0.99 * double(epoch.daysTo(maxDate.date()) - epoch.daysTo(minDate.date())) + epoch.daysTo(minDate.date()))*24*60*60;
+    }
 
     // ----------------- Дополнение графика по выбранной дате (будущей) ----------------- //
     QVector<double> temp_x = x;
@@ -633,7 +640,7 @@ void WorkplaceForm::MakeInversePlot()
             // Значение даты в секундах для оси ординат (по убыванию идут)
             temp_yReg.prepend(QDateTime(lastDate, QTime(0,0)).toSecsSinceEpoch());
             // Значения даты в днях для расчета предсказанного моделью значения (по убыванию идут)
-            temp_numericDates.prepend(epoch.daysTo(lastDate)/10000.0);
+            temp_numericDates.prepend(0.01 + 0.99 * double(epoch.daysTo(lastDate) - epoch.daysTo(minDate.date())) / double(epoch.daysTo(maxDate.date()) - epoch.daysTo(minDate.date())));
 
             // Решение уравнения [x = b0 + b1 * y] относительно неизвестной y (курса доллара), т.к. хотим предсказывать курс по дате, а не наоборот.
             // В этой функции полагается регрессия вида (переобозначение относительно программных переменных):
@@ -672,7 +679,7 @@ void WorkplaceForm::MakeInversePlot()
         ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsNone);
         ui->customPlot->graph(2)->setName("Прогноз");
         // Надпись
-        ui->forecastCurs_label->setText("Прогноз курса Доллара США: " + QString::number(xPos, 'f', 2) + " руб.");
+        ui->forecastCurs_label->setText("Прогноз курса Доллара США: " + QString::number(xPos, 'g', 6) + " руб.");
     }
 
     // ----------------- Подсветка графика ----------------- //
