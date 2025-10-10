@@ -37,7 +37,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_ChooseFile_clicked()
 {
     QString str{};
-    str = QFileDialog::getOpenFileName(this, "Выбрать файл", "D:/KAI_MAGISTRATURA/KMMSS/Labs",
+    str = QFileDialog::getOpenFileName(this, "Выбрать файл", "D:/KAI_MAGISTRATURA/KMMSS/Labs/Lab1",
                                        "All Files (*.*);; XLSX Files (*.xlsx);");
     if ((ui->choosenFile_label->text().isEmpty() || !str.isEmpty()) && loadDataFromExcel(str, ui->data_tableView)){
         ui->choosenFile_label->setText(str);

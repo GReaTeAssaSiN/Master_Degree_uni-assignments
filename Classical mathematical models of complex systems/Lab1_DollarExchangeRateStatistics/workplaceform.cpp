@@ -308,6 +308,8 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
     QVector<double> predicts{(mode != 1) ? ((mode != 2 && mode != 6) ? this->vector_values["yT"] : this->vector_values["lnyT"]) : this->vector_values["xT"]};
     if (mode == 2 || mode == 6)
         fillCalculateTable(ui->calculate_tableView, this->mode, this->n, this->dataColumns, this->numericDates, this->cursValues, predicts, this->values, this->vector_values["lny"]);
+    else if (mode == 1)
+        fillCalculateTable(ui->calculate_tableView, this->mode, this->n, this->dataColumns, this->cursValues, this->numericDates, predicts, this->values);
     else
         fillCalculateTable(ui->calculate_tableView, this->mode, this->n, this->dataColumns, this->numericDates, this->cursValues, predicts, this->values);
     // Отображение найденных значений под таблицей
@@ -361,6 +363,7 @@ WorkplaceForm::WorkplaceForm(const int &mode, const QVector<QString> &dataColumn
 
     // ---- УСТАНОВКА ДАТЫ ---- //
     this->default_date = QDate::fromString(this->dataColumns.first(), "dd.MM.yyyy").addDays(1);
+    //this->default_date = QDate::currentDate();
     ui->selectDate_dateEdit->setDate(this->default_date);
     ui->selectDate_dateEdit->setMinimumDate(this->default_date);
 }

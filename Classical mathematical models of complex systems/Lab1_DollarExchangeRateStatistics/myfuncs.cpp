@@ -389,7 +389,7 @@ QString fillTextEditWithSums(const int &mode, const QHash<QString, double> &valu
     return info;
 }
 
-// --- Функии вычисления для соответствующего типа регрессии --- //
+// --- Функции вычисления для соответствующего типа регрессии --- //
 // Вычисление сумм и средних значений у регрессий
 void calculateRegressionsSums(const int& mode, const QVector<double> &numericDates, const QVector<double> &cursValues,
                               int &n, const int &degree, QHash<QString, QVector<double>> &vector_values, QHash<QString, double> &values){
@@ -1206,7 +1206,6 @@ void calculateLogarithmicRegression(const QVector<double> &lnx, const QVector<do
     values["R2"] = (values["Spoln"] != 0.0) ? (1.0 - values["Sost"] / values["Spoln"]) : 0.0; // Sregr/Spoln
     values["MSE"] = values["Sost"] / n;
 }
-
 // 7)
 // Вычисление коэффициентов для степенной регрессии
 void getCoefsForPower(const int& n, const QVector<double> &lnx, const QVector<double> &lny,

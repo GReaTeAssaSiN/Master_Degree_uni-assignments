@@ -31,6 +31,10 @@
   <property name="windowTitle">
    <string>4199_Горшков Ал.О._Лабораторная работа №1</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="res.qrc">
+    <normaloff>:/icons/images/RegressionsIcon.ico</normaloff>:/icons/images/RegressionsIcon.ico</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">QMainWindow{
 	 background-color: rgb(30, 30, 30);  /* тёмно-серый фон */
@@ -1141,6 +1145,8 @@ QPushButton:checked {
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections/>
 </ui>
