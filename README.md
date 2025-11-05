@@ -5,6 +5,7 @@
 Directories:
 
 + Classical mathematical models of complex systems using two other libraries, coded by good people, by below links:
+
   Lab1:
   - https://github.com/QtExcel/QXlsx - for using Excel in Qt;
   - https://www.qcustomplot.com/index.php/download - for drawing graphs in Qt.
