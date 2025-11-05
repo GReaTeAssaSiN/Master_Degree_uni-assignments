@@ -11,6 +11,6 @@ Directories:
   - https://www.qcustomplot.com/index.php/download - for drawing graphs in Qt.
   * I really hope that, one day, decent libraries will be written for C++, comparable in power to Python :C
   
-  Lab2:
+  Lab2-3:
   - UAVflight_ErrorAnalysis - second lab for synthetic data (UAV on-board system and integration system error);
   - UAV_flight_TOTAL - third lab for synthetic and experimental data (UAV on-board system and integration system error + flight trajectory graphs (latitude and longitude))/
