@@ -20,6 +20,7 @@ class ExcelParser:
         return xls.sheet_names
 
     def _read_sheet(self, sheet_name=0):
+        """ Возвращает обработанный DataFrame для чтения указанного листа Excel с заголовками """
         df = pd.read_excel(self.filepath, sheet_name=sheet_name, header=None)   # DataFrame для чтения указанного листа Excel с заголовками
         df = df[pd.to_numeric(df.iloc[:, 0], errors='coerce').notna()]          # Фильтр для оставления только числовых данных
         df = df.reset_index(drop=True)                                          # Реиндексация данных после удаления "неправильных"
@@ -359,6 +360,18 @@ class SimulationManager:
         self.x_sp = x_sp
         self.y_sp = y_sp
 
+    def _compute_path(self, x, y):
+        """ Вычисление пройденного пути БЛА """
+        # Приведение к массивам NumPy
+        x = np.array(x, dtype=float)
+        y = np.array(y, dtype=float)
+        # Вычисление
+        dx = np.diff(x)              # приращения по долготе
+        dy = np.diff(y)              # приращения по широте
+        ds = np.sqrt(dx**2 + dy**2)  # пройденный путь в каждый момент времени
+        path = np.cumsum(ds)         # накопленный путь в каждый момент времени
+        return path
+
     def run(self):
         """ Реализация моделирования полета БЛА и расчета ошибок """
         x, y = self.model_flight.simulate()
@@ -426,13 +439,38 @@ class SimulationManager:
             x_GPS = self.x_sp
             y_GPS = self.y_sp
             
+        # Вывод
+        print("Среднеквадратические ошибки определения координат положения БЛА:")
+        MSE_X_without_GPS = np.sqrt(np.mean((np.array(x_GPS) - np.array(x_without_GPS)) ** 2))
+        MSE_Y_without_GPS = np.sqrt(np.mean((np.array(y_GPS) - np.array(y_without_GPS)) ** 2))
+        MSE_X_with_GPS = np.sqrt(np.mean((np.array(x_GPS) - np.array(x_with_GPS)) ** 2))
+        MSE_Y_with_GPS = np.sqrt(np.mean((np.array(y_GPS) - np.array(y_with_GPS)) ** 2))
+        print(f"- Долгота [без комплексирования]: MSE = {MSE_X_without_GPS:5f} м")
+        print(f"- Широта  [без комплексирования]: MSE = {MSE_Y_without_GPS:5f} м")
+        print(f"- Долгота [с комплексированием]: MSE = {MSE_X_with_GPS:5f} м")
+        print(f"- Широта  [с комплексированием]: MSE = {MSE_Y_with_GPS:5f} м")
+        print(f"- Снижение MSE (долгота) : MSE = {100 - MSE_X_with_GPS/MSE_X_without_GPS * 100:5f}%")
+        print(f"- Снижение MSE  (широта) : MSE = {100 - MSE_Y_with_GPS/MSE_Y_without_GPS * 100:5f}%")
+        print()
+        
+        print("Среднеквадратические ошибки вычисления пройденного пути БЛА:")
+        path_without_GPS = self._compute_path(x_without_GPS, y_without_GPS)
+        path_with_GPS = self._compute_path(x_with_GPS, y_with_GPS)
+        path_GPS = self._compute_path(x_GPS, y_GPS)
+        MSE_path_without_GPS = np.sqrt(np.mean((np.array(path_GPS) - np.array(path_without_GPS))**2))
+        MSE_path_with_GPS = np.sqrt(np.mean((np.array(path_GPS) - np.array(path_with_GPS))**2))
+        print(f"- [без комплексирования] MSE = {MSE_path_without_GPS:5f} м")
+        print(f"- [c комплексированием]  MSE = {MSE_path_with_GPS:5f} м")
+        print(f"- Снижение MSE: {100 - MSE_path_with_GPS/MSE_path_without_GPS * 100:5f}%")
+        print("\n")
+        
         # Траектория полета БЛА + Траектории полета БЛА без комплексирования и с ним (долгота + время)
         axs[0, 0].plot(t, x_GPS, label="Траектория полета БЛА по спутнику/GPS", color='green', linestyle='-')
         axs[0, 0].plot(t, x_without_GPS, label="Траектория полета БЛА без комплексирования", color='red', linestyle='--')
         axs[0, 0].plot(t, x_with_GPS, label="Траектория полета БЛА с комплексированием", color='blue', linestyle='--')
         axs[0, 0].set_title("Сравнение всех тректорий полета БЛА (долгота)", fontsize=10)
         axs[0, 0].set_xlabel("t (время, мин)", fontsize=9)
-        axs[0, 0].set_ylabel("$W_\lambda$ (долгота, м)", fontsize=9)
+        axs[0, 0].set_ylabel("$\lambda$ (долгота, м)", fontsize=9)
         axs[0, 0].legend(fontsize=8)
         axs[0, 0].grid(True)
         
@@ -442,7 +480,7 @@ class SimulationManager:
         axs[0, 1].plot(t, y_with_GPS, label="Траектория полета БЛА с комплексированием", color='blue', linestyle='--')
         axs[0, 1].set_title("Сравнение всех тректорий полета БЛА (широта)", fontsize=10)
         axs[0, 1].set_xlabel("t (время, мин)", fontsize=9)
-        axs[0, 1].set_ylabel("$W_\phi$ (широта, м)", fontsize=9)
+        axs[0, 1].set_ylabel("$\phi$ (широта, м)", fontsize=9)
         axs[0, 1].legend(fontsize=8)
         axs[0, 1].grid(True)
 
@@ -451,8 +489,8 @@ class SimulationManager:
         axs[1, 0].plot(x_without_GPS, y_without_GPS, label="Траектория полета БЛА без комплексирования", color='red', linestyle='--')
         axs[1, 0].plot(x_with_GPS, y_with_GPS, label="Траектория полета БЛА с комплексированием", color='blue', linestyle='--')
         axs[1, 0].set_title("Сравнение всех тректорий полета БЛА", fontsize=10)
-        axs[1, 0].set_xlabel("$W_\lambda$ (долгота, м)", fontsize=9)
-        axs[1, 0].set_ylabel("$W_\phi$ (широта, м)", fontsize=9)
+        axs[1, 0].set_xlabel("$\lambda$ (долгота, м)", fontsize=9)
+        axs[1, 0].set_ylabel("$\phi$ (широта, м)", fontsize=9)
         axs[1, 0].legend(fontsize=8)
         axs[1, 0].grid(True)
 
