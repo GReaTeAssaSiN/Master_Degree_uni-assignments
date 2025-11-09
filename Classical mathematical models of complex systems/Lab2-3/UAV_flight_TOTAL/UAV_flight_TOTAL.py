@@ -366,10 +366,10 @@ class SimulationManager:
         x = np.array(x, dtype=float)
         y = np.array(y, dtype=float)
         # Вычисление
-        dx = np.diff(x)              # приращения по долготе
-        dy = np.diff(y)              # приращения по широте
-        ds = np.sqrt(dx**2 + dy**2)  # пройденный путь в каждый момент времени
-        path = np.cumsum(ds)         # накопленный путь в каждый момент времени
+        dx = np.diff(x)                             # приращения по долготе
+        dy = np.diff(y)                             # приращения по широте
+        ds = np.sqrt(dx**2 + dy**2)                 # пройденный путь в каждый момент времени
+        path = np.concatenate(([0], np.cumsum(ds))) # накопленный путь в каждый момент времени
         return path
 
     def run(self):
@@ -469,7 +469,7 @@ class SimulationManager:
         axs[0, 0].plot(t, x_without_GPS, label="Траектория полета БЛА без комплексирования", color='red', linestyle='--')
         axs[0, 0].plot(t, x_with_GPS, label="Траектория полета БЛА с комплексированием", color='blue', linestyle='--')
         axs[0, 0].set_title("Сравнение всех тректорий полета БЛА (долгота)", fontsize=10)
-        axs[0, 0].set_xlabel("t (время, мин)", fontsize=9)
+        axs[0, 0].set_xlabel("t (время, с)", fontsize=9)
         axs[0, 0].set_ylabel("$\lambda$ (долгота, м)", fontsize=9)
         axs[0, 0].legend(fontsize=8)
         axs[0, 0].grid(True)
@@ -479,18 +479,18 @@ class SimulationManager:
         axs[0, 1].plot(t, y_without_GPS, label="Траектория полета БЛА без комплексирования", color='red', linestyle='--')
         axs[0, 1].plot(t, y_with_GPS, label="Траектория полета БЛА с комплексированием", color='blue', linestyle='--')
         axs[0, 1].set_title("Сравнение всех тректорий полета БЛА (широта)", fontsize=10)
-        axs[0, 1].set_xlabel("t (время, мин)", fontsize=9)
+        axs[0, 1].set_xlabel("t (время, с)", fontsize=9)
         axs[0, 1].set_ylabel("$\phi$ (широта, м)", fontsize=9)
         axs[0, 1].legend(fontsize=8)
         axs[0, 1].grid(True)
 
-        # Траектория полета БЛА + Траектории полета БЛА без комплексирования и с ним (широта + долгота)
-        axs[1, 0].plot(x_GPS, y_GPS, label="Траектория полета БЛА по спутнику/GPS", color='green', linestyle='-')
-        axs[1, 0].plot(x_without_GPS, y_without_GPS, label="Траектория полета БЛА без комплексирования", color='red', linestyle='--')
-        axs[1, 0].plot(x_with_GPS, y_with_GPS, label="Траектория полета БЛА с комплексированием", color='blue', linestyle='--')
-        axs[1, 0].set_title("Сравнение всех тректорий полета БЛА", fontsize=10)
-        axs[1, 0].set_xlabel("$\lambda$ (долгота, м)", fontsize=9)
-        axs[1, 0].set_ylabel("$\phi$ (широта, м)", fontsize=9)
+        # Путь полета БЛА + Пути полета БЛА без комплексирования и с ним (путь + время)
+        axs[1, 0].plot(t, path_GPS, label="Путь полета БЛА по спутнику/GPS", color='green', linestyle='-')
+        axs[1, 0].plot(t, path_without_GPS, label="Путь полета БЛА без комплексирования", color='red', linestyle='--')
+        axs[1, 0].plot(t, path_with_GPS, label="Путь полета БЛА с комплексированием", color='blue', linestyle='--')
+        axs[1, 0].set_title("Сравнение всех путей полета БЛА", fontsize=10)
+        axs[1, 0].set_xlabel("t (время, с)", fontsize=9)
+        axs[1, 0].set_ylabel("s (путь, м)", fontsize=9)
         axs[1, 0].legend(fontsize=8)
         axs[1, 0].grid(True)
 
@@ -500,7 +500,7 @@ class SimulationManager:
         axs[1, 1].plot(t, err_without_GPS_Y, label="Ошибка бортовой системы БЛА (широта)", color='green', linestyle=':')
         axs[1, 1].plot(t, err_with_GPS_Y, label="Ошибка системы комплексирования (широта)", color='orange', linestyle='--')
         axs[1, 1].set_title("Сравнение погрешностей бортовой и комплексной системы", fontsize=10)
-        axs[1, 1].set_xlabel("t (время, мин)", fontsize=9)
+        axs[1, 1].set_xlabel("t (время, с)", fontsize=9)
         axs[1, 1].set_ylabel("$\epsilon$ (ошибка, м)", fontsize=9)
         axs[1, 1].legend(fontsize=8)
         axs[1, 1].grid(True)
