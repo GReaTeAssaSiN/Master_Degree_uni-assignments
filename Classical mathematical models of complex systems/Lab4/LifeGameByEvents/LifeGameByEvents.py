@@ -63,6 +63,7 @@ class LifeGameByEvents:
         ## -- ЗАВЕРШЕНИЕ ИГРЫ -- ##
         # Если в очереди событий закончились события, то моделирование завершается
         if not self.events:
+            print("[INFO] Все события из очереди событий были успешно обработаны.")
             return
         
         ## -- СОБЫТИЯ -- ##
@@ -128,7 +129,7 @@ class LifeGameByEvents:
                     f"\nУмершие клетки (сейчас): {self.current_dead_cells}"
                     f"\nРодившиеся клетки (в целом): {self.total_born_cells}"
                     f"\nУмершие клетки (в целом): {self.total_dead_cells}"
-                    f"\n\nМатричная сетка {self.m}x{self.n} (текущее поле):\n" + '\n'.join([' '.join(map(str, row)) for row in self.current_field]))
+                    f"\n\nМатричная сетка {self.n}x{self.m} (текущее поле):\n" + '\n'.join([' '.join(map(str, row)) for row in self.current_field]))
         self.text_display.set_text(text_str)
         
         ## -- ОБНОВЛЕНИЕ ОТОБРАЖЕНИЯ -- ##
@@ -223,8 +224,6 @@ class LifeGameByEvents:
         ## -- АНИМАЦИЯ -- ##
         print("[INFO] Анимация модели клеточного автомата на базе дискретных событий была запущена...")
         ani = FuncAnimation(self.fig, self.update_display, frames=(self.n*self.m+1)*steps - 3, interval=interval, blit=True, repeat=False)
-        if not self.events:
-            print("[INFO] Все события из очереди событий были успешно обработаны.")
 
         ## -- СОХРАНЕНИЕ АНИМАЦИИ В .MP4 -- ##
         if (self.save_results):
@@ -301,5 +300,5 @@ class EventScanCell(Event):
 #       ЗАПУСК ПРОГРАММЫ        #
 #################################    
 if __name__ == '__main__':
-    game = LifeGameByEvents(n=10, m=6, random_init=True, p=0.2)
-    game.run_animation(steps=30, interval=1, save_results=False, fps=60)
+    game = LifeGameByEvents(n=10, m=10, random_init=True, p=0.2)
+    game.run_animation(steps=5, interval=1, save_results=False, fps=60)
