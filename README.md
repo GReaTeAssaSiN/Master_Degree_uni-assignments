@@ -18,3 +18,4 @@ Directories:
   Lab 4:
   - LifeGame - classical Conway's Game of Life (Cellular automaton);
   - LifeGameByEvents - Conway's Game of Life based on discrete events (Cellular automaton).
+  * To save the results in .mp4 format, you need to download ffmpeg from the website (for example, https://www.gyan.dev/ffmpeg/builds/) and add ffmpeg to the environment variables.
