@@ -120,7 +120,7 @@ class LifeGameByEvents:
         
         ## -- ТЕКСТОВОЕ ПОЛЕ -- ##
         # Обновление содержимого текстового поля
-        text_str = (f"Шаг (модельное время): {self.time}/{self.steps}"
+        text_str = (f"Поколение (модельное время): {self.time}/{self.steps}"
                     f"\nframe (текущий кадр): {frame + 3 + 1}/{(self.n*self.m+1)*self.steps}"
                     f"\nI тип (события): {self.I_events}/{self.n*self.m * self.steps}"
                     f"\nII тип (события): {self.II_events}/{self.steps}"
