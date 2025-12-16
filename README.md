@@ -18,4 +18,6 @@ Directories:
   Lab 4:
   - LifeGame - classical Conway's Game of Life (Cellular automaton);
   - LifeGameByEvents - Conway's Game of Life based on discrete events (Cellular automaton).
-  * To save the results in .mp4 format, you need to download ffmpeg from the website (for example, https://www.gyan.dev/ffmpeg/builds/) and add ffmpeg to the environment variables.
+  * The Pygame library is used for visualisation and control the process. It's really cool that there are such powerful libraries and such cool ideas like cellular automata :)
+  * This program also includes mechanisms for logging and saving visualization frames in .png format. Don't be surprised there are so many of them :)
+  * P.S. If you want to enjoy the simplest cellular automaton mechanism, use the first program, since the second one is more scientific in nature.
