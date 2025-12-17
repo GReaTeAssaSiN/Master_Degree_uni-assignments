@@ -512,8 +512,8 @@ class GameOfLifeByEventsApp:
 if __name__ == "__main__":
     print(f"{'-'*100}")
     # Постоянные
-    GAME_HEIGHT = 100
-    GAME_WIDTH = 100
+    GAME_HEIGHT = 10
+    GAME_WIDTH = 10
     P = 0.3
     SEED = 42
     # Матричная сетка
@@ -524,6 +524,6 @@ if __name__ == "__main__":
     print(f"[INFO] Сетка инициализирована значениями 0/1 с вероятностью живых клеток p={P}, мертвых клеток q={1-P} и seed={SEED}.")
     # Запуск визуализации
     print("[INFO] Запущена визуализация...")
-    app = GameOfLifeByEventsApp(game, fps=60, log=False, save_frames=True)
+    app = GameOfLifeByEventsApp(game, fps=60, log=True, save_frames=True)
     app.run()
     print("[INFO] Визуализация завершена...")

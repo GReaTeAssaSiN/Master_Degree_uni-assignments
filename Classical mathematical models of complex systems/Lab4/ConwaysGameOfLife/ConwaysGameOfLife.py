@@ -257,7 +257,7 @@ class GameOfLifeApp:
             f"Seed={self.game.seed}",
             f"{'-'*80}",
             "Статистика:",
-            f"Поколение (модельное время): {self.model_time - 1}",
+            f"Поколение (модельное время): {self.model_time}",
             f"Живые клетки (количество)  : {alive_cells}/{self.game.height*self.game.width}",
             f"Мертвые клетки (количество): {self.game.height*self.game.width - alive_cells}/{self.game.height*self.game.width}"
         ]
@@ -353,8 +353,8 @@ class GameOfLifeApp:
 if __name__ == "__main__":
     print(f"{'-'*100}")
     # Постоянные
-    GAME_HEIGHT = 100
-    GAME_WIDTH = 100
+    GAME_HEIGHT = 110
+    GAME_WIDTH = 110
     P = 0.3
     SEED = 42
     # Матричная сетка
@@ -365,6 +365,6 @@ if __name__ == "__main__":
     print(f"[INFO] Сетка инициализирована значениями 0/1 с вероятностью живых клеток p={P}, мертвых клеток q={1-P} и seed={SEED}.")
     # Запуск визуализации
     print("[INFO] Запущена визуализация...")
-    app = GameOfLifeApp(game, fps=10, log=False, save_frames=True)
+    app = GameOfLifeApp(game, fps=20, log=True, save_frames=True)
     app.run()
     print("[INFO] Визуализация завершена...")
