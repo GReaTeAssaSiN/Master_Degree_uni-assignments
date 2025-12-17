@@ -456,6 +456,7 @@ class GameOfLifeByEventsApp:
                 elif event.key == pygame.K_RETURN:     # ENTER
                     if self.paused:
                         self.game._process_next_event()
+                        self.model_time = self.game.event.time
                         self.pauseAction = True
                         if self.logger:
                             # Тип события
@@ -481,7 +482,7 @@ class GameOfLifeByEventsApp:
             # Следующее событие игры
             if not self.paused:
                 self.game._process_next_event()
-                self.model_time = self.game.time - 1
+                self.model_time = self.game.event.time
                 if self.logger:
                     self.logger.log_grid(self.model_time)
             # Визуализация
@@ -511,8 +512,8 @@ class GameOfLifeByEventsApp:
 if __name__ == "__main__":
     print(f"{'-'*100}")
     # Постоянные
-    GAME_HEIGHT = 10
-    GAME_WIDTH = 10
+    GAME_HEIGHT = 100
+    GAME_WIDTH = 100
     P = 0.3
     SEED = 42
     # Матричная сетка
@@ -523,6 +524,6 @@ if __name__ == "__main__":
     print(f"[INFO] Сетка инициализирована значениями 0/1 с вероятностью живых клеток p={P}, мертвых клеток q={1-P} и seed={SEED}.")
     # Запуск визуализации
     print("[INFO] Запущена визуализация...")
-    app = GameOfLifeByEventsApp(game, fps=100, log=False, save_frames=True)
+    app = GameOfLifeByEventsApp(game, fps=60, log=False, save_frames=True)
     app.run()
     print("[INFO] Визуализация завершена...")
