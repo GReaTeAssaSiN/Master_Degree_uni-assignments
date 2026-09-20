@@ -39,13 +39,3 @@
 
 # debug information files
 *.dwo
-
-# Custom
-.DS_Store
-
-*/
-!Aquarium/
-!Aquarium/**
-
-*.md
-!README.md
